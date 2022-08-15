@@ -22,7 +22,7 @@ print_decimal:
 
 	xor eax,eax
 	mov al,dl
-	xor edx,edxnmnmnbm
+	xor edx,edx
 	mov bl,0ah		; set divisor to 10
 	div ebx			; divide eax by ebx, quotent in eax, remainder in edx
 	add al,30h
