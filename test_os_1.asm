@@ -11,24 +11,23 @@ start:
 	xor ecx,ecx
 
 	mov ah,0x2		; set operation type
-	mov dl,0x1		; drive num
+	mov dl,0x80		; drive num
 	mov dh,0x0		; head num/platter num
 	mov ch,0x0		; cylinder
-	mov cl,0x2		; sector
+	mov cl,0x2 		; sector
 	mov al,0x1		; number of sectors to read
 	
 	mov bx,0x500
 	mov es,bx		; where in memory to write it to
-	mov bx,0x00
+	mov bx,0x000
 	int 0x13
 
 	mov bl,ah
 	call print_decimal
 
 	xor eax,eax
-	mov ax,start
-	add ax,0x500
-	jmp [eax]
+	mov ax,0x50
+	jmp 0x50:0
 
 	mov bl, 0xff
 	call print_decimal
@@ -73,4 +72,4 @@ print_decimal:
 	mov ah,0x0e
 	int 0x10
 
-	jmp $
+	;jmp $
