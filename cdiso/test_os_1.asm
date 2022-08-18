@@ -5,16 +5,6 @@ start:
 	mov ss,ax
 	mov sp,0x400
 
-	xor eax,eax
-
-	mov ax,0x61
-	push ax
-	xor ax,ax
-	pop bx
-	mov al,bl
-	mov ah,0x0e
-	int 0x10
-
 	xor edx,edx
 	xor eax,eax
 	xor ebx,ebx
@@ -24,7 +14,7 @@ start:
 	mov dl,0x80		; drive num
 	mov dh,0x0		; head num/platter num
 	mov ch,0x0		; cylinder
-	mov cl,0x2 		; sector
+	mov cl,0x1 		; sector
 	mov al,0x1		; number of sectors to read
 	
 	mov bx,0x500
@@ -32,11 +22,18 @@ start:
 	mov bx,0x000
 	int 0x13
 
+	push ax
+
+	add bx,0x5
+
+	mov bl,[es:bx]
+	call print_decimal
+
+	pop ax
+
 	mov bl,ah
 	call print_decimal
 
-	xor eax,eax
-	mov ax,0x50
 	jmp 0x50:0
 
 	mov bl, 0xff
@@ -77,6 +74,8 @@ print_decimal:
 
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
+
+	dw 0xffff
 
 	mov al,0x61
 	mov ah,0x0e
