@@ -1,10 +1,39 @@
 	BITS 16
 start:
 
+	mov ax,0x07c0
+	mov ss,ax
+	mov sp,0x400
+
+	xor edx,edx
+	xor eax,eax
 	xor ebx,ebx
+	xor ecx,ecx
+
+	mov ah,0x2		; set operation type
+	mov dl,0x1		; drive num
+	mov dh,0x0		; head num/platter num
+	mov ch,0x0		; cylinder
+	mov cl,0x2		; sector
+	mov al,0x1		; number of sectors to read
+	
+	mov bx,0x500
+	mov es,bx		; where in memory to write it to
+	mov bx,0x00
+	int 0x13
+
+	mov bl,ah
+	call print_decimal
+
+	xor eax,eax
+	mov ax,start
+	add ax,0x500
+	jmp [eax]
+
 	mov bl, 0xff
 	call print_decimal
 
+	jmp $
 ;text_string db 'hello!', 0
 
 print_decimal:
@@ -30,23 +59,18 @@ print_decimal:
 	int 10h
 
 	mov al,dl
-	add al,30h
-	mov ah,0eh
+	add al,0x30
+	mov ah,0x0e
 	int 10h
 
+	xor eax,eax
 	ret
-
-print_bl:
-	mov al,bl
-	mov ah,0eh
-	int 10h
-	xor bl,bl
-	ret
-
 
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
+	dw 0xAA55		        ; The standard PC boot signature
 
-.end:
-	
+	mov al,0x61
+	mov ah,0x0e
+	int 0x10
 
-	dw 0xAA55		        ; The standard PC boot signatureD
+	jmp $
