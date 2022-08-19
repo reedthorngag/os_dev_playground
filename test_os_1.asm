@@ -1,20 +1,25 @@
 	BITS 16
 start:
 
-	mov ax,0x07c0
+	cli
+	xor ax,ax
 	mov ss,ax
-	mov sp,0x400
+	mov sp,0x7c00
+	sti
 
-	xor edx,edx
+	xor ax,ax
+	int 0x13
+
 	xor eax,eax
 	xor ebx,ebx
 	xor ecx,ecx
+	xor edx,edx
 
-	mov ah,0x2		; set operation type
+	mov ah,0x02		; set operation type
 	mov dl,0x80		; drive num
 	mov dh,0x0		; head num/platter num
 	mov ch,0x0		; cylinder
-	mov cl,0x1 		; sector
+	mov cl,0x2		; sector
 	mov al,0x1		; number of sectors to read
 	
 	mov bx,0x500
@@ -24,10 +29,16 @@ start:
 
 	push ax
 
+	;xor bx,bx
+	;mov bx,0x5000
+
 	mov bl,[es:bx]
 	call print_decimal
 
 	pop ax
+
+	mov bl,al
+	call print_decimal
 
 	mov bl,ah
 	call print_decimal
