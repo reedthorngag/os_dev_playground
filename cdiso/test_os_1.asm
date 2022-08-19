@@ -32,20 +32,18 @@ start:
 	xor bx,bx
 	mov bx,0x5000
 
-	; b0 61
-	; b4 0e
-	; cd 10
-
 	mov dword [bx],0xb061b404
-	add bx,0x4
+	;add bx,0x4
 	mov dword [bx],0xcd10ebfe
 
-	sub bx,0x4
-
-	jmp 0x5000
+	;sub bx,0x1
 
 	mov bl,[bx]
 	call print_decimal
+
+	mov bx,0x5000
+
+	jmp bx
 
 	pop ax
 
