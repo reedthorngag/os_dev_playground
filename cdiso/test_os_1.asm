@@ -16,7 +16,7 @@ start:
 	xor edx,edx
 
 	mov ah,0x02		; set operation type
-	mov dl,0x80		; drive num
+	mov dl,0x00		; drive num
 	mov dh,0x0		; head num/platter num
 	mov ch,0x0		; cylinder
 	mov cl,0x2		; sector
@@ -29,10 +29,22 @@ start:
 
 	push ax
 
-	;xor bx,bx
-	;mov bx,0x5000
+	xor bx,bx
+	mov bx,0x5000
 
-	mov bl,[es:bx]
+	; b0 61
+	; b4 0e
+	; cd 10
+
+	mov dword [bx],0xb061b404
+	add bx,0x4
+	mov dword [bx],0xcd10ebfe
+
+	sub bx,0x4
+
+	jmp 0x5000
+
+	mov bl,[bx]
 	call print_decimal
 
 	pop ax
@@ -90,4 +102,4 @@ print_decimal:
 	mov ah,0x0e
 	int 0x10
 
-	;jmp $
+	jmp $
