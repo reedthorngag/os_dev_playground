@@ -7,6 +7,10 @@ start:
 	mov sp,0x7c00
 	sti
 
+	mov ax,0xffff
+	call print_hex
+	ret
+
 	xor ax,ax
 	int 0x13
 
@@ -38,7 +42,9 @@ start:
 
 	;sub bx,0x1
 
-	mov bl,[bx]
+	mov bx,0x5000
+
+	mov ax,[bx]
 	call print_decimal
 
 	mov bx,0x5000
@@ -61,24 +67,62 @@ start:
 	jmp $
 ;text_string db 'hello!', 0
 
+hex_characters db 0xff,0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xff
+
+print_hex:
+
+	mov bx,hex_characters
+	mov bl,[hex_characters]
+	call print_decimal
+	ret
+
+	; ax contains number to output
+	xor dx,dx
+	xor cx,cx
+	xor bx,bx
+
+	mov bx,0x1000
+	
+.hex_print_loop:
+
+	div bx		; divide ax by bx, quotent in ax, remainder in dx
+	mov bx,hex_characters
+	add bx,ax
+	mov bl,[bx]
+	mov ah,0x0e
+	int 0x10
+
+	push dx
+	mov ax,bx
+	mov bx,0x10
+	div bx
+	mov bx,ax
+	pop ax
+	cmp bx,1
+	jne .hex_print_loop
+.end:
+	ret
+
 print_decimal:
 
-	xor eax,eax
-	xor edx,edx
+	xor ax,ax
 	mov al,bl
-	xor ebx,ebx
-	
+	xor bx,bx
+	xor cx,cx
+	xor dx,dx
+
+
 	mov bl,64h		; set divisor to 100
-	div ebx			; divide eax by ebx, quotent in eax, remainder in edx
+	div bx			; divide ax by bx, quotent in ax, remainder in dx
 	add al,30h
 	mov ah,0eh
 	int 10h
 
-	xor eax,eax
+	xor ax,ax
 	mov al,dl
-	xor edx,edx
+	xor dx,dx
 	mov bl,0ah		; set divisor to 10
-	div ebx			; divide eax by ebx, quotent in eax, remainder in edx
+	div bx			; divide eax by ebx, quotent in eax, remainder in edx
 	add al,30h
 	mov ah,0eh
 	int 10h
@@ -88,8 +132,10 @@ print_decimal:
 	mov ah,0x0e
 	int 10h
 
-	xor eax,eax
+	xor ax,ax
 	ret
+
+; -----------------------------
 
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
