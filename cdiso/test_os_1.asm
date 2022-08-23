@@ -67,21 +67,14 @@ start:
 	jmp $
 ;text_string db 'hello!', 0
 
-	db 0xff,0xaa
-hex_characters: db 0xff,0xaa,0xb0,0x61,0xb4,0x0e,0xcd,0x10,0xeb,0xfe
-	ret
+hex_characters db '0123456789abcde'
 
 print_hex:
 
-	db 0xff,0xbb	
-	mov dx,hex_characters
-	db 0xff,0xcc
-	mov dx,[print_hex]
-	db 0xff,0xbb
-	call print_decimal
+	;mov bl,[0x7c00+hex_characters]
+	;call print_decimal
 
-	jmp hex_characters
-	ret
+	;ret
 
 	; ax contains number to output
 	xor dx,dx
@@ -95,7 +88,10 @@ print_hex:
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
 	mov bx,hex_characters
 	add bx,ax
-	mov bl,[bx]
+	;mov dx,bx
+	;mov bl,dl
+	;call print_decimal
+	mov al,[0x7c00+bx]
 	mov ah,0x0e
 	int 0x10
 
