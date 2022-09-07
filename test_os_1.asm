@@ -7,12 +7,15 @@ start:
 	mov sp,0x7c00
 	sti
 
-	mov ax,0xffff
+	mov bx,0xffff
 	call print_hex
+
 	ret
 
 	xor ax,ax
 	int 0x13
+
+	; -------------------------- file read/write stuff ---------------------------------
 
 	xor eax,eax
 	xor ebx,ebx
@@ -67,25 +70,26 @@ start:
 	jmp $
 ;text_string db 'hello!', 0
 
-hex_characters db '0123456789abcde'
+hex_characters db '0123456789abcdef'
 
 print_hex:
 
 	;mov bl,[0x7c00+hex_characters]
-	;call print_decimal
-
+	;call print_decimal					; prints 48 (the right number)
 	;ret
 
-	; ax contains number to output
+	mov ax,bx
 	xor dx,dx
 	xor cx,cx
-	xor bx,bx
 
 	mov bx,0x1000
 	
 .hex_print_loop:
 
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
+	;mov bx,dx
+	;call print_decimal
+	;ret
 	mov bx,hex_characters
 	add bx,ax
 	mov al,[0x7c00+bx]
@@ -93,14 +97,20 @@ print_hex:
 	int 0x10
 
 	push dx
+	xor dx,dx
 	mov ax,bx
 	mov bx,0x10
+	;call print_decimal
 	div bx
 	mov bx,ax
 	pop ax
+	call print_decimal
 	cmp bx,1
 	jne .hex_print_loop
-.end:
+
+	mov bl,0xff
+	call print_decimal
+
 	ret
 
 print_decimal:
@@ -135,7 +145,7 @@ print_decimal:
 	xor ax,ax
 	ret
 
-; -----------------------------
+; ------------------------- end ---------------------------------------
 
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
