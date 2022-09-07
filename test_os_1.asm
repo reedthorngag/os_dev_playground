@@ -7,11 +7,6 @@ start:
 	mov sp,0x7c00
 	sti
 
-	mov bx,0xffff
-	call print_hex
-
-	ret
-
 	xor ax,ax
 	int 0x13
 
@@ -74,42 +69,35 @@ hex_characters db '0123456789abcdef'
 
 print_hex:
 
-	;mov bl,[0x7c00+hex_characters]
-	;call print_decimal					; prints 48 (the right number)
-	;ret
-
 	mov ax,bx
 	xor dx,dx
-	xor cx,cx
-
 	mov bx,0x1000
-	
+
 .hex_print_loop:
 
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
-	;mov bx,dx
-	;call print_decimal
-	;ret
+	push bx
 	mov bx,hex_characters
 	add bx,ax
 	mov al,[0x7c00+bx]
 	mov ah,0x0e
 	int 0x10
 
+	pop ax
 	push dx
 	xor dx,dx
-	mov ax,bx
 	mov bx,0x10
-	;call print_decimal
 	div bx
 	mov bx,ax
 	pop ax
-	call print_decimal
 	cmp bx,1
 	jne .hex_print_loop
 
-	mov bl,0xff
-	call print_decimal
+	mov bx,hex_characters
+	add bx,ax
+	mov al,[0x7c00+bx]
+	mov ah,0x0e
+	int 0x10
 
 	ret
 

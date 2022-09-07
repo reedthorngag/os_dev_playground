@@ -7,7 +7,7 @@ start:
 	mov sp,0x7c00
 	sti
 
-	mov bx,0xffff
+	mov bx,0x7f54
 	call print_hex
 
 	ret
@@ -90,26 +90,33 @@ print_hex:
 	;mov bx,dx
 	;call print_decimal
 	;ret
+	push bx
 	mov bx,hex_characters
 	add bx,ax
 	mov al,[0x7c00+bx]
 	mov ah,0x0e
 	int 0x10
 
+	pop ax
 	push dx
 	xor dx,dx
-	mov ax,bx
 	mov bx,0x10
-	;call print_decimal
 	div bx
 	mov bx,ax
 	pop ax
-	call print_decimal
+	;call print_decimal
+	;ret
 	cmp bx,1
 	jne .hex_print_loop
 
-	mov bl,0xff
-	call print_decimal
+	mov bx,hex_characters
+	add bx,ax
+	mov al,[0x7c00+bx]
+	mov ah,0x0e
+	int 0x10
+
+	;mov bl,0xff
+	;call print_decimal
 
 	ret
 
