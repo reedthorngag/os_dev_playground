@@ -1,12 +1,12 @@
 	BITS 16
 start:
 
+	sti
 	mov ax, 0x06c0		; set up 4k stack space below the bootloader (0x7c00 - 0x6c00 = 0x1000 = 4096)
 	mov ss, ax
 	mov sp, 4096		; point stack pointer to top of stack space
 
-	mov ax, 0x07c0		; Set data segment to where we're loaded (unrelated from stack, this isnt the base pointer)
-	mov ds, ax
+	cli
 
 	; -------------------------- file read/write testing stuff ---------------------------------
 
@@ -20,13 +20,12 @@ start:
 	mov bx,0x7e00
 	mov es,bx		; where in memory to write it to
 	int 0x13
-
 	jnz .error
 
-	;jmp bx
 	mov ax,[bx]
 	mov bx,ax
 	call print_hex
+
 	ret
 
 .error:
@@ -68,7 +67,7 @@ print_hex:
 	div bx
 	mov bx,ax
 	pop ax
-	cmp bx,0
+	cmp bx,0x00
 	jne .hex_print_loop
 
 	ret
@@ -77,8 +76,9 @@ print_hex:
 
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
+	dw 0xffff
 
-	times 256 db 0x22
+	times 252 db 0x22
 
 	dw 0x4444
 

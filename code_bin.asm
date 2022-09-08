@@ -5,9 +5,6 @@ start:
 	mov ss, ax
 	mov sp, 4096		; point stack pointer to top of stack space
 
-	mov ax, 0x07c0		; Set data segment to where we're loaded (unrelated from stack, this isnt the base pointer)
-	mov ds, ax
-
 	xor edx,edx
 	mov edx, 0x100000
 
