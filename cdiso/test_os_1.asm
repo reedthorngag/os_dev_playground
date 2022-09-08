@@ -7,89 +7,57 @@ start:
 	mov sp,0x7c00
 	sti
 
-	mov bx,0x7f54
-	call print_hex
-
+	call .error
 	ret
 
-	xor ax,ax
-	int 0x13
-
-	; -------------------------- file read/write stuff ---------------------------------
-
-	xor eax,eax
-	xor ebx,ebx
-	xor ecx,ecx
-	xor edx,edx
+	; -------------------------- file read/write testing stuff ---------------------------------
 
 	mov ah,0x02		; set operation type
 	mov dl,0x00		; drive num
 	mov dh,0x0		; head num/platter num
 	mov ch,0x0		; cylinder
-	mov cl,0x2		; sector
+	mov cl,0x1		; sector
 	mov al,0x1		; number of sectors to read
 	
-	mov bx,0x500
+	mov bx,0x7e00
 	mov es,bx		; where in memory to write it to
-	mov bx,0
 	int 0x13
 
-	push ax
+	jnz .error
 
-	xor bx,bx
-	mov bx,0x5000
-
-	mov dword [bx],0xb061b404
-	;add bx,0x4
-	mov dword [bx],0xcd10ebfe
-
-	;sub bx,0x1
-
-	mov bx,0x5000
-
+	;jmp bx
 	mov ax,[bx]
-	call print_decimal
+	mov bx,ax
+	call print_hex
+	ret
 
-	mov bx,0x5000
+.error:
+	mov bx,error_text
+	mov ah,0x0e
+.error_loop:
+	mov al,[0x7c00+bx]
+	cmp al,0
+	je .end
+	int 0x10
+	add bx,1
+	jmp .error_loop
+.end:
+	ret
 
-	jmp bx
 
-	pop ax
-
-	mov bl,al
-	call print_decimal
-
-	mov bl,ah
-	call print_decimal
-
-	jmp 0x50:0
-
-	mov bl, 0xff
-	call print_decimal
-
-	jmp $
-;text_string db 'hello!', 0
+error_text db 'error!',0
 
 hex_characters db '0123456789abcdef'
 
 print_hex:
 
-	;mov bl,[0x7c00+hex_characters]
-	;call print_decimal					; prints 48 (the right number)
-	;ret
-
 	mov ax,bx
 	xor dx,dx
-	xor cx,cx
-
 	mov bx,0x1000
-	
+
 .hex_print_loop:
 
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
-	;mov bx,dx
-	;call print_decimal
-	;ret
 	push bx
 	mov bx,hex_characters
 	add bx,ax
@@ -104,8 +72,6 @@ print_hex:
 	div bx
 	mov bx,ax
 	pop ax
-	;call print_decimal
-	;ret
 	cmp bx,1
 	jne .hex_print_loop
 
@@ -114,9 +80,6 @@ print_hex:
 	mov al,[0x7c00+bx]
 	mov ah,0x0e
 	int 0x10
-
-	;mov bl,0xff
-	;call print_decimal
 
 	ret
 
@@ -157,10 +120,12 @@ print_decimal:
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
 
-	dw 0xffff
+	times 256 db 0x22
 
-	mov al,0x61
-	mov ah,0x0e
-	int 0x10
+	dw 0x4444
 
-	jmp $
+	;mov al,0x61
+	;mov ah,0x0e
+	;int 0x10
+
+	;jmp $
