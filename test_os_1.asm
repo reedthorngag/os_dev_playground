@@ -1,14 +1,12 @@
 	BITS 16
 start:
 
-	cli
-	xor ax,ax
-	mov ss,ax
-	mov sp,0x7c00
-	sti
+	mov ax, 0x06c0		; set up 4k stack space below the bootloader (0x7c00 - 0x6c00 = 0x1000 = 4096)
+	mov ss, ax
+	mov sp, 4096		; point stack pointer to top of stack space
 
-	call .error
-	ret
+	mov ax, 0x07c0		; Set data segment to where we're loaded (unrelated from stack, this isnt the base pointer)
+	mov ds, ax
 
 	; -------------------------- file read/write testing stuff ---------------------------------
 
@@ -50,13 +48,11 @@ error_text db 'error!',0
 hex_characters db '0123456789abcdef'
 
 print_hex:
-
 	mov ax,bx
 	xor dx,dx
 	mov bx,0x1000
 
 .hex_print_loop:
-
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
 	push bx
 	mov bx,hex_characters
@@ -72,14 +68,8 @@ print_hex:
 	div bx
 	mov bx,ax
 	pop ax
-	cmp bx,1
+	cmp bx,0
 	jne .hex_print_loop
-
-	mov bx,hex_characters
-	add bx,ax
-	mov al,[0x7c00+bx]
-	mov ah,0x0e
-	int 0x10
 
 	ret
 

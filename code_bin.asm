@@ -1,12 +1,11 @@
 	BITS 16
 
 start:
-	mov ax, 07C0h		; Set up 4K stack space after this bootloader
-	add ax, 288		    ; (4096 + 512) / 16 bytes per paragraph
+	mov ax, 0x06c0		; set up 4k stack space below the bootloader (0x7c00 - 0x6c00 = 0x1000 = 4096)
 	mov ss, ax
-	mov sp, 4096
+	mov sp, 4096		; point stack pointer to top of stack space
 
-	mov ax, 07C0h		; Set data segment to where we're loaded
+	mov ax, 0x07c0		; Set data segment to where we're loaded (unrelated from stack, this isnt the base pointer)
 	mov ds, ax
 
 	xor edx,edx
@@ -96,13 +95,11 @@ print_bl:
 
 
 print_hex:
-
 	mov ax,bx
 	xor dx,dx
 	mov bx,0x1000
 
 .hex_print_loop:
-
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
 	push bx
 	mov bx,hex_characters
@@ -118,14 +115,8 @@ print_hex:
 	div bx
 	mov bx,ax
 	pop ax
-	cmp bx,1
+	cmp bx,0
 	jne .hex_print_loop
-
-	mov bx,hex_characters
-	add bx,ax
-	mov al,[0x7c00+bx]
-	mov ah,0x0e
-	int 0x10
 
 	ret
 
