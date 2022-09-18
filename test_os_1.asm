@@ -10,32 +10,7 @@ start:
 	mov sp, 4096		; point stack pointer to top of stack space
 	cli
 
-	;call print_hex
-
 	; -------------------------- file read/write testing stuff ---------------------------------
-
-
-	mov ax, 0x4b01
-	mov si,0x100
-	mov dl,0xe0
-	;int 0x13
-
-	;jc .error
-
-	mov bx,[si+0x0]
-	;mov bx,ax
-	call print_hex
-
-	mov bx,0xffff
-	call print_hex
-
-
-	mov ah,0x02		; set operation type
-	mov dl,0x00		; drive num
-	mov dh,0x0		; head num/platter num
-	mov ch,0x0		; cylinder
-	mov cl,0x1		; sector
-	mov al,0x1		; number of sectors to read
 	
 	mov si, 0x0100
 	mov word  [si+0], 0x10		; packet size
@@ -48,14 +23,12 @@ start:
 	mov dword [si+12],0x0000	; upper 16 bits of starting LBA
 	mov dword [si+14],0x0000	; insurance
 
-	xor ax,ax
-	mov ah,0x42
+	mov ax,0x4200
 	mov dl,0xe0
-	int 0x13
+	mov si,disk_address_packet
+	int 0x13		; es:si contain pointer to packet
 	
-	mov cx,ax
-	call .error
-	mov bx,cx
+	mov bx,ax
 	call print_hex
 
 	mov ax,0x0010
@@ -78,6 +51,27 @@ start:
 	jmp .error_loop
 .end:
 	ret
+
+
+;	file reading info packet
+disk_address_packet:
+	db 0x10
+	db 0x00
+.number_of_sectors:
+	db 0x0001
+.transfer_buffer_offset:
+	db 0x0000
+.transfer_buffer_segment:
+	db 0x0000
+.LBA_address:
+	db 0x0000
+	db 0x0000
+	db 0x0000
+
+;	file writing info packet
+result_buffer:
+	db 0x001e
+
 
 
 error_text db 'error!',0
