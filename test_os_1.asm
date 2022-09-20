@@ -10,6 +10,10 @@ start:
 	mov sp, 4096		; point stack pointer to top of stack space
 	cli
 
+	xor bx,bx
+	mov bl,[0x7c00+disk_address_packet]
+	call print_hex
+
 	; -------------------------- file read/write testing stuff ---------------------------------
 	
 	mov si, 0x0100
@@ -25,7 +29,9 @@ start:
 
 	mov ax,0x4200
 	mov dl,0xe0
-	mov si,disk_address_packet
+	mov bx,disk_address_packet
+	add bx,0x7c00
+	mov si,bx
 	int 0x13		; es:si contain pointer to packet
 	
 	mov bx,ax
