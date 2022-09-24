@@ -10,9 +10,17 @@ start:
 	mov sp, 4096		; point stack pointer to top of stack space
 	cli
 
+	xor cl,cl
+.top:
+	in al,0x60
+	cmp al,cl
+	je .top
+	mov cl,al
 	xor bx,bx
-	mov bl,[0x7c00+disk_address_packet]
+	mov bl,al
 	call print_hex
+	jmp .top
+
 
 	; -------------------------- file read/write testing stuff ---------------------------------
 	
@@ -84,6 +92,8 @@ error_text db 'error!',0
 
 hex_characters db '0123456789abcdef'
 
+
+; doesnt use cx
 print_hex:
 	mov ax,bx
 	xor dx,dx
