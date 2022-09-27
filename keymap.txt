@@ -1,3 +1,102 @@
+keydown: first bit of byte is 0
+keyup: first bit of byte is 1
 
-a == 1e
-b == 30
+0 0b
+1 02
+2 03
+3 04
+4 05
+5 06
+6 07
+7 08
+8 09
+9 0a
+
+a 1e
+b 30
+c 2e
+d 20
+e 12
+f 21
+g 22
+h 23
+i 17
+j 24
+k 25
+l 26
+m 32
+n 31
+o 18
+p 19
+q 10
+r 13
+s 1f
+t 14
+u 16
+v 2f
+w 11
+x 2d
+y 15
+z 2c
+
+f1 3b
+f2 3c
+f3 3d
+f4 3e
+f5 3f
+f6 40
+f7 41
+f8 42
+f9 43
+f10 44
+f11 57
+f12 58
+
+
+` 29
+- 0c
+= 0d
+[ 1a
+] 1b
+\ 2b
+; 27
+' 2b
+, 33
+. 34
+/ 35
+
+
+esc: 01
+space: 39
+backspace: 0e
+tab: 0f
+caps lock: 3a
+left shift: 2a
+right shift: 36
+enter: 1c
+ctrl: 1d
+alt: 3b
+
+special keys:
+
+right alt: preceded by e0
+right ctrl preceded by e0
+
+
+all the rest are down plus up:
+
+left arrow: e0 4b e0 cb
+up arrow: e0 4b e0 c8
+right arrow: e0 4d e0 cd
+down arrow: e0 50 e0 d0
+
+win key: 0e 5b 0e db
+print screen: e0 2a e0 37 e0 b7 e0 aa e0 b7 e0 aa
+pause break: e1 1d 45 e1 9d c5
+insert: e0 52 e0 d2
+delete: e0 52 e0 d3
+ctrl-break: 1d e0 46 e0 c6 d9
+ctrl-alt-del: 1d 38 e0 53 e0 d3 b8 9d
+alt-print screen: 38 54 d4 b8
+
+
