@@ -1,9 +1,6 @@
     BITS 16
 start:
 
-    ;   THIS PROBABLY WONT RUN PROPERLY, STACK AND STUFF ISNT SET UP!!!!!
-
-
     mov si, 0x0100
 	mov word  [si+0], 0x10		; packet size
 	mov word  [si+1], 0x00		; always 0
