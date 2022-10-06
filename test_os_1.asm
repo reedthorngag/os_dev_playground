@@ -10,10 +10,22 @@ start:
 	mov sp, 4096		; point stack pointer to top of stack space
 	cli
 
-error_text db 'error!',0
+initialize_file_system:
+
+
+
+
+
+file_system_start db 0x8c00
+
+file_system_start_data:
+	db 2,'C:',0		; "2" is the number of subfolders/files (only supports up to 255 for now that means), "C:" is the name of the folder, "0" is the null termination
+	db 1,'/system',0
+	db 1,'/user',0
+	db 0,'testfile.txt',0
+	; db 3,0x[offset] 		where the file/folder declerations continue in memory
 
 hex_characters db '0123456789abcdef'
-
 
 ; doesnt use cx
 print_hex:
