@@ -12,7 +12,7 @@ start:
 
 	xor cl,cl
 .top:
-	in al,0x60
+	in al,0x64
 	cmp al,cl
 	je .top
 	mov cl,al

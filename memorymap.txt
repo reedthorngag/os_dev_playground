@@ -1,0 +1,8 @@
+
+0x7c00 - 0x7e00  =  boot sector
+
+
+
+
+
+
