@@ -4,26 +4,58 @@ start:
 	xor bx,bx
 	mov bl,dl
 
-	sti
+	cli
 	mov ax, 0x06c0		; set up 4k stack space below the bootloader (0x7c00 - 0x6c00 = 0x1000 = 4096)
 	mov ss, ax
 	mov sp, 4096		; point stack pointer to top of stack space
-	cli
+	sti
 
 initialize_file_system:
+	mov bx,0
+	mov si,[0x7c00+file_system_start]
+ifs_loop:
+	mov al,[0x7c00+file_system_start_data+bx]
+	cmp al,0xff
+	jz end_ifs_loop
+	mov [0x8c00+file_system_start+bx],al
+	add bx,1
+	jmp ifs_loop
+end_ifs_loop:
+
+	call write_file
+
+	cli
+	hlt
 
 
+file_path_buffer dw 0x8a00
 
-
-
-file_system_start db 0x8c00
+file_system_start dw 0x8c00
 
 file_system_start_data:
-	db 2,'C:',0		; "2" is the number of subfolders/files (only supports up to 255 for now that means), "C:" is the name of the folder, "0" is the null termination
-	db 1,'/system',0
-	db 1,'/user',0
-	db 0,'testfile.txt',0
-	; db 3,0x[offset] 		where the file/folder declerations continue in memory
+	db 0x02
+	db 'C:',0,		; "2" is the number of subfolders/files (only supports up to 255 for now that means), "C:" is the name of the folder, "0" is the null termination
+	db 0x01
+	db '/system',0,
+	db 0x01
+	db '/user',0,
+	db 0x00
+	db 'testfile.txt',0
+	; db 2,0x[offset] 		where the file/folder declerations continue in memory
+	dw 0xffff
+
+
+write_file:
+	
+	mov bx,file_system_start
+	mov al,[bx]
+	xor bx,bx
+	mov bl,al
+	call print_hex
+
+	ret
+
+
 
 hex_characters db '0123456789abcdef'
 

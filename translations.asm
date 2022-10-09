@@ -7,6 +7,7 @@
 ; cd 10		    ; int 0x10
 ; eb fe		    ; jmp $
 ; c3            ; ret
+; f4            ; hlt
 
 
 
