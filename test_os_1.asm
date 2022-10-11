@@ -12,12 +12,12 @@ start:
 
 initialize_file_system:
 	mov bx,0
-	mov si,[0x7c00+file_system_start]
+	mov si,[file_system_start]
 ifs_loop:
-	mov al,[0x7c00+file_system_start_data+bx]
+	mov al,[0x07c0:file_system_start_data+bx]
 	cmp al,0xff
 	jz end_ifs_loop
-	mov [0x8c00+file_system_start+bx],al
+	mov [si:bx],al
 	add bx,1
 	jmp ifs_loop
 end_ifs_loop:
@@ -30,7 +30,7 @@ end_ifs_loop:
 
 file_path_buffer dw 0x8a00
 
-file_system_start dw 0x8c00
+file_system_start dw 0x8c0
 
 file_system_start_data:
 	db 0x02
@@ -47,7 +47,7 @@ file_system_start_data:
 
 write_file:
 	
-	mov bx,file_system_start
+	mov bx,[file_system_start+1]
 	mov al,[bx]
 	xor bx,bx
 	mov bl,al
