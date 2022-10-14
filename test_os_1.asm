@@ -12,12 +12,14 @@ start:
 
 initialize_file_system:
 	mov bx,0
-	mov si,[file_system_start]
+	mov es,[file_system_start]
+	mov ax,0x07c0
+	mov fs,ax
 ifs_loop:
-	mov al,[0x07c0:file_system_start_data+bx]
+	mov al,[fs:file_system_start_data+bx]
+	mov [es:bx],al
 	cmp al,0xff
 	jz end_ifs_loop
-	mov [si:bx],al
 	add bx,1
 	jmp ifs_loop
 end_ifs_loop:
@@ -28,28 +30,28 @@ end_ifs_loop:
 	hlt
 
 
-file_path_buffer dw 0x8a00
+file_path_buffer dw 0x08a0	; max length 512 bytes
 
-file_system_start dw 0x8c0
+file_system_start dw 0x08c0
 
 file_system_start_data:
-	db 0x02
-	db 'C:',0,		; "2" is the number of subfolders/files (only supports up to 255 for now that means), "C:" is the name of the folder, "0" is the null termination
-	db 0x01
+	db 0x02			; "2" is the number of subfolders/files (only supports up to 255 for now that means)
+	db 'C:',0,		; "C:" is the name of the folder, "0" is the null termination
+	db 0x01			; declares it as a folder type
 	db '/system',0,
 	db 0x01
 	db '/user',0,
-	db 0x00
+	db 0x00			; declares a file type
 	db 'testfile.txt',0
 	; db 2,0x[offset] 		where the file/folder declerations continue in memory
-	dw 0xffff
+	dw 0xff
 
-
+; 
 write_file:
 	
-	mov bx,[file_system_start+1]
-	mov al,[bx]
-	xor bx,bx
+	mov es,[file_system_start]
+	mov bx,0
+	mov al,[es:bx]
 	mov bl,al
 	call print_hex
 
