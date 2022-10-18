@@ -38,25 +38,35 @@ file_system_start_data:
 	db 0x02			; "2" is the number of subfolders/files (only supports up to 255 for now that means)
 	db 'C:',0,		; "C:" is the name of the folder, "0" is the null termination
 	db 0x01			; declares it as a folder type
-	db '/system',0,
+	db 'system',0,
 	db 0x01
-	db '/user',0,
+	db 'user',0,
 	db 0x00			; declares a file type
 	db 'testfile.txt',0
 	; db 2,0x[offset] 		where the file/folder declerations continue in memory
 	dw 0xff
 
-; 
-write_file:
+
+write_file proc
 	
-	mov es,[file_system_start]
+	mov es,[file_path_buffer]
 	mov bx,0
+
+.load_next_path_letter:
 	mov al,[es:bx]
-	mov bl,al
-	call print_hex
 
-	ret
+.cmp_to_next_chars:
 
+.test_still_valid_file:
+
+.cmp_to_char
+
+	cmp al,
+
+	inc bx
+	jmp .load_next_path_letter
+
+write_file endp
 
 
 hex_characters db '0123456789abcdef'
