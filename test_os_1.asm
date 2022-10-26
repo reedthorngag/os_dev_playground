@@ -19,6 +19,7 @@ write_file_sys_to_mem:
 ifs_loop:
 	mov al,[file_system_start_data+bx]
 	mov [es:bx],al
+	or al,0x80
 	cmp al,0xff
 	jz end_ifs_loop
 	add bx,1
@@ -27,6 +28,7 @@ end_ifs_loop:
 
 	call find_file
 
+hang:
 	cli
 	hlt
 
@@ -49,8 +51,9 @@ file_system_start_data:
 	db 0x00				; declares a file type
 	db 0x12
 	db 'testfile.txt'
-	db 0x0000, 0x0000 	; where the file/folder declerations continue in memory
-	db 0xff
+	db 0x0000, 0x0000
+	db 0x7f				; set highest bit if this isnt the end (0xff)
+	db 0x0000, 0x0000	; where the file/folder declerations continue in memory
 
 find_file:
 	mov es,[file_path_buffer]
@@ -64,29 +67,58 @@ find_file:
 	cmp al,0x2f			; "/"
 	je .found_end_of_sub_path
 	cmp al,0
-	je .found_end_of_path
-	jmp .loop_0
+	jne .loop_0
+	jmp .calc_file_folder_name_len	; cos al is already 0, we dont need to change it
 
 .found_end_of_sub_path:
+	mov al,1
+
+.calc_file_folder_name_len:
+	dec bx
 	mov cx,bx
 	pop bx
 	push cx
 	sub cx,bx
 
 .cmp_to_files_and_folders:
-	mov bx,[file_system_start]
-	add bx,1
-	add bl,[bx]
-	
+	mov fs,[file_system_start]
+	mov bx,1
+	call print_decimal
+	call hang
+	add bl,[fs:bx]
+.loop_1:
+	mov dl,[fs:bx]
+	cmp dl,al
+	je .compare
+
+	inc bx
+	xor dx,dx
+	mov dl,[fs:bx]
+	add bx,dx
+	jmp .loop_1
+
+.compare:	; same type determined (file or folder), now compare length, and if the same, compare the characters
+	inc bx
+	movzx word dx,[fs:bx]
+	cmp cx,dx
+	jne .loop_1
+.loop_2:
+	inc bx
+	mov al,[es:si]
+	cmp al,0x2f			; "/"
+	je .found_path		; checks if its at the end of the path, and if so, that means they were equal
+	cmp ax,[fs:bx]
+	jne .loop_1
+
+.found_path:
+
+	; found the path! (in theroy)
 
 
 
-	add si,cx
 	jmp .cmp_to_files_and_folders
 
 .found_sub_folder:
-
-.found_end_of_path:	
 
 .found_file:	
 

@@ -19,6 +19,7 @@ write_file_sys_to_mem:
 ifs_loop:
 	mov al,[file_system_start_data+bx]
 	mov [es:bx],al
+	or al,0x80
 	cmp al,0xff
 	jz end_ifs_loop
 	add bx,1
@@ -32,7 +33,7 @@ end_ifs_loop:
 
 file_path_buffer dw 0x08a0	; max length 512 bytes
 
-file_system_start dw 0x08c0
+file_system_start dw 0x8c00
 
 file_system_start_data:
 	db 0x02			; "2" is the number of subfolders/files (only supports up to 255 for now that means)
@@ -49,8 +50,9 @@ file_system_start_data:
 	db 0x00				; declares a file type
 	db 0x12
 	db 'testfile.txt'
-	db 0x0000, 0x0000 	; where the file/folder declerations continue in memory
-	db 0xff
+	db 0x0000, 0x0000
+	db 0x7f				; set highest bit if this isnt the end (0xff)
+	db 0x0000, 0x0000	; where the file/folder declerations continue in memory
 
 find_file:
 	mov es,[file_path_buffer]
@@ -60,29 +62,60 @@ find_file:
 	xor bx,bx
 .loop_0:
 	mov al,[es:si+bx]
+	inc bx
 	cmp al,0x2f			; "/"
 	je .found_end_of_sub_path
 	cmp al,0
-	je .found_end_of_path
-	inc bx
-	jmp .loop_0
+	jne .loop_0
+	jmp .calc_file_folder_name_len	; cos al is already 0, we dont need to change it
 
 .found_end_of_sub_path:
+	mov al,1
+	jmp .calc_file_folder_name_len
+
+.calc_file_folder_name_len:
+	dec bx
 	mov cx,bx
 	pop bx
 	push cx
 	sub cx,bx
 
-.cmp_to_next_thingy:
-	xor bx,bx
+.cmp_to_files_and_folders:
+	mov bx,[file_system_start]
+	add bx,1
+	add bl,[bx]
+.loop_1:
+	mov dl,[bx]
+	cmp dl,al
+	je .compare
+
+	inc bx
+	xor dx,dx
+	mov dl,[bx]
+	add bx,dx
+	jmp .loop_1
+
+.compare:
+	inc bx
+	movzx word dx,[bx]
+	cmp cx,dx
+	jne .loop_1
+.loop_2:
+	inc bx
+	mov ax,[es:si]
+	mov fs,[file_system_start]
+	cmp ax,[fs:bx]
+	jne .loop_1
+	cmp bx,cx		; todo: check this is right!
+	jne .loop_2
+
+	; found the path! (in theroy)
 
 
-	add si,cx
-	jmp .cmp_to_next_thingy
+
+	jmp .cmp_to_files_and_folders
 
 .found_sub_folder:
-
-.found_end_of_path:	
 
 .found_file:	
 
