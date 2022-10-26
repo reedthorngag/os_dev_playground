@@ -43,6 +43,16 @@ start:
 
 ;text_string db 'hello!', 0
 
+; test if first bit is set in ax register, returns 1 if set, or 0 if not
+test_first_bit:
+	mov dx,0x8000
+	and ax,dx
+	cmp ax,0
+	mov dx,1
+	cmovne ax,dx
+	ret
+
+
 print_all:
 	xor eax,eax
 	mov ah,0eh
