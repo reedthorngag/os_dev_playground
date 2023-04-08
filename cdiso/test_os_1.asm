@@ -26,14 +26,47 @@ ifs_loop:
 	jmp ifs_loop
 end_ifs_loop:
 
+	mov al,[file_to_find]
+	mov ah,0x0e
+	;int 10h
+
+	xor bx,bx
+	db 0xff
+	mov es,[file_path_buffer]
+	db 0xff
+	mov ah,0x0e
+.loop_3:
+	mov al,[file_to_find+bx]
+	push ax
+	push bx
+	mov bl,al
+	call print_hex
+	pop bx
+	pop ax
+	cmp al,0
+	je .end_0
+	mov [es:bx],al
+	add bx,1
+	jmp .loop_3
+
+.end_0:
+	mov ah,0x0e
+	mov al,[fs:2]
+	int 0x10
+
+	jmp hang
+
 	call find_file
 
+hang:
 	cli
 	hlt
 
+file_to_find db "system/hi",0
+
 file_path_buffer dw 0x08a0	; max length 512 bytes
 
-file_system_start dw 0x8c00
+file_system_start dw 0x08c0
 
 file_system_start_data:
 	db 0x02			; "2" is the number of subfolders/files (only supports up to 255 for now that means)
@@ -71,7 +104,6 @@ find_file:
 
 .found_end_of_sub_path:
 	mov al,1
-	jmp .calc_file_folder_name_len
 
 .calc_file_folder_name_len:
 	dec bx
@@ -81,34 +113,37 @@ find_file:
 	sub cx,bx
 
 .cmp_to_files_and_folders:
-	mov bx,[file_system_start]
-	add bx,1
-	add bl,[bx]
+	mov fs,[file_system_start]
+	mov bx,1
+	add bl,[fs:bx]
 .loop_1:
-	mov dl,[bx]
+	mov dl,[fs:bx]
 	cmp dl,al
 	je .compare
 
 	inc bx
 	xor dx,dx
-	mov dl,[bx]
+	mov dl,[fs:bx]
 	add bx,dx
 	jmp .loop_1
 
-.compare:
+.compare:	; same type determined (file or folder), now compare length, and if the same, compare the characters
 	inc bx
-	movzx word dx,[bx]
+	movzx word dx,[fs:bx]
 	cmp cx,dx
 	jne .loop_1
 .loop_2:
 	inc bx
-	mov ax,[es:si]
-	mov fs,[file_system_start]
+	inc si
+	mov al,[es:si]
+	cmp al,0x2f			; "/"
+	je .found_path		; checks if its at the end of the path, and if so, that means they were equal
 	cmp ax,[fs:bx]
 	jne .loop_1
-	cmp bx,cx		; todo: check this is right!
-	jne .loop_2
 
+.found_path:
+	mov ax,0x0e61
+	int 10h
 	; found the path! (in theroy)
 
 

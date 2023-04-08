@@ -26,11 +26,43 @@ ifs_loop:
 	jmp ifs_loop
 end_ifs_loop:
 
+	mov al,[file_to_find]
+	mov ah,0x0e
+	;int 10h
+
+	xor bx,bx
+	db 0xff
+	mov es,[file_path_buffer]
+	db 0xff
+	mov ah,0x0e
+.loop_3:
+	mov al,[file_to_find+bx]
+	push ax
+	push bx
+	mov bl,al
+	call print_hex
+	pop bx
+	pop ax
+	cmp al,0
+	je .end_0
+	mov [es:bx],al
+	add bx,1
+	jmp .loop_3
+
+.end_0:
+	mov ah,0x0e
+	mov al,[fs:2]
+	int 0x10
+
+	jmp hang
+
 	call find_file
 
 hang:
 	cli
 	hlt
+
+file_to_find db "system/hi",0
 
 file_path_buffer dw 0x08a0	; max length 512 bytes
 
@@ -83,8 +115,6 @@ find_file:
 .cmp_to_files_and_folders:
 	mov fs,[file_system_start]
 	mov bx,1
-	call print_decimal
-	call hang
 	add bl,[fs:bx]
 .loop_1:
 	mov dl,[fs:bx]
@@ -104,6 +134,7 @@ find_file:
 	jne .loop_1
 .loop_2:
 	inc bx
+	inc si
 	mov al,[es:si]
 	cmp al,0x2f			; "/"
 	je .found_path		; checks if its at the end of the path, and if so, that means they were equal
@@ -111,7 +142,8 @@ find_file:
 	jne .loop_1
 
 .found_path:
-
+	mov ax,0x0e61
+	int 10h
 	; found the path! (in theroy)
 
 
