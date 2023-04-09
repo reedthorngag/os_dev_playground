@@ -9,36 +9,12 @@ start:
 	sti
 
 	mov ax, 0x07c0
-	mov ds, ax
+	mov ds, ax		; this should already be set, but better safe than sorry
 
-	;mov es,[file_system_start]
 
-	mov bx, 0xfffa
-	mov bl, dl
-	call print_hex
-
-	;call hang
-
-	jmp .end_ifs_loop
-
-.write_file_sys_to_mem:
-	mov bx,0
-	mov ax,0x07c0
-	mov fs,ax
-.ifs_loop:
-	mov al,[file_system_start_data+bx]
-	mov [es:bx],al
-	or al,0x80
-	cmp al,0xff
-	jz .end_ifs_loop
-	inc bx
-	jmp .ifs_loop
-.end_ifs_loop:
-
+	jmp .skip_for_now
 	mov byte [disk], dl
-
 	mov dl,0x80
-
 	mov ax, 0x0201		; ah = 0x02 (read sector function of int 0x13), al = 1 (read 1 sectors)
 						; sector count could theoretically be 255, but 65 is the max that can be read
 						; without crossing a segment boundary
@@ -50,133 +26,124 @@ start:
 	xor dh, dh		; dh = 0x00 (head idx), dl = drive number (implicitly placed in dl by BIOS on startup)
 	int 0x13		; copy data
 
-	mov ah, 0x01
-	int 0x13
-
 	mov al,0x01
+	mov bh,ah
 	cmovc bx, ax
 	call print_hex
-	
+.skip_for_now:
 
-	mov bx,[0x8000]
+	mov bx,[0x400]
 	call print_hex
 
-	call hang
+	mov si, file_to_find
 
+	call write_to_file_path
 
+	mov ax,0x07c0
+	mov es,ax
+	mov ax,[file_path_buffer_offset]
+	mov si,ax
+	call compare_paths
+	je .yay
+	jne .sad
 
-	mov al,[file_to_find]
-	mov ah,0x0e
-	;int 10h
+.yay:
+	mov ax,0x0e61
+	int 0x10
+	jmp .end
 
-	xor bx,bx
-	db 0xff
-	mov es,[file_path_buffer]
-	db 0xff
-	mov ah,0x0e
-.loop_3:
-	mov al,[file_to_find+bx]
-	push ax
-	push bx
-	mov bl,al
-	call print_hex
-	pop bx
-	pop ax
-	cmp al,0
-	je .end_0
-	mov [es:bx],al
-	add bx,1
-	jmp .loop_3
-
-.end_0:
-	mov ah,0x0e
-	mov al,[fs:2]
+.sad:
+	mov ax,0x0e62
 	int 0x10
 
+.end:
+
 	call hang
 
-	call find_file
+
+write_to_file_path:
+	xor bx,bx
+	mov di,[file_path_buffer_offset]
+.loop:
+	mov al,[si+bx]
+	cmp al,0
+	je .end
+	mov [di+bx], al
+	inc bx
+	jmp .loop
+.end:
+	ret
+
 
 hang:
-	cli
-	hlt
+	cli	; disable interrupts
+	hlt	; halt the processor
 
+
+; return segment:offset in es:si
+get_file:
+	mov es,[file_system_start]
+	xor ax,ax
+	mov si,ax
+	mov ax,[es:si]
+
+	cmp ax,0xf11f
+	mov si,corrupt_file_sys
+	call exception
+
+.end:
+	ret
+
+; es:si should point to first byte of path
+; zero flag set if equal (use je to jump if paths are equal)
+; this also increments si to point at byte after null terminator (the file/folder offset)
+compare_paths:
+	mov bx,[file_path_buffer_offset]
+.loop:
+	mov al,[bx]
+	mov cl,[es:si]
+	cmp al,cl
+	jne .not_equal
+	cmp al,0
+	je .equal
+	inc bx
+	inc si
+	jmp .loop
+.not_equal:
+	cmp cl,0
+	je .end_not_equal_loop
+	inc si
+	mov cl,[es:si]
+	jmp .not_equal
+.end_not_equal_loop:
+	cmp cl,1	; unset ZF as we know cl must be 0
+	inc si
+	ret
+.equal:
+	inc si
+	xor ax,ax	; set ZF
+	ret
 
 disk db 0x00
 
-file_to_find db "system/hi",0
+file_to_find db "testfile.txt",0
 
-file_path_buffer dw 0x07e0	; max length 512 bytes (up to 0x0800)
+file_path_buffer_offset dw 0x0200	; max length 512 bytes (up to 0x0800)
 
-file_system_start dw 0x0800
+file_system_start dw 0x0800			; segment the file system starts at
 
-find_file:
-	mov es,[file_path_buffer]
-	mov si,0
-	push 0x0000
-.find_len_of_next_sub_path:
-	xor bx,bx
-.loop_0:
-	mov al,[es:si+bx]
-	inc bx
-	cmp al,0x2f			; "/"
-	je .found_end_of_sub_path
+
+corrupt_file_sys: db 'ERR: file system corrupted!',0
+
+exception:
+	lodsb
 	cmp al,0
-	jne .loop_0
-	jmp .calc_file_folder_name_len	; cos al is already 0, we dont need to change it
-
-.found_end_of_sub_path:
-	mov al,1
-
-.calc_file_folder_name_len:
-	dec bx
-	mov cx,bx
-	pop bx
-	push cx
-	sub cx,bx
-
-.cmp_to_files_and_folders:
-	mov fs,[file_system_start]
-	mov bx,1
-	add bl,[fs:bx]
-.loop_1:
-	mov dl,[fs:bx]
-	cmp dl,al
-	je .compare
-
-	inc bx
-	xor dx,dx
-	mov dl,[fs:bx]
-	add bx,dx
-	jmp .loop_1
-
-.compare:	; same type determined (file or folder), now compare length, and if the same, compare the characters
-	inc bx
-	movzx word dx,[fs:bx]
-	cmp cx,dx
-	jne .loop_1
-.loop_2:
-	inc bx
-	inc si
-	mov al,[es:si]
-	cmp al,0x2f			; "/"
-	je .found_path		; checks if its at the end of the path, and if so, that means they were equal
-	cmp ax,[fs:bx]
-	jne .loop_1
-
-.found_path:
-	mov ax,0x0e61
-	int 10h
-	; found the path! (in theory)
-
-
-
-	jmp .cmp_to_files_and_folders
-
-.found_sub_folder:
-
-.found_file:	
-
+	je .end
+	mov ah,0x0e
+	int 0x10
+	jmp exception
+.end:
+	call hang
 
 hex_characters db '0123456789abcdef'
 
@@ -224,22 +191,21 @@ printstr:
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
 
+	times 1024-($-$$) db 0
+
 file_system_start_data:
 	dw 0xf11f		; magic number to indicate fs table
 	db 0x02			; "2" is the number of subfolders/files (only supports up to 255 for now that means)
-	db 0x02			; length of file/folder name
-	db 'C:'			; "C:" is the name of this folder (always first)
+	db 'C:',0		; "C:" is the name of this folder (always first)
 
-	db 0x01			; declares next path as a folder type
-	db 0x06			
-	db 'system'
+	db 0x01			; declares next path as a folder type		
+	db 'system',0
 	dw 0x0000, 0x0000	; segment:offset
 
 	db 0x02				; declares a file type
-	db 0x12
-	db 'testfile.txt'
-	dw 0x0000			; offset, max 65535
+	db 'testfile.txt',0
+	dw 0x0000			; offset? maybe do this differently?
 
 	db 0xff				; unset lowest bit if this isnt the end of the table (0xfe)
-	dw 0x0000, 0x0000	; where the file/folder declerations continue in memory
+	dw 0x0000, 0x0000	; segment:offset where the file/folder declerations continue in memory
 

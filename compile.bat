@@ -8,8 +8,7 @@ cd cdiso
 
 nasm -f bin -o test_os_1.flp test_os_1.asm
 
-
-mkisofs -no-emul-boot -boot-load-size 1 -exclude-list exclude.txt -o test_os_1.iso -b test_os_1.flp %cd%
+mkisofs -no-emul-boot -boot-load-size 4 -exclude-list exclude.txt -o test_os_1.iso -b test_os_1.flp %cd%
 
 cd ..
 
