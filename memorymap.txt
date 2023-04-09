@@ -1,5 +1,7 @@
 
 0x7c00 - 0x7e00  =  boot sector
+0x7e00 - 0x8000  =  file path
+0x8000 <         =  file system
 
 
 
