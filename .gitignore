@@ -1,1 +1,4 @@
 node_modules/
+cdiso/*.asm
+cdiso/*.flp
+cdiso/*.iso

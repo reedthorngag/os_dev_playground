@@ -32,23 +32,14 @@ start:
 	call print_hex
 .skip_for_now:
 
-	mov bx,[0x400]
-	call print_hex
-
 	mov si, file_to_find
+	call write_to_file_buffer
 
-	call write_to_file_path
 
-	mov ax,0x07c0
-	mov es,ax
-	mov ax,[file_path_buffer_offset]
-	mov si,ax
-	call compare_paths
-	je .yay
+	call get_file
 	jne .sad
 
-.yay:
-	mov ax,0x0e61
+	mov ax,0x0e61	; it worked!
 	int 0x10
 	jmp .end
 
@@ -61,7 +52,7 @@ start:
 	call hang
 
 
-write_to_file_path:
+write_to_file_buffer:
 	xor bx,bx
 	mov di,[file_path_buffer_offset]
 .loop:
@@ -81,24 +72,99 @@ hang:
 
 
 ; return segment:offset in es:si
+; ZF set on success, unset on path not found
 get_file:
 	mov es,[file_system_start]
-	xor ax,ax
-	mov si,ax
+	xor si,si
+.enter_folder_loop:
 	mov ax,[es:si]
-
 	cmp ax,0xf11f
+	jne .error
+	add si,2
+	xor bx,bx
+.folder_search_loop:
+	mov dl,[es:si]
+	inc si
+	push bx
+	call compare_paths
+	pop bx
+	jne .next
+
+	inc bx
+	cmp dl,1
+	je .enter_folder
+
+	cmp dl,2
+	jne .error
+
+	mov si,[es:si]
+	mov ax,[es:si]
+	cmp ax,0x1ff1
+	je .found
+	jmp .error2
+
+.next:
+	add si,2
+	mov al,[es:si]
+
+	cmp al,1
+	je .folder_search_loop
+	cmp al,2
+	je .folder_search_loop
+
+	cmp al,0xff
+	je .not_found
+
+	cmp al,0xfe
+	jne .error
+
+.enter_folder:
+	inc si
+	mov es,[es:si]
+	xor si,si
+	jmp .enter_folder_loop
+
+
+.not_found:
+	mov ax,0
+	cmp ax,1	; unset ZF
+	ret
+.found:
+	xor ax,ax	; set ZF
+	ret
+
+.error2
+	mov bx,0xff11
+	call print_hex
+
+.error:
 	mov si,corrupt_file_sys
 	call exception
 
-.end:
-	ret
 
 ; es:si should point to first byte of path
+; bx should be how many folders deep we are
 ; zero flag set if equal (use je to jump if paths are equal)
 ; this also increments si to point at byte after null terminator (the file/folder offset)
 compare_paths:
+	mov cx,bx
 	mov bx,[file_path_buffer_offset]
+.init_loop:
+	cmp cx,0
+	je .done_init
+.find_slash_loop:
+	mov al,[bx]
+	cmp al,0x2f
+	je .found_slash
+	cmp al,0
+	je .error
+	inc bx
+	jmp .find_slash_loop
+.found_slash:
+	inc bx
+	dec cx
+	jmp .init_loop
+.done_init:
 .loop:
 	mov al,[bx]
 	mov cl,[es:si]
@@ -124,6 +190,10 @@ compare_paths:
 	xor ax,ax	; set ZF
 	ret
 
+.error:
+	mov si,compare_paths_exception
+	call exception
+
 disk db 0x00
 
 file_to_find db "testfile.txt",0
@@ -134,6 +204,8 @@ file_system_start dw 0x0800			; segment the file system starts at
 
 
 corrupt_file_sys: db 'ERR: file system corrupted!',0
+
+compare_paths_exception: db 'ERR: compare paths exception! (malformed path probably)',0
 
 exception:
 	lodsb
@@ -193,19 +265,26 @@ printstr:
 
 	times 1024-($-$$) db 0
 
-file_system_start_data:
-	dw 0xf11f		; magic number to indicate fs table
-	db 0x02			; "2" is the number of subfolders/files (only supports up to 255 for now that means)
-	db 'C:',0		; "C:" is the name of this folder (always first)
+file_system:
+	dw 0xf11f			; magic number to indicate fs table
 
-	db 0x01			; declares next path as a folder type		
-	db 'system',0
-	dw 0x0000, 0x0000	; segment:offset
+	;db 0x01			; declares next path as a folder type		
+	;db 'system',0
+	;dw 0x0000			; segment
 
 	db 0x02				; declares a file type
 	db 'testfile.txt',0
-	dw 0x0000			; offset? maybe do this differently?
+	dw 0x0200			; offset? maybe do this differently?
 
 	db 0xff				; unset lowest bit if this isnt the end of the table (0xfe)
-	dw 0x0000, 0x0000	; segment:offset where the file/folder declerations continue in memory
+	dw 0x0000			; segment where the file/folder declerations continue in memory
+
+
+
+	times 1536-($-$$) db 0
+
+	dw 0x1ff1			; magic number to indicate a file
+	db 'testfile.txt',0	; file name
+	dw 0x0800			; segment of parent folder
+	dw 0x1000			; size of file
 
