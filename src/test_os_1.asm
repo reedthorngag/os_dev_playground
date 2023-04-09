@@ -11,11 +11,8 @@ start:
 
 	;mov es,[file_system_start]
 
-	mov bx, 0xffff
-
-	;call print_hex
-	mov ax,0x0e2f
-	int 0x10
+	mov bx, 0xfffa
+	call print_hex
 
 	call hang
 
@@ -175,9 +172,8 @@ print_hex:
 .hex_print_loop:
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
 	push bx
-	mov bx,hex_characters
-	add bx,ax
-	mov al,[0x7c00+bx]
+	mov bx,ax
+	mov al,[hex_characters+bx]
 	mov ah,0x0e
 	int 0x10
 
@@ -191,7 +187,10 @@ print_hex:
 	cmp bx,0x00
 	jne .hex_print_loop
 
-	mov ax,0x0e20
+	mov ax,0x0e61
+	int 0x10
+
+	mov ax,0x0e62
 	int 0x10
 
 	ret

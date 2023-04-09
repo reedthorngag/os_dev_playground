@@ -2,7 +2,11 @@
 
 cls
 
-xcopy /Y /I "test_os_1.asm" "cdiso/test_os_1.asm"
+echo %cd%
+
+if exist "src/test_os_1.asm" (echo hello)
+
+xcopy /Y /-I ".\src\test_os_1.asm" ".\cdiso\test_os_1.asm"
 
 cd cdiso
 
