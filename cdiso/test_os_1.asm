@@ -3,18 +3,21 @@ start:
 
 	cli
 	xor ax, ax
-	mov ds, ax
 	mov es, ax
 	mov ss, ax	; intialize stack to 0x0000:0x7C00
 			    ; (directly below bootloader)
 	sti
 
+	mov ax, 0x07c0
+	mov ds, ax
+
 	;mov es,[file_system_start]
 
 	mov bx, 0xfffa
+	mov bl, dl
 	call print_hex
 
-	call hang
+	;call hang
 
 	jmp .end_ifs_loop
 
@@ -32,7 +35,9 @@ start:
 	jmp .ifs_loop
 .end_ifs_loop:
 
-	mov [disk], dl	
+	mov byte [disk], dl
+
+	mov dl,0x80
 
 	mov ax, 0x0201		; ah = 0x02 (read sector function of int 0x13), al = 1 (read 1 sectors)
 						; sector count could theoretically be 255, but 65 is the max that can be read
@@ -44,6 +49,19 @@ start:
 	mov cx, 0x0002		; ch = 0x00 (track idx), cl = 0x02 (sector idx to start reading from)
 	xor dh, dh		; dh = 0x00 (head idx), dl = drive number (implicitly placed in dl by BIOS on startup)
 	int 0x13		; copy data
+
+	mov ah, 0x01
+	int 0x13
+
+	mov al,0x01
+	cmovc bx, ax
+	call print_hex
+	
+
+	mov bx,[0x8000]
+	call print_hex
+
+	call hang
 
 
 
@@ -187,12 +205,18 @@ print_hex:
 	cmp bx,0x00
 	jne .hex_print_loop
 
-	mov ax,0x0e61
+	mov ax,0x0e20
 	int 0x10
+	ret
 
-	mov ax,0x0e62
+printstr:
+	lodsb
+	cmp al,0x00
+	je .end
+	mov ah,0x0e
 	int 0x10
-
+	jmp printstr
+.end:
 	ret
 
 ; ------------------------- end ---------------------------------------
@@ -201,7 +225,7 @@ print_hex:
 	dw 0xAA55		        ; The standard PC boot signature
 
 file_system_start_data:
-	db 0xf11f		; magic number to indicate fs table
+	dw 0xf11f		; magic number to indicate fs table
 	db 0x02			; "2" is the number of subfolders/files (only supports up to 255 for now that means)
 	db 0x02			; length of file/folder name
 	db 'C:'			; "C:" is the name of this folder (always first)
@@ -209,13 +233,13 @@ file_system_start_data:
 	db 0x01			; declares next path as a folder type
 	db 0x06			
 	db 'system'
-	db 0x0000, 0x0000	; segment:offset
+	dw 0x0000, 0x0000	; segment:offset
 
 	db 0x02				; declares a file type
 	db 0x12
 	db 'testfile.txt'
-	db 0x0000			; offset, max 65535
+	dw 0x0000			; offset, max 65535
 
 	db 0xff				; unset lowest bit if this isnt the end of the table (0xfe)
-	db 0x0000, 0x0000	; where the file/folder declerations continue in memory
+	dw 0x0000, 0x0000	; where the file/folder declerations continue in memory
 
