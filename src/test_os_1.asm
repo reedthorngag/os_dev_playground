@@ -33,7 +33,7 @@ start:
 .skip_for_now:
 
 	mov si, folder_to_create
-	call write_to_file_buffer
+	call write_to_file_path_buffer
 
 	call create_folder
 	jne .sad
@@ -50,7 +50,7 @@ start:
 	call hang
 
 
-#include "utils/small_utils.asm"
+#include "utils/print_utils.asm"
 #include "create_folder.asm"
 #include "compare_paths.asm"
 
@@ -65,6 +65,7 @@ file_system_start dw 0x1000			; segment the file system starts at
 
 
 #include "get_file.asm"
+#include "utils/utils.asm"
 
 
 file_to_find db "testfile.txt",0

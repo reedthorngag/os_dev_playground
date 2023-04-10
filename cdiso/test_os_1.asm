@@ -33,7 +33,7 @@ start:
 .skip_for_now:
 
 	mov si, folder_to_create
-	call write_to_file_buffer
+	call write_to_file_path_buffer
 
 	call create_folder
 	jne .sad
@@ -91,7 +91,7 @@ printstr:
 .end:
 	ret
 
-write_to_file_buffer:
+write_to_file_path_buffer:
 	xor bx,bx
 	mov di,[file_path_buffer_offset]
 .loop:

@@ -1,6 +1,6 @@
-; returns folder segment:offset in es:si
+; returns file segment:offset in es:si
 ; ZF set on suces, unset on failure (invalid path)
-create_folder:
+create_file:
 	xor bx,bx
 .free_memory_lookup_loop:
 	inc bx	; this can be done here because we know at least the first one will exist already
@@ -87,10 +87,11 @@ create_folder:
 	mov es,[es:si]
 	xor si,si
 	cmp dl,0
-	je .create_folder_here
+	je .create_file_here
 	jmp .enter_folder_loop
 
-.create_folder_here:
+.create_file_here:
+    push es
 	mov ax,[es:si]
 	cmp ax,0xf11f
 	jne .error
@@ -121,7 +122,8 @@ create_folder:
 	cmp dh,0
 	jne .get_to_folder_name
 .write_data:
-	mov byte [es:si], 0x01
+	mov byte [es:si], 0x02
+    push bx
 .loop:
 	inc bx
 	inc si
@@ -138,9 +140,15 @@ create_folder:
 	jmp .created
 	mov es,cx
 	xor si,si
-	mov word [es:si],0xf11f
+	mov word [es:si],0x1ff1
 	add si,2
-	mov byte [es:si],0xff
+    pop bx
+.write_file_name:
+    mov al,[bx]
+    mov byte [es:si],al
+    cmp al,0
+    jne .write_file_name
+    mov 
 
 .failed:
 	mov ax,0
