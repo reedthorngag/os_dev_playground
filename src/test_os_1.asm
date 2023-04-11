@@ -66,10 +66,12 @@ file_system_start dw 0x1000			; segment the file system starts at
 
 #include "get_file.asm"
 #include "utils/utils.asm"
+#include "create_file.asm"
 
 
-file_to_find db "testfile.txt",0
-folder_to_create db "testfolder",0
+file_to_find: db "testfile.txt",0
+folder_to_create: db "testfolder",0
+file_to_create: db "testfolder/testfile.txt",0
 
 
 corrupt_file_sys: db 'ERR: file system corrupted!',0
@@ -113,17 +115,24 @@ file_system:
 
 	db 0x02				; declares a file type
 	db 'testfile.txt',0
-	dw 0x0100			; offset, maybe do this differently?
+	dw 0x0020			; segment_offset, modify es by the segment_offset
 
 	db 0xff				; unset lowest bit if this isnt the end of the table (0xfe)
 	dw 0x0000			; segment where the file/folder declerations continue in memory
 
+	times 0x80180+0x400-($-$$) db 0
+
+	db 0x01
+	db 0x01
+	db 0x01
 
 
-	times 0x8100+0x400-($-$$) db 0
+	times 0x80200+0x400-($-$$) db 0
 
 	dw 0x1ff1			; magic number to indicate a file
-	db 'testfile.txt',0	; file name
-	dw 0x0800			; segment of parent folder
-	dw 0x1000			; size of file
+	db 'testfile.txt',0	; file name (obviously)
+	dw 0x1000			; segment of parent folder
+	dw 0x01				; number of 0x100 byte chunks file takes up
+	db 0xff				; if the file is extended or not, 0xfe if it is
+	dw 0x0000			; parent folder segment offset of where it continues if it does
 

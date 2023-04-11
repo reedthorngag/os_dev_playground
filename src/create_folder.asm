@@ -4,13 +4,12 @@ create_folder:
 	xor bx,bx
 .free_memory_lookup_loop:
 	inc bx	; this can be done here because we know at least the first one will exist already
+	cmp bx,0x20 	; 0x0800 * 0x20 = 0x10000 (out of bounds)
+	je .out_of_space
 	mov al,[memory_usage_table+bx]
 	cmp al,1
 	je .free_memory_lookup_loop
-	cmp bl,0x20 	; 0x0800 * 0x20 = 0xffff = 65536
-	je .out_of_space
 	mov byte [memory_usage_table+bx],0x01
-	inc bx
 	mov ax,0x0800
 	mul bx		; multiply ax by bx, result in dx:ax
 	mov cx,ax	; remember not to modify cx!!!
