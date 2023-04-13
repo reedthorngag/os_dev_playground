@@ -5,9 +5,11 @@
 compare_paths:
 	mov cx,bx
 	mov bx,[file_path_buffer_offset]
+
 .init_loop:
 	cmp cx,0
 	je .done_init
+
 .find_slash_loop:
 	mov al,[bx]
 	cmp al,0x2f
@@ -16,10 +18,12 @@ compare_paths:
 	je .error
 	inc bx
 	jmp .find_slash_loop
+
 .found_slash:
 	inc bx
 	dec cx
 	jmp .init_loop
+
 .done_init:
 .loop:
 	mov al,[bx]

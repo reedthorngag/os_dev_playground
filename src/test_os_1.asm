@@ -30,7 +30,7 @@ start:
 	mov bh,ah
 	cmovc bx, ax
 	call print_hex
-.skip_for_now:
+.skip_for_now:	
 
 	mov si, folder_to_create
 	call write_to_file_path_buffer
@@ -39,6 +39,14 @@ start:
 	jne .sad
 
 	mov ax,0x0e61	; it worked!
+	int 0x10
+
+	mov si, file_to_create
+	call write_to_file_path_buffer
+
+	call create_file
+	jne .sad
+	mov ax,0x0e61
 	int 0x10
 	jmp .end
 
@@ -52,27 +60,26 @@ start:
 
 #include "utils/print_utils.asm"
 #include "create_folder.asm"
-#include "compare_paths.asm"
 
 
 disk db 0x00
-
-file_path_buffer_offset dw 0x0200	; max length 512 bytes (up to 0x0800)
-file_system_start dw 0x1000			; segment the file system starts at
 
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
 
 
+#include "compare_paths.asm"
 #include "get_file.asm"
 #include "utils/utils.asm"
 #include "create_file.asm"
 
 
+file_path_buffer_offset dw 0x6400	; max length 512 bytes (up to 0x0800)
+file_system_start dw 0x1000			; segment the file system starts at
+
 file_to_find: db "testfile.txt",0
 folder_to_create: db "testfolder",0
 file_to_create: db "testfolder/testfile.txt",0
-
 
 corrupt_file_sys: db 'ERR: file system corrupted!',0
 
@@ -80,7 +87,7 @@ compare_paths_exception: db 'ERR: compare paths exception! (malformed path proba
 
 out_of_space_error: db 'ERR: out of memory pages!',0
 
-file_name_error: db 'ERR: a file with that name already exists!',0
+file_name_error: db 'ERR: a file or folder with that name already exists!',0
 
 exception:
 	lodsb

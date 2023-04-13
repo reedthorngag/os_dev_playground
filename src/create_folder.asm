@@ -29,7 +29,8 @@ create_folder:
 	jmp .get_folder_depth_loop
 
 .main_loop:
-	mov ax,ds
+	xor bx,bx	; bx is used by compare_paths, dont delete!
+	mov ax,ds	; these next few lines are so that [es:si] points to the data in file_system_start mem location
 	mov es,ax
 	mov si,file_system_start
 	dec si
@@ -40,7 +41,6 @@ create_folder:
 	cmp ax,0xf11f
 	jne .error
 	add si,2
-	xor bx,bx
 .folder_search_loop:
 	mov al,[es:si]
 	inc si
@@ -70,7 +70,6 @@ create_folder:
 	cmp al,2
 	je .folder_search_loop
 
-
 	cmp al,0xff
 	je .failed
 
@@ -94,18 +93,33 @@ create_folder:
 	cmp ax,0xf11f
 	jne .error
 
-.find_end:
+.check_already_exists:
+	push cx
+.check_already_exists_loop:
 	inc si
+	push bx
+	call compare_paths
+	pop bx
+	je .error_file_name
+	add si,2
 	mov al,[es:si]
 	cmp al,0xff
-	je .write_folder
+	je .end
 	cmp al,0xfe
-	je .goto_extended
-	jmp .find_end
+	jne .check_already_exists_loop
 
 .goto_extended:
+	inc si
 	mov es,[es:si]
-	jmp .enter_folder_loop
+	xor si,si
+	mov ax,[es:si]
+	cmp ax,0xf11f
+	jne .error
+	add si,2
+	jmp .check_already_exists_loop
+
+.end:
+	pop cx
 
 .write_folder:
 	mov bx,[file_path_buffer_offset]
