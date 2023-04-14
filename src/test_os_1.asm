@@ -48,6 +48,27 @@ start:
 	jne .sad
 	mov ax,0x0e61
 	int 0x10
+
+	call get_file
+	jne .sad
+	mov ax,0x0e61
+	int 0x10
+
+	mov ax,[es:si]
+	cmp ax,0x1ff1
+	jne .sad
+
+	mov bx,0xffff
+	call print_hex
+
+	xor bx,bx
+.loop:
+	mov bl,[es:si]
+	call print_hex
+	inc bx
+	cmp bl,0
+	jne .loop
+
 	jmp .end
 
 .sad:
@@ -59,7 +80,6 @@ start:
 
 
 #include "utils/print_utils.asm"
-#include "create_folder.asm"
 
 
 disk db 0x00
@@ -67,6 +87,8 @@ disk db 0x00
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
 
+
+#include "create_folder.asm"
 
 #include "compare_paths.asm"
 #include "get_file.asm"

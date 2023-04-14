@@ -21,7 +21,6 @@ create_file:
 	mov ax,ds	; these next few lines are so that [es:si] points to the data in file_system_start mem location
 	mov es,ax
 	mov si,file_system_start
-	dec si
 	jmp .enter_folder
 
 .enter_folder_loop:
@@ -32,20 +31,24 @@ create_file:
 	jne .error
 	add si,2
 
+	mov al,[es:si]
+	cmp al,0xff
+	je .end
+	cmp al,0xfe
+	je .goto_extended_1
+
 .folder_search_loop:
-	mov cl,[es:si]
+	mov al,[es:si]
 	inc si
-	push bx
 	call compare_paths
-	pop bx
 	jne .next
 
 	inc bx
 
-	cmp cl,1
+	cmp al,1
 	je .enter_folder
 
-	cmp cl,2
+	cmp al,2
 	je .error_file_name
 
 	jmp .error
@@ -65,13 +68,12 @@ create_file:
 	cmp al,0xfe
 	jne .error
 
-	inc si
+.goto_extended_1:
 	mov es,[es:si]
 	jmp .enter_folder_loop
 
 .enter_folder:
 	dec dl
-	inc si
 	mov es,[es:si]
 	xor si,si
 	cmp dl,0
@@ -83,14 +85,17 @@ create_file:
 	cmp ax,0xf11f
 	jne .error
     add si,2
+	
+	mov al,[es:si]
+	cmp al,0xff
+	je .end
+	cmp al,0xfe
+	je .goto_extended
 
 .check_already_exists:
-	push cx
 .check_already_exists_loop:
 	inc si
-	push bx
 	call compare_paths
-	pop bx
 	je .error_file_name
 	add si,2
 	mov al,[es:si]
@@ -110,8 +115,6 @@ create_file:
 	jmp .check_already_exists_loop
 
 .end:
-	pop cx
-
 .find_free_space:
     mov ax,es
     add ax,0x18
@@ -150,7 +153,7 @@ create_file:
 	jne .get_to_file_name_loop
 
 .write_data:
-	mov byte [es:si], 0x01	; indicates a file
+	mov byte [es:si], 0x02	; indicates a file
 	push bx
 
 .write_file_name_to_folder_loop:
@@ -161,14 +164,13 @@ create_file:
 	cmp al,0
 	jne .write_file_name_to_folder_loop
 
-.continue:
+.continue_1:
 	inc si
 	mov word [es:si],cx
 	add si,2
 	mov byte [es:si],0xff
 	
-	mov es,cx
-	xor si,si
+	mov si,cx		; move file offset into si
 	mov word [es:si],0x1ff1
 	inc si
 	pop bx
@@ -180,6 +182,8 @@ create_file:
     mov byte [es:si],al
     cmp al,0
     jne .write_file_name_to_file_loop
+
+.continue_2:
     inc si
 	pop bx	; number of segments file takes up
     pop ax	; parent folder segment
@@ -188,21 +192,16 @@ create_file:
     mov byte [es:si],bl
     inc si
     mov byte [es:si],0xff
-	xor si,si	; so [es:si] points to the start of the file
+	mov si,cx			; so [es:si] points to the start of the file
 	jmp .created
 
 .failed:
-	mov ax,0
+	xor ax,ax
 	cmp ax,1	; unset ZF
 	ret
 .created:
 	xor ax,ax	; set ZF
 	ret
-
-.error2:
-	mov ax,0x0e64
-	int 0x10
-	call hang
 
 .error:
 	mov si,corrupt_file_sys

@@ -3,18 +3,18 @@
 get_file:
 	mov es,[file_system_start]
 	xor si,si
+	xor bx,bx
+
 .enter_folder_loop:
 	mov ax,[es:si]
 	cmp ax,0xf11f
 	jne .error
 	add si,2
-	xor bx,bx
+
 .folder_search_loop:
 	mov al,[es:si]
 	inc si
-	push bx
 	call compare_paths
-	pop bx
 	jne .next	; paths not equal
 
 	; paths are equal
@@ -51,7 +51,6 @@ get_file:
 	jmp .enter_folder_loop
 
 .enter_folder:
-	inc si
 	mov es,[es:si]
 	xor si,si
 	jmp .enter_folder_loop
@@ -64,6 +63,11 @@ get_file:
 .found:
 	xor ax,ax	; set ZF
 	ret
+
+.error2:
+	mov ax,0x0e70
+	int 0x10
+	call hang
 
 .error:
 	mov si,corrupt_file_sys

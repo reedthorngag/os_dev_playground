@@ -3,7 +3,7 @@
 create_folder:
 	xor bx,bx
 .free_memory_lookup_loop:
-	inc bx	; this can be done here because we know at least the first one will exist already
+	inc bx			; this can be done here because we know at least the first one will exist already
 	cmp bx,0x20 	; 0x0800 * 0x20 = 0x10000 (out of bounds)
 	je .out_of_space
 	mov al,[memory_usage_table+bx]
@@ -11,6 +11,7 @@ create_folder:
 	je .free_memory_lookup_loop
 	mov byte [memory_usage_table+bx],0x01
 	mov ax,0x0800
+	inc bx
 	mul bx		; multiply ax by bx, result in dx:ax
 	mov cx,ax	; remember not to modify cx!!!
 
@@ -29,6 +30,7 @@ create_folder:
 	jmp .get_folder_depth_loop
 
 .main_loop:
+	push cx
 	xor bx,bx	; bx is used by compare_paths, dont delete!
 	mov ax,ds	; these next few lines are so that [es:si] points to the data in file_system_start mem location
 	mov es,ax
@@ -41,12 +43,17 @@ create_folder:
 	cmp ax,0xf11f
 	jne .error
 	add si,2
+
+	mov al,[es:si]
+	cmp al,0xff
+	je .failed
+	cmp al,0xfe
+	je .goto_extended_1
+	
 .folder_search_loop:
 	mov al,[es:si]
 	inc si
-	push bx
 	call compare_paths
-	pop bx
 	jne .next
 
 	inc bx
@@ -62,9 +69,6 @@ create_folder:
 	add si,2
 	mov al,[es:si]
 
-	;mov bx,si
-	;call print_hex
-
 	cmp al,1
 	je .folder_search_loop
 	cmp al,2
@@ -76,6 +80,7 @@ create_folder:
 	cmp al,0xfe
 	jne .error
 
+.goto_extended_1:
 	mov es,[es:si]
 	jmp .enter_folder_loop
 
@@ -92,14 +97,18 @@ create_folder:
 	mov ax,[es:si]
 	cmp ax,0xf11f
 	jne .error
+	add si,2
+
+	mov al,[es:si]
+	cmp al,0xff
+	je .end
+	cmp al,0xfe
+	je .goto_extended_2
 
 .check_already_exists:
-	push cx
 .check_already_exists_loop:
 	inc si
-	push bx
 	call compare_paths
-	pop bx
 	je .error_file_name
 	add si,2
 	mov al,[es:si]
@@ -108,7 +117,7 @@ create_folder:
 	cmp al,0xfe
 	jne .check_already_exists_loop
 
-.goto_extended:
+.goto_extended_2:
 	inc si
 	mov es,[es:si]
 	xor si,si
@@ -135,28 +144,31 @@ create_folder:
 	jne .get_to_folder_name
 .write_data:
 	mov byte [es:si], 0x01
-.loop:
-	inc bx
 	inc si
+.loop:
 	mov	al,[bx]
 	cmp al,0
 	je .end_loop
 	mov byte [es:si],al
+	inc bx
+	inc si
 	jmp .loop
 .end_loop:
 	inc si
 	mov word [es:si],cx
 	add si,2
 	mov byte [es:si],0xff
-	jmp .created
 	mov es,cx
 	xor si,si
 	mov word [es:si],0xf11f
 	add si,2
 	mov byte [es:si],0xff
+	mov si,0x180
+	mov word [es:si],0x0101
+	jmp .created
 
 .failed:
-	mov ax,0
+	xor ax,ax
 	cmp ax,1	; unset ZF
 	ret
 .created:

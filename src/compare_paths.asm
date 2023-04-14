@@ -2,7 +2,10 @@
 ; bx should be how many folders deep we are
 ; zero flag set if equal (use je to jump if paths are equal)
 ; this also increments si to point at byte after null terminator (the file/folder offset)
+; also this preserves ax, bx and dx
 compare_paths:
+	push bx
+	push ax
 	mov cx,bx
 	mov bx,[file_path_buffer_offset]
 
@@ -31,6 +34,13 @@ compare_paths:
 	cmp al,0x2f
 	cmove ax,cx
 	mov cl,[es:si]
+
+	;push bx
+	;mov bh,al
+	;mov bl,cl
+	;call print_hex
+	;pop bx
+
 	cmp al,cl
 	jne .not_equal
 	cmp al,0
@@ -45,12 +55,16 @@ compare_paths:
 	mov cl,[es:si]
 	jmp .not_equal
 .end_not_equal_loop:
-	cmp cl,1	; unset ZF as we know cl must be 0
 	inc si
+	cmp cl,1	; unset ZF as we know cl must be 0
+	pop ax
+	pop bx
 	ret
 .equal:
 	inc si
 	xor ax,ax	; set ZF
+	pop ax
+	pop bx
 	ret
 
 .error:
