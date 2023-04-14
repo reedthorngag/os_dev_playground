@@ -3,12 +3,12 @@ hex_characters db '0123456789abcdef'
 ; number to print in bx
 ; preserves all registers
 print_hex:
-	;push ax
-	;push bx
-	;push dx
+	push ax
+	push bx
+	push dx
 	mov ax,bx
 	mov bx,0x1000
-	xor dx,dx
+	xor dx,dx	; this is necessery for some reason (div instruction dies without it)
 
 .hex_print_loop:
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
@@ -29,12 +29,12 @@ print_hex:
 	jne .hex_print_loop
 
 .end:
-	mov ax,0x0e70
+	mov ax,0x0e20
 	int 0x10		; add a space at the end for nice output
 
-	;pop dx
-	;pop bx
-	;pop ax
+	pop dx
+	pop bx
+	pop ax
 	ret
 
 ; prints string in ds:si until a null terminator
