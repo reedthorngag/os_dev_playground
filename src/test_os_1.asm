@@ -35,12 +35,8 @@ start:
 	call command_line
 	; nothing after this should run
 
-.sad:
-	mov ax,0x0e62
-	int 0x10
-
-.end:
-	call hang
+	mov si,how_tf
+	call exception
 
 ; load exception error message into ds:si
 exception:
@@ -85,6 +81,7 @@ compare_paths_exception: db 'ERR: compare paths exception! (malformed path proba
 corrupt_file_sys: db 'ERR: file system corrupted!',0
 file_name_error: db 'ERR: a file or folder with that name already exists!',0
 out_of_space_error: db 'ERR: out of memory pages!',0
+how_tf: db 'ERR: how tf u manage this?',0
 
 
 file_path_buffer: times 0x200 db 0x00
