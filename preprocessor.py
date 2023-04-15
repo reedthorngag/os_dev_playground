@@ -1,20 +1,26 @@
 
+
+def process(input_dir,input,output):
+
+    input = open(input_dir+'/'+input,'r')
+
+    for line in input:
+        if line[0:9]=='#include ':
+            output.write('\n\n')
+            file_pieces = line.split('"')[1].split('/')
+            file = file_pieces[-1]
+            dir = input_dir + '/' + '/'.join(file_pieces[:-1])
+            try:
+                process(dir,file,output)
+            except:
+                print("Couldn't open '"+dir+'/'+file+"'!")
+        else:
+            output.write(line)
+
+    input.close()
+
 output = open('cdiso/output.asm','w')
-
-base_input = open('src/test_os_1.asm','r')
-
-for line in base_input:
-    if line[0:9]=='#include ':
-        try:
-            with open('src/'+line.split('"')[1],'r') as f2:
-                for line2 in f2:
-                    output.write(line2)
-        except:
-            print("Couldn't open '"+'src/'+line.split('"')[1]+"'!")
-    else:
-        output.write(line)
-
-base_input.close()
+process('src','test_os_1.asm',output)
 output.close()
 
 

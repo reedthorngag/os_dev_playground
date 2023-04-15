@@ -38,24 +38,30 @@ print_hex:
 	ret
 
 ; prints string in ds:si until a null terminator
-printstr:
+print_str:
+	push ax
+.loop:
 	lodsb
 	cmp al,0x00
 	je .end
 	mov ah,0x0e
 	int 0x10
-	jmp printstr
+	jmp .loop
 .end:
+	pop ax
 	ret
 
 ; prints string in es:si until a null terminator
 print_es_str:
+	push ax
+.loop:
 	mov al,[es:si]
 	inc si
 	cmp al,0x00
 	je .end
 	mov ah,0x0e
 	int 0x10
-	jmp printstr
+	jmp .loop
 .end:
+	pop ax
 	ret

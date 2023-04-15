@@ -30,31 +30,10 @@ start:
 	mov bh,ah
 	cmovc bx, ax
 	call print_hex
-.skip_for_now:	
+.skip_for_now:
 
-	mov si, folder_to_create
-	call write_to_file_path_buffer
-
-	call create_folder
-	jne .sad
-
-	mov ax,0x0e61	; it worked!
-	int 0x10
-
-	mov si, file_to_create
-	call write_to_file_path_buffer
-
-	call create_file
-	jne .sad
-	mov ax,0x0e61
-	int 0x10
-
-	call get_file
-	jne .sad
-	mov ax,0x0e61
-	int 0x10
-
-	jmp .end
+	call command_line
+	; nothing after this should run
 
 .sad:
 	mov ax,0x0e62
@@ -63,39 +42,7 @@ start:
 .end:
 	call hang
 
-
-#include "utils/print_utils.asm"
-
-
-disk db 0x00
-
-	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
-	dw 0xAA55		        ; The standard PC boot signature
-
-
-#include "create_folder.asm"
-
-#include "compare_paths.asm"
-#include "get_file.asm"
-#include "utils/utils.asm"
-#include "create_file.asm"
-
-
-file_path_buffer_offset dw 0x6400	; max length 512 bytes (up to 0x0800)
-file_system_start dw 0x1000			; segment the file system starts at
-
-file_to_find: db "testfile.txt",0
-folder_to_create: db "testfolder",0
-file_to_create: db "testfolder/testfile.txt",0
-
-corrupt_file_sys: db 'ERR: file system corrupted!',0
-
-compare_paths_exception: db 'ERR: compare paths exception! (malformed path probably)',0
-
-out_of_space_error: db 'ERR: out of memory pages!',0
-
-file_name_error: db 'ERR: a file or folder with that name already exists!',0
-
+; load exception error message into ds:si
 exception:
 	lodsb
 	cmp al,0
@@ -110,6 +57,37 @@ exception:
 hang:
 	cli	; disable interrupts
 	hlt	; halt the processor
+
+#include "utils/utils.asm"
+#include "utils/print_utils.asm"
+#include "get_file.asm"
+#include "compare_paths.asm"
+
+disk db 0x00
+
+	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
+	dw 0xAA55		        ; The standard PC boot signature
+
+
+#include "command_line/command_line.asm"
+
+#include "create_folder.asm"
+#include "create_file.asm"
+
+
+file_system_start dw 0x1000			; segment the file system starts at
+
+file_to_find: db "testfile.txt",0
+folder_to_create: db "testfolder",0
+file_to_create: db "testfolder/testfile.txt",0
+
+compare_paths_exception: db 'ERR: compare paths exception! (malformed path probably)',0
+corrupt_file_sys: db 'ERR: file system corrupted!',0
+file_name_error: db 'ERR: a file or folder with that name already exists!',0
+out_of_space_error: db 'ERR: out of memory pages!',0
+
+
+file_path_buffer: times 0x200 db 0x00
 
 
 memory_usage_table:
@@ -129,24 +107,24 @@ file_system:
 
 	db 0x02				; declares a file type
 	db 'testfile.txt',0
-	dw 0x0020			; segment_offset, modify es by the segment_offset
+	dw 0x0200			; file offset from folder (max 0x7f00 as 0x8000 is next folder)
 
 	db 0xff				; unset lowest bit if this isnt the end of the table (0xfe)
 	dw 0x0000			; segment where the file/folder declerations continue in memory
 
-	times 0x80180+0x400-($-$$) db 0
+	times 0x8180+0x400-($-$$) db 0
 
 	db 0x01
 	db 0x01
 	db 0x01
 
 
-	times 0x80200+0x400-($-$$) db 0
+	times 0x8200+0x400-($-$$) db 0
 
 	dw 0x1ff1			; magic number to indicate a file
 	db 'testfile.txt',0	; file name (obviously)
 	dw 0x1000			; segment of parent folder
 	dw 0x01				; number of 0x100 byte chunks file takes up
 	db 0xff				; if the file is extended or not, 0xfe if it is
-	dw 0x0000			; parent folder segment offset of where it continues if it does
+	dw 0x0000			; parent folder file offset of where it continues if it does
 

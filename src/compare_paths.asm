@@ -7,7 +7,7 @@ compare_paths:
 	push bx
 	push ax
 	mov cx,bx
-	mov bx,[file_path_buffer_offset]
+	mov bx,file_path_buffer
 
 .init_loop:
 	cmp cx,0

@@ -1,5 +1,5 @@
 ; returns folder segment:offset in es:si
-; ZF set on suces, unset on failure (invalid path)
+; ZF set on sucess, unset on failure (invalid path)
 create_folder:
 	xor bx,bx
 .free_memory_lookup_loop:
@@ -17,7 +17,7 @@ create_folder:
 
 	mov dl,1
 	mov dh,1
-	mov bx,[file_path_buffer_offset]
+	mov bx,file_path_buffer
 .get_folder_depth_loop:
 	inc bx
 	mov al,[bx]
@@ -131,7 +131,7 @@ create_folder:
 	pop cx
 
 .write_folder:
-	mov bx,[file_path_buffer_offset]
+	mov bx,file_path_buffer
 	cmp dh,1
 	je .write_data
 .get_to_folder_name:

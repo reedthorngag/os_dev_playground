@@ -1,7 +1,7 @@
 ; offset in si, preserves si
 write_to_file_path_buffer:
 	xor bx,bx
-	mov di,[file_path_buffer_offset]
+	mov di,file_path_buffer
 .loop:
 	mov al,[si+bx]
 	cmp al,0
@@ -20,4 +20,5 @@ write_to_file_path_buffer:
 	jmp .clear_path
 .end:
 	ret
+
 

@@ -3,7 +3,7 @@
 create_file:
 	mov dl,1
 	mov dh,1
-	mov bx,[file_path_buffer_offset]
+	mov bx,file_path_buffer
 .get_folder_depth_loop:
 	inc bx
 	mov al,[bx]
@@ -139,7 +139,7 @@ create_file:
 	mov es,ax
 
 .write_folder_data:
-	mov bx,[file_path_buffer_offset]
+	mov bx,file_path_buffer
 	cmp dh,1
 	je .write_data
 
@@ -185,7 +185,7 @@ create_file:
 
 .continue_2:
     inc si
-	pop bx	; number of segments file takes up
+	pop bx	; number of 0x100 byte segments file takes up
     pop ax	; parent folder segment
     mov word [es:si],ax
     add si,2
