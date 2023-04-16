@@ -34,6 +34,9 @@ get_arg:
     cmp al,0x22   ; "
     je .quotes
 
+    jmp .not_a_break
+
+
 .not_a_break:
 
     cmp dl,0

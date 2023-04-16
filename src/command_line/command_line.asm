@@ -41,19 +41,23 @@ command_line:
 
 
 #include "wait_for_input.asm"
+#include "utils/compare_command_name.asm"
+#include "utils/get_arg.asm"
 
 #include "utils/backspace.asm"
 #include "utils/endl.asm"
 #include "utils/tab.asm"
 #include "utils/pad_line.asm"
 
-#include "utils/compare_command_name.asm"
-#include "utils/get_arg.asm"
-
 #include "commands/help.asm"
 #include "commands/ls.asm"
 #include "commands/clear.asm"
 #include "commands/echo.asm"
+
+#include "file_editor/pull.asm"
+#include "file_editor/push.asm"
+#include "file_editor/edit.asm"
+
 
 clear_buffer:
     mov si,command_buffer
@@ -94,20 +98,25 @@ commands:
         db 0
         db 0
 
-.clear  db 'clear',0
+.clear: db 'clear',0
         dw clear
         db 0
         db 'clears the screen',0
 
-.cls    db 'cls',0
+.cls:   db 'cls',0
         dw clear
         db 0
         db 'alias for clear',0
 
-.echo   db 'echo',0
+.echo:  db 'echo',0
         dw echo
         db 0
         db 'prints everything after "echo " to the screen',0
+
+.edit:  db 'edit',0
+        dw edit
+        db 0
+        db 'opens a simple text editor with the currently pulled file',0
 
 .help:  db 'help',0
         dw help
@@ -118,4 +127,14 @@ commands:
         dw ls
         db '[path]',0
         db 'shows files in the folder specified by [path] or current folder if unspecified',0
+
+.pull:  db 'pull',0
+        dw pull
+        db '[path]',0
+        db 'pulls a file, overwriting any previous file that hasnt been pushed',0
+
+.push:  db 'push',0
+        dw push
+        db 0
+        db 'pushes (saves) the current file',0
 

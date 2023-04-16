@@ -28,6 +28,29 @@ start:
 	mov bx,[es:si+0x100]
 	call print_hex
 
+
+
+	jmp .skip_for_now
+	mov byte [disk], dl
+	mov dl,0x80
+	mov ax, 0x0201		; ah = 0x02 (read sector function of int 0x13), al = 1 (read 1 sectors)
+						; sector count could theoretically be 255, but 65 is the max that can be read
+						; without crossing a segment boundary
+						; 65 sectors is roughly 33k of disk space, so make sure you have disk drivers
+						; up and running before your kernel binary grows beyond this size, else
+						; some data will not be loaded
+	mov bx, 0x8000		; es:bx = memory location to copy data into, es already zeroed
+	mov cx, 0x0002		; ch = 0x00 (track idx), cl = 0x02 (sector idx to start reading from)
+	xor dh, dh		; dh = 0x00 (head idx), dl = drive number (implicitly placed in dl by BIOS on startup)
+	int 0x13		; copy data
+
+	mov al,0x01
+	mov bh,ah
+	cmovc bx, ax
+	call print_hex
+.skip_for_now:
+
+
 	ret
 
 .error:

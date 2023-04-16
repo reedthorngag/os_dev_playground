@@ -20,7 +20,7 @@ def process(input_dir,input,output):
     input.close()
 
 output = open('cdiso/output.asm','w')
-process('src','test_os_1.asm',output)
+process('src','os.asm',output)
 output.close()
 
 
