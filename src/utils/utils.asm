@@ -1,3 +1,7 @@
+
+#include "print_utils.asm"
+
+
 ; offset in si, preserves si
 write_to_file_path_buffer:
 	xor bx,bx
@@ -20,5 +24,4 @@ write_to_file_path_buffer:
 	jmp .clear_path
 .end:
 	ret
-
 

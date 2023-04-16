@@ -45,7 +45,6 @@ disk db 0x00
 
 
 #include "utils/utils.asm"
-#include "utils/print_utils.asm"
 
 #include "command_line/command_line.asm"
 
@@ -82,7 +81,7 @@ file_system:
 
 	db 0x02				; declares a file type
 	db 'testfile.txt',0
-	dw 0x0200			; file offset from folder (max 0x7f00 as 0x8000 is next folder)
+	dw 0x0200			; file offset from folder in 0x100 byte chunks (max 0x7f00 as 0x8000 is the next folder)
 
 	db 0xff				; unset lowest bit if this isnt the end of the table (0xfe)
 	dw 0x0000			; segment where the file/folder declerations continue in memory

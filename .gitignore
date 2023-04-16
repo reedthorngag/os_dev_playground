@@ -1,4 +1,6 @@
 node_modules/
-cdiso/*.asm
-cdiso/*.flp
-cdiso/*.iso
+
+cdiso/
+!cdiso/exclude.txt
+
+package-lock.json

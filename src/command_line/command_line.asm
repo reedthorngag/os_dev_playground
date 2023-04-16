@@ -41,22 +41,17 @@ command_line:
 
 
 #include "wait_for_input.asm"
-#include "utils/compare_command_name.asm"
-#include "utils/get_arg.asm"
 
-#include "utils/backspace.asm"
-#include "utils/endl.asm"
-#include "utils/tab.asm"
-#include "utils/pad_line.asm"
+#include "utils/utils.asm"
 
-#include "commands/help.asm"
-#include "commands/ls.asm"
 #include "commands/clear.asm"
 #include "commands/echo.asm"
+#include "commands/help.asm"
+#include "commands/ls.asm"
 
-#include "file_editor/pull.asm"
-#include "file_editor/push.asm"
-#include "file_editor/edit.asm"
+#include "commands/file_editor/edit.asm"
+#include "commands/file_editor/pull.asm"
+#include "commands/file_editor/push.asm"
 
 
 clear_buffer:
@@ -82,11 +77,16 @@ command_buffer: times 0x300 db 0
 
 commands_array:
     dw commands.empty_command
+
+    dw commands.clear
+    dw commands.cls
+    dw commands.echo
+    dw commands.edit
     dw commands.help
     dw commands.ls
-    dw commands.cls
-    dw commands.clear
-    dw commands.echo
+    dw commands.pull
+    dw commands.push
+
     dw 0xffff
 
 

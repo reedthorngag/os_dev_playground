@@ -1,5 +1,0 @@
-
-keyboard    0x60
-mouse       0x64
-
-
