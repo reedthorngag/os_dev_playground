@@ -13,7 +13,7 @@ command_line:
 
     call endl
 
-    mov di,command_array
+    mov di,commands_array
     sub di,2
 .find_command_loop:
     add di,2
@@ -29,8 +29,8 @@ command_line:
 
     call si
 
-    call endl
     jmp .main_loop
+
 
 .command_not_found:
     mov si,command_not_found
@@ -41,11 +41,19 @@ command_line:
 
 
 #include "wait_for_input.asm"
-#include "input_actions/backspace.asm"
-#include "input_actions/endl.asm"
-#include "compare_command_name.asm"
+
+#include "utils/backspace.asm"
+#include "utils/endl.asm"
+#include "utils/tab.asm"
+#include "utils/pad_line.asm"
+
+#include "utils/compare_command_name.asm"
+#include "utils/get_arg.asm"
 
 #include "commands/help.asm"
+#include "commands/ls.asm"
+#include "commands/clear.asm"
+#include "commands/echo.asm"
 
 clear_buffer:
     mov si,command_buffer
@@ -58,6 +66,8 @@ clear_buffer:
 .end:
     ret
 
+empty_function:
+    ret
 
 prompt_string: db '> ',0
 
@@ -66,14 +76,46 @@ command_not_found: db 'ERR: command not found!',0
 command_buffer: times 0x300 db 0
 
 
-command_array:
+commands_array:
+    dw commands.empty_command
     dw commands.help
+    dw commands.ls
+    dw commands.cls
+    dw commands.clear
+    dw commands.echo
     dw 0xffff
 
 
 commands:
 
+.empty_command:
+        db 0
+        dw empty_function
+        db 0
+        db 0
+
+.clear  db 'clear',0
+        dw clear
+        db 0
+        db 'clears the screen',0
+
+.cls    db 'cls',0
+        dw clear
+        db 0
+        db 'alias for clear',0
+
+.echo   db 'echo',0
+        dw echo
+        db 0
+        db 'prints everything after "echo " to the screen',0
+
 .help:  db 'help',0
         dw help
+        db 0
+        db 'outputs all commands and their descriptions',0
 
+.ls:    db 'ls',0
+        dw ls
+        db '[path]',0
+        db 'shows files in the folder specified by [path] or current folder if unspecified',0
 

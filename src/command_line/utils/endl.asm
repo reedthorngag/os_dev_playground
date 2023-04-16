@@ -29,7 +29,7 @@ endl:
     xor cx,cx
     mov dx,0x184f   ; row 24, col 79
     mov bh,0x07     ; white on black character attribute
-    mov ax,0x0705   ; scroll 3 lines
+    mov ax,0x0705   ; scroll 5 lines
     int 0x10
 
     xor bx,bx

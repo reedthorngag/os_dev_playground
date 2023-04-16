@@ -38,17 +38,18 @@ wait_for_input:
     cmp cx,0x300
     je .buffer_full_error
 
+    cmp cx,dx
+    jne .shift_buffer
+
     mov ah,0x0e
     int 0x10
 
     mov byte [bx],al
     inc bx
-    inc dx
     inc cx
+    inc dx
 
     jmp .get_key_loop
-
-#include "wait_for_input.backspace.asm"
 
 .left_arrow:
     cmp dx,0
@@ -91,6 +92,10 @@ wait_for_input:
     pop bx
     inc dx
     jmp .get_key_loop
+
+
+#include "wait_for_input.backspace.asm"
+#include "wait_for_input.shift_buffer.asm"
 
 .enter:
     xor ax,ax	; set ZF

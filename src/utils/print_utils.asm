@@ -37,19 +37,60 @@ print_hex:
 	pop ax
 	ret
 
-; prints string in ds:si until a null terminator
+
+; prints string in si until a null terminator
+; if max_len is set it will end early and set the OF if it hits it
+; warning: this could have problems with text without spaces if max_len set
 print_str:
 	push ax
+	push bx
+	push cx
+	xor bx,bx
+	mov cx,[.max_len]
 .loop:
 	lodsb
 	cmp al,0x00
-	je .end
+	je .sucess
+
 	mov ah,0x0e
 	int 0x10
+
+	inc bx
+	cmp bx,cx
+	je .overflow
+
 	jmp .loop
+
+
+.overflow:
+
+.find_last_space_loop:
+	call backspace
+	dec bx
+	cmp bx,0
+	je .end
+	dec si
+	cmp byte [si],0x20
+	jne .find_last_space_loop
+
+	mov word [.max_len], 0xffff
+	mov al,0x7f		; largest positive integer
+	inc al			; set OF
+	jmp .end
+
+.sucess:
+	mov word [.max_len], 0xffff
+	test ax,ax	; unset OF
+
 .end:
+	pop cx
+	pop bx
 	pop ax
+
 	ret
+
+
+.max_len: dw 0xffff	; if this overflows you have a problem lol
 
 ; prints string in es:si until a null terminator
 print_es_str:
