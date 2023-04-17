@@ -1,7 +1,8 @@
 
 start_editor:
 
-
+    mov ax,0x0501
+    int 0x10
 
 .get_input_loop:
 
@@ -12,13 +13,70 @@ start_editor:
     mov ah,0x00
     int 0x16
 
-
 .process_input:
-    cmp ax,0x011b
-    je .end
 
+    cmp ax,0x011b   ; esc
+    je .esc
+
+    cmp ax,0x0e08
+    je .backspace
+
+    cmp ax,0x5300
+    je .del
+
+    cmp ax,0x1c0d
+    je .enter
+
+    cmp ax,0x4b00
+    je .left_arrow
+
+    cmp ax,0x4d00
+    je .right_arrow
+
+    cmp ax,0x4800
+    je .up_arrow
+
+    cmp ax,0x5000
+    je .down_arrow
+
+.standard_input:
+
+    call insert
 
     jmp .get_input_loop
 
-.end:
+.actions:
+
+.backspace:
+    call delete
+    jmp .get_input_loop
+
+.del:
+    call shift_right
+    jmp .backspace
+
+.enter:
+    call enter
+    jmp .get_input_loop
+
+.left_arrow:
+    call shift_left
+    jmp .get_input_loop
+
+.right_arrow:
+    call shift_right
+    jmp .get_input_loop
+
+.up_arrow:
+    call shift_up
+    jmp .get_input_loop
+
+.down_arrow:
+    call shift_down
+    jmp .get_input_loop
+
+.esc:
+    mov ax,0x0500
+    int 0x10
+
     ret

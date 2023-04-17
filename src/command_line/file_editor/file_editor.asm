@@ -1,7 +1,14 @@
 
+; \n is 0x0a
+
+
 #include "start_editor.asm"
 
 #include "cursor/cursor.asm"
+
+#include "actions/insert.asm"
+#include "actions/delete.asm"
+#include "actions/enter.asm"
 
 folder_segment: dw 0
 file_offset: dw 0
