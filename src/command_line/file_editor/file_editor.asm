@@ -17,4 +17,3 @@ file_data:  times 0x3200 db 0   ; 0x80 * 0x32 * 2
 
 first_showen_line: db 0x0
 
-cursor_pos: dw 0x0000

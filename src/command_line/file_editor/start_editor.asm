@@ -4,7 +4,19 @@ start_editor:
     mov ax,0x0501
     int 0x10
 
+    mov bh,1
+    mov dx,0x1010
+    mov ah,0x02
+    int 0x10
+
+    mov ah,0x08
+    int 0x10
+
+    mov bx,ax
+    call print_hex
+
 .get_input_loop:
+    hlt
 
     mov ah,0x01
     int 0x16
@@ -76,6 +88,12 @@ start_editor:
     jmp .get_input_loop
 
 .esc:
+    xor bx,bx
+    xor dx,dx
+    mov cx,0x184f
+    mov ax,0x0700
+    int 0x10
+
     mov ax,0x0500
     int 0x10
 

@@ -9,6 +9,8 @@ wait_for_input:
     xor dx,dx   ; this keeps track of relative cursor position
 
 .get_key_loop:
+    hlt
+
     mov ah,0x01
     int 0x16
     jz .get_key_loop

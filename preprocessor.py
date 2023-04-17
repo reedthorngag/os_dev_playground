@@ -6,15 +6,16 @@ def process(input_dir,input,output):
 
     for line in input:
         if line[0:9]=='#include ':
-            output.write('\n\n')
+            output.write('\n')
             file_pieces = line.split('"')[1].split('/')
             file = file_pieces[-1]
             dir = input_dir + ('/' + '/'.join(file_pieces[:-1]) if len(file_pieces[:-1])!=0 else '')
             try:
                 process(dir,file,output)
+                output.write('\n')
             except:
                 print("Couldn't open '"+dir+'/'+file+"' ("+str(file_pieces)+")!")
-        else:
+        elif line!='\n':
             output.write(line)
 
     input.close()
