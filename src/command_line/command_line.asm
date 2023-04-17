@@ -44,6 +44,8 @@ command_line:
 
 #include "utils/utils.asm"
 
+#include "file_editor/file_editor.asm"
+
 #include "commands/clear.asm"
 #include "commands/echo.asm"
 #include "commands/help.asm"

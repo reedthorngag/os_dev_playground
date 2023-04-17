@@ -1,8 +1,13 @@
 
 #include "start_editor.asm"
 
-folder_segment: dw 0
-file offset: dw 0
-file_path:  times 0x300 db 0
-file_data:  times 0x300 db 0
+#include "cursor/cursor.asm"
 
+folder_segment: dw 0
+file_offset: dw 0
+file_path:  times 0x300 db 0
+file_data:  times 0x3200 db 0   ; 0x80 * 0x32 * 2
+
+first_showen_line: db 0x0
+
+cursor_pos: dw 0x0000
