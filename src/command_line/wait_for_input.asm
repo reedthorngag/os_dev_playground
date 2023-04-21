@@ -53,6 +53,8 @@ wait_for_input:
 
     jmp .get_key_loop
 
+    
+
 .left_arrow:
     cmp dx,0
     je .get_key_loop

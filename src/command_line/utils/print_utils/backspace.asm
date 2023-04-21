@@ -1,11 +1,17 @@
 ; moves cursor back one place and over writes with space
+; if bx is 1, it assumes it is page 2
 ; preserves all registers
 backspace:
     push ax
     push bx
     push cx
     push dx
+    
+    cmp bx,1
+    je .dont_zero_bx
     xor bx,bx
+.dont_zero_bx:
+
     mov ah,0x03
     int 0x10
     cmp dl,0

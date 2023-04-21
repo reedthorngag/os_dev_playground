@@ -14,10 +14,9 @@ command_line:
     call endl
 
     mov di,commands_array
-    sub di,2
 .find_command_loop:
-    add di,2
     mov si,[di]
+    add di,2
     cmp si,0xffff
     je .command_not_found
 
@@ -143,7 +142,7 @@ commands:
         db 0
         db 'pushes (saves) the current file',0
 
-.tictactoe
+.tictactoe:
         db 'tictactoe',0
         dw tictactoe
         db 0

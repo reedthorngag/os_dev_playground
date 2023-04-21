@@ -8,7 +8,8 @@
 update_cursor_offset:
     xor ax,ax
     mov al,[cursor_pos.y]
-    mul 0x80
+    mov bx,0x0080
+    mul bx
     xor bx,bx
     mov bl,[cursor_pos.x]
     add ax,bx
