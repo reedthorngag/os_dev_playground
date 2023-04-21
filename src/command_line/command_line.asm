@@ -9,7 +9,7 @@ command_line:
     call print_str
 
     call wait_for_input
-    jnz .main_loop
+    jnz .print_error
 
     call endl
 
@@ -27,9 +27,19 @@ command_line:
     add si,0x7c00
 
     call si
+    mov bx,0    ; set bh to 0 (current page)
+    jnz .print_error
 
     jmp .main_loop
 
+
+.print_error:
+    cmp si,0
+    je .main_loop
+    
+    call print_str
+    call endl
+    jmp .main_loop
 
 .command_not_found:
     mov si,command_not_found

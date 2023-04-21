@@ -12,6 +12,7 @@ ls:
 
 .end:
     call endl
+    xor ax,ax
     ret
 
 ls_failed: db 'ls command failed!',0

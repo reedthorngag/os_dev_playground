@@ -14,6 +14,7 @@ help:
 
 .end:
     call endl
+    xor ax,ax
     ret
 
 
@@ -42,7 +43,6 @@ print_command:
     jno .end
 
 .print_extended_description:
-    ;call hang
     call endl
     mov al,0x24
     call pad_line

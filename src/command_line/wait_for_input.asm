@@ -108,10 +108,6 @@ wait_for_input:
 .buffer_full_error:
     call endl
     mov si,buffer_full_error
-    call print_str
-    call endl
-    call endl
-
     mov ax,0
 	cmp ax,1	; unset ZF
 	ret

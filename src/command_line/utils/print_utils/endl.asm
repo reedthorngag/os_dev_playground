@@ -1,15 +1,15 @@
 ; ends the current line and goes to the next line
-; if bx is 1, it assumes it is page 2
+; if bh is 1, it assumes it is page 2
 endl:
     push ax
     push cx
     push dx
     push bx
 
-    cmp bx,1
-    je .dont_zero_bx
+    cmp bh,1
+    je .dont_zero_bx1
     xor bx,bx
-.dont_zero_bx:
+.dont_zero_bx1:
 
     mov ah,0x03
     int 0x10
@@ -34,9 +34,9 @@ endl:
     push bx
 
     cmp bx,1
-    je .dont_zero_bx
+    je .dont_zero_bx2
     xor bx,bx
-.dont_zero_bx:
+.dont_zero_bx2:
     
     mov dx,0x1700
     mov ah,0x02

@@ -106,3 +106,39 @@ print_es_str:
 .end:
 	pop ax
 	ret
+
+; number to print in bx
+; preserves all registers
+print_decimal:
+	push ax
+	push bx
+	push dx
+	mov ax,bx
+	mov bx,0x2710
+	xor dx,dx	; this is necessery for some reason (div instruction dies without it)
+
+.hex_print_loop:
+	div bx		; divide ax by bx, quotent in ax, remainder in dx
+	push bx
+	add al,0x30
+	mov ah,0x0e
+	int 0x10
+
+	pop ax
+	push dx
+	xor dx,dx
+	mov bx,0x0a
+	div bx
+	mov bx,ax
+	pop ax
+	cmp bx,0x00
+	jne .hex_print_loop
+
+.end:
+	mov ax,0x0e20
+	int 0x10		; add a space at the end for nice output
+
+	pop dx
+	pop bx
+	pop ax
+	ret

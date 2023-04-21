@@ -9,4 +9,5 @@ echo:
     call print_str
 
     call endl
+    xor ax,ax
     ret
