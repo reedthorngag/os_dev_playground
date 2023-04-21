@@ -1,5 +1,5 @@
 ; this is blocking
-; this preserves all registers
+; this preserves NO registers
 ; writes data to command_input
 ; sets ZF if successful on enter key input
 ; unsets ZF and returns immediately if max command_input (0x512 bytes) reached

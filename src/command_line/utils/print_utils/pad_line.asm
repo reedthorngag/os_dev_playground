@@ -10,7 +10,7 @@ pad_line:
     cmp al,0x4f
     jge .failed
 
-    xor bx,bx
+    mov bh,[print_page]
     mov ah,0x03
     int 0x10
 

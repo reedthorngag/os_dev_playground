@@ -3,6 +3,7 @@ start_editor:
 
     mov ax,0x0501   ; switch to second page
     int 0x10
+    mov byte [print_page],1
 
     mov bh,1
     xor dx,dx
@@ -92,13 +93,11 @@ start_editor:
     jmp .get_input_loop
 
 .esc:
-    xor bx,bx
-    xor dx,dx
-    mov cx,0x184f
-    mov ax,0x0700   ; cleanup page before exiting by clearing it
-    int 0x10
+    mov bh,1
+    call reset_page    
 
     mov ax,0x0500   ; switch back to fist page
     int 0x10
+    mov byte [print_page],0
 
     ret

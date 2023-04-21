@@ -6,10 +6,7 @@ endl:
     push dx
     push bx
 
-    cmp bh,1
-    je .dont_zero_bx1
-    xor bx,bx
-.dont_zero_bx1:
+    mov bh,[print_page]
 
     mov ah,0x03
     int 0x10
@@ -30,14 +27,7 @@ endl:
     mov ax,0x0601   ; scroll 1 line
     int 0x10
 
-    pop bx
-    push bx
-
-    cmp bx,1
-    je .dont_zero_bx2
-    xor bx,bx
-.dont_zero_bx2:
-    
+    mov bh,[print_page]
     mov dx,0x1700
     mov ah,0x02
     int 0x10

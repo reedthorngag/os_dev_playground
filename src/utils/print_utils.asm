@@ -15,6 +15,7 @@ print_hex:
 	push bx
 	mov bx,ax
 	mov al,[hex_characters+bx]
+	mov bh,[print_page]
 	mov ah,0x0e
 	int 0x10
 
@@ -29,6 +30,7 @@ print_hex:
 	jne .hex_print_loop
 
 .end:
+	mov bh,[print_page]
 	mov ax,0x0e20
 	int 0x10		; add a space at the end for nice output
 
@@ -52,8 +54,11 @@ print_str:
 	cmp al,0x00
 	je .sucess
 
+	push bx
+	mov bh,[print_page]
 	mov ah,0x0e
 	int 0x10
+	pop bx
 
 	inc bx
 	cmp bx,cx
@@ -95,15 +100,18 @@ print_str:
 ; prints string in es:si until a null terminator
 print_es_str:
 	push ax
+	push bx
 .loop:
 	mov al,[es:si]
 	inc si
 	cmp al,0x00
 	je .end
+	mov bh,[print_page]
 	mov ah,0x0e
 	int 0x10
 	jmp .loop
 .end:
+	pop bx
 	pop ax
 	ret
 
@@ -121,6 +129,7 @@ print_decimal:
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
 	push bx
 	add al,0x30
+	mov bx,[print_page]
 	mov ah,0x0e
 	int 0x10
 
@@ -135,6 +144,7 @@ print_decimal:
 	jne .hex_print_loop
 
 .end:
+	mov bh,[print_page]
 	mov ax,0x0e20
 	int 0x10		; add a space at the end for nice output
 
@@ -142,3 +152,5 @@ print_decimal:
 	pop bx
 	pop ax
 	ret
+
+print_page: db 0

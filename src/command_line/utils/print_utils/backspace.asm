@@ -7,10 +7,7 @@ backspace:
     push cx
     push dx
     
-    cmp bx,1
-    je .dont_zero_bx
-    xor bx,bx
-.dont_zero_bx:
+    mov bh,[print_page]
 
     mov ah,0x03
     int 0x10
