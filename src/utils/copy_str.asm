@@ -1,8 +1,7 @@
 ; original string in di
 ; destination address in si
-; preserves all registers
+; preserves all registers except bx, which hs the length of the string in it
 copy_str:
-    push bx
     push ax
     xor bx,bx
 .copy_loop:
@@ -15,6 +14,5 @@ copy_str:
 
 .end:
     pop ax
-    pop bx
     ret
 

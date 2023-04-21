@@ -31,6 +31,7 @@ start_tictactoe:
     call wait_for_input     ; doesnt preserve any registers
     mov word [error_string_address],si
     jnz .end_with_error
+    mov word [error_string_address],0
     pop dx
     pop cx
 
@@ -47,15 +48,36 @@ start_tictactoe:
     call copy_str
 
     cmp dx,2
-    je .reset_point
+    je .reset
     
     add dx,2
     inc cl
     call endl
     jmp .get_name_loop
 
+.win:
+    xor ax,ax
+    mov al,[turn]
+    shl al,1
+    mov si,name_map
+    add si,ax
 
-.reset_point:
+    mov di,[si]
+    mov si,win_string
+    call copy_str
+
+    add si,bx
+    mov di,win_string.end
+    call copy_str
+
+    mov word [error_string_address],win_string
+
+    jmp .reset
+
+.draw:
+    mov word [error_string_address],draw_string
+
+.reset:
     mov di,empty_board
     mov si,board
     call copy_str
@@ -64,7 +86,7 @@ start_tictactoe:
     and al,1
     mov byte [turn],al
 
-    mov word [error_string_address],0
+
 .tictactoe_loop:
 
     call clear_buffer
@@ -152,9 +174,9 @@ tictactoe_redraw:
     push cx
     xor cx,cx
 .print_score_loop:
-    mov di,name_map
-    add di,cx
-    mov si, [di]
+    mov si,name_map
+    add si,cx
+    mov si, [si]
     call print_str
 
     mov bh,1
@@ -162,9 +184,9 @@ tictactoe_redraw:
     int 0x10
     call tab
 
-    mov di,score_map
-    add di,cx
-    mov si,[di]
+    mov si,score_map
+    add si,cx
+    mov si,[si]
     mov bx,[si]
     call print_decimal
 
@@ -257,3 +279,8 @@ error_string_address: dw 0
 
 player_name_prompt_string1: db 'enter player ',0
 player_name_prompt_string2: db ' name: ',0
+
+win_string: times 0x100 db 0
+.end: db ' won!!!',0
+
+draw_string: db 'draw!!!',0

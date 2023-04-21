@@ -36,6 +36,7 @@ process_tictactoe_input:
     call check_for_win
     jnz .no_win
 
+
     xor ax,ax
     mov al,[turn]
     mov bl,al
@@ -45,7 +46,7 @@ process_tictactoe_input:
     mov di,[si]
     inc word [di]
     pop ax
-    jmp start_tictactoe.reset_point
+    jmp start_tictactoe.win
 
 .no_win:
     not byte [turn]
