@@ -1,21 +1,25 @@
 
 start_editor:
 
-    mov ax,0x0501
+    mov ax,0x0501   ; switch to second page
     int 0x10
 
     mov bh,1
-    mov dx,0x1010
+    xor dx,dx
+    mov ah,0x02     ; move cursor to start of page/file
+    int 0x10
+
+    mov ax,0x0e0a   ; /n
+    int 0x10
+
     mov ah,0x02
     int 0x10
 
-    mov ah,0x08
-    int 0x10
-
-    mov bx,ax
-    call print_hex
+    mov word [cursor_pos],0 ; move buffer cursor to start of buffer
+    call update_cursor_offset
 
 .get_input_loop:
+
     hlt
 
     mov ah,0x01
@@ -91,10 +95,10 @@ start_editor:
     xor bx,bx
     xor dx,dx
     mov cx,0x184f
-    mov ax,0x0700
+    mov ax,0x0700   ; cleanup page before exiting by clearing it
     int 0x10
 
-    mov ax,0x0500
+    mov ax,0x0500   ; switch back to fist page
     int 0x10
 
     ret

@@ -1,5 +1,6 @@
 
 #include "print_utils.asm"
+#include "get_random.asm"
 
 
 ; offset in si, preserves si

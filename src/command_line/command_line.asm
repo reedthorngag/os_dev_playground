@@ -45,11 +45,13 @@ command_line:
 #include "utils/utils.asm"
 
 #include "file_editor/file_editor.asm"
+#include "tictactoe/tictactoe.asm"
 
 #include "commands/clear.asm"
 #include "commands/echo.asm"
 #include "commands/help.asm"
 #include "commands/ls.asm"
+#include "commands/tictactoe.asm"
 
 #include "commands/file_editor/edit.asm"
 #include "commands/file_editor/pull.asm"
@@ -88,6 +90,7 @@ commands_array:
     dw commands.ls
     dw commands.pull
     dw commands.push
+    dw commands.tictactoe
 
     dw 0xffff
 
@@ -139,4 +142,10 @@ commands:
         dw push
         db 0
         db 'pushes (saves) the current file',0
+
+.tictactoe
+        db 'tictactoe',0
+        dw tictactoe
+        db 0
+        db 'a simple tic tac toe game (definitely not just showing off)',0
 
