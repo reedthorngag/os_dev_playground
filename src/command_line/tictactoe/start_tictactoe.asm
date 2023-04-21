@@ -48,12 +48,35 @@ start_tictactoe:
     call copy_str
 
     cmp dx,2
-    je .reset
+    je .reset   ; change this to .compare_names to enable that part
     
     add dx,2
     inc cl
     call endl
     jmp .get_name_loop
+
+.compare_names:
+    mov di,player1_name
+    mov si,player2_name
+    xor bx,bx
+    mov cl,1
+.comapre_names_loop:
+    mov al,[player1_name]
+    mov dl,[player2_name]
+    cmp al,dl
+    jne .not_equal_names
+    cmp al,0
+    je .found_end
+
+
+.not_equal_names:
+    xor cx,cx
+    inc bx
+    inc di
+    inc si
+    jmp .comapre_names_loop
+
+    jmp .reset
 
 .win:
     xor ax,ax
@@ -182,7 +205,9 @@ tictactoe_redraw:
     mov bh,1
     mov ax,0x0e3a
     int 0x10
-    call tab
+
+    mov al,[name_padding_len]
+    call pad_line
 
     mov si,score_map
     add si,cx
@@ -262,6 +287,9 @@ draw_tictactoe_line:
 .end:
     call endl
     ret
+
+
+name_padding_len: db 10
 
 instruction_string: db 'type exit to quit',0
 

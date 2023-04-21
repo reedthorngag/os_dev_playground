@@ -19,7 +19,7 @@ pad_line:
     jz .success
 
     mov dl,al
-
+    
     mov ax,0x0e20
 .pad_loop:
     int 0x10
