@@ -7,7 +7,7 @@ compare_command_name:
     mov al,[bx]
     cmp al,0x20
     cmove ax,cx
-    cmp al,[si]
+    cmp byte [si],al
     jne .not_equal
     cmp al,0
     je .equal

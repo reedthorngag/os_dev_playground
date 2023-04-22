@@ -9,7 +9,13 @@ command_line:
     call print_str
 
     call wait_for_input
-    jnz .print_error
+
+    push si
+    mov al,0x20
+    call print_char
+    mov si,command_buffer
+    call print_str
+    pop si
 
     call endl
 
@@ -27,7 +33,6 @@ command_line:
     add si,0x7c00
 
     call si
-    mov bx,0    ; set bh to 0 (current page)
     jnz .print_error
 
     jmp .main_loop
@@ -79,6 +84,7 @@ clear_buffer:
     ret
 
 empty_function:
+    xor ax,ax
     ret
 
 prompt_string: db '> ',0

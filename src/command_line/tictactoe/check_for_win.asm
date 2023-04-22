@@ -64,10 +64,8 @@ check_for_win:
 
     mov byte [.locked],0
 
-.still_locked
-
+.still_locked:
     add di,ax
-
     jmp .mod_loop
 
 .equal:

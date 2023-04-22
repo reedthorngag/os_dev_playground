@@ -69,6 +69,8 @@ process_tictactoe_input:
 
 
 #include "tictactoe_exit.asm"
+#include "tictactoe_reset.asm"
+#include "tictactoe_restart.asm"
 
 
 tictactoe_empty_input:
@@ -79,17 +81,25 @@ tictactoe_commands_array:
 
     dw tictactoe_commands.empty_input
     dw tictactoe_commands.exit
+    dw tictactoe_commands.reset
+    dw tictactoe_commands.restart
 
     dw 0xffff
 
 tictactoe_commands:
 
 .empty_input:
-        db 0
-        dw tictactoe_empty_input
+            db 0
+            dw tictactoe_empty_input
 
-.exit:  db 'exit',0
-        dw tictactoe_exit
+.exit:      db 'exit',0
+            dw tictactoe_exit
+
+.reset:     db 'reset',0
+            dw tictactoe_reset
+
+.restart:   db 'restart',0
+            dw tictactoe_restart
 
 
 tictactoe_invalid_input: db 'Invalid input!',0

@@ -14,12 +14,9 @@
     inc bx
     inc dx
 
-    push ax
-    mov ah,0x0e
-    int 0x10
-    pop ax
+    call print_char
 
-    mov al,ah
+    shr ax,8    ; mov al,ah
 
     cmp dx,cx
     je .end
@@ -28,8 +25,7 @@
 
 
 .end:
-    mov ah,0x0e
-    int 0x10
+    call print_char
 
     mov byte [bx],al
     inc bx
@@ -40,6 +36,7 @@
     sub ax,bx   ; get the difference between the cursor and the end
     ;dec ax      ; add one because we are moving one place towards the end
     push bx
+    mov bh,[print_page]
     mov ah,0x03
     int 0x10
     sub dl,al

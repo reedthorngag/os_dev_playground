@@ -6,9 +6,9 @@ copy_str:
     xor bx,bx
 .copy_loop:
     mov al,[di+bx]
+    mov byte [si+bx],al
     cmp al,0
     je .end
-    mov byte [si+bx],al
     inc bx
     jmp .copy_loop
 

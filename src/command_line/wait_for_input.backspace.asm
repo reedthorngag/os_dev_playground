@@ -16,16 +16,24 @@
     mov al,[bx]
     dec bx
     mov byte [bx], al
+
+    push bx
     mov ah,0x0e
     int 0x10
+    pop bx
+    ;call print_char
+
     inc bx
     inc dx
     jmp .overwrite_loop
     
 .end_overwrite_loop:
     mov byte [bx],0
+
+    mov bh,[print_page]
     mov ax,0x0e20
     int 0x10
+    ;call print_char
     call backspace
 
     pop dx
@@ -34,12 +42,12 @@
     push dx
     mov ax,cx
     sub ax,dx
-    xor bx,bx
+    mov bh,[print_page]
     mov ah,0x03
     int 0x10
     sub dl,al
 
-    xor bx,bx
+    mov bh,[print_page]
     mov ah,0x02
     int 0x10
 

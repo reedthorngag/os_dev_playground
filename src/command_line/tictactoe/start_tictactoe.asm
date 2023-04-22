@@ -12,26 +12,67 @@ start_tictactoe:
     mov ah,0x02     ; move cursor to start of page/file
     int 0x10
 
+    cmp byte [player1_name],0
+    je .new_game
+
+.check_continue_game:
+    mov si,continue_game_prompt_string
+    call print_str
+    call wait_for_input
+    mov al,[command_buffer]
+    cmp al,'y'
+    je .continue_game
+    cmp al,'Y'
+    je .continue_game
+    jmp .new_game
+
+.continue_game:
+    jmp .reset
+
+.new_game:
+
+.get_names:
+    call reset_page
+
+    cmp word [error_string_address],0
+    je .no_error_message
+    mov si,[error_string_address]
+    call print_str
+    call endl
+    call endl
+    mov word [error_string_address],0
+
+.no_error_message:
+
     xor cx,cx
     xor dx,dx
     mov cl,0x31
 .get_name_loop:
     call clear_buffer
 
-    mov si,player_name_prompt_string1
+    mov si,player_name_prompt.start
+    call print_str
+    mov ah,0x08     ; length of 'player 1'
+    mov al,cl
+    sub al,0x26 ; 0x31 - 0x0b (cyan, red is 0x0c)
+    call set_color
+    mov si,player_name_prompt.middle
     call print_str
     mov ah,0x0e
     mov al,cl
     int 0x10
-    mov si,player_name_prompt_string2
+    mov si,player_name_prompt.end
     call print_str
+
+    mov ah,0x20
+    mov al,cl
+    sub al,0x26
+    call set_color
 
     push cx
     push dx
+    mov word [max_buffer_len],0x0020
     call wait_for_input     ; doesnt preserve any registers
-    mov word [error_string_address],si
-    jnz .end_with_error
-    mov word [error_string_address],0
     pop dx
     pop cx
 
@@ -41,6 +82,7 @@ start_tictactoe:
     jmp .get_name_loop
 
 .write_name:
+
     mov di,name_map
     add di,dx
     mov si,[di]
@@ -48,7 +90,7 @@ start_tictactoe:
     call copy_str
 
     cmp dx,2
-    je .reset   ; change this to .compare_names to enable that part
+    je .compare_names
     
     add dx,2
     inc cl
@@ -56,26 +98,45 @@ start_tictactoe:
     jmp .get_name_loop
 
 .compare_names:
-    mov di,player1_name
-    mov si,player2_name
+    mov si,player1_name
+    mov di,player2_name
     xor bx,bx
     mov cl,1
-.comapre_names_loop:
-    mov al,[player1_name]
-    mov dl,[player2_name]
-    cmp al,dl
-    jne .not_equal_names
-    cmp al,0
-    je .found_end
 
+.compare_names_loop:
+    mov al,[si]
+    mov dl,[di]
+    
+    cmp al,0
+    je .skip_si_inc
+    inc si
+.skip_si_inc:
+
+    cmp dl,0
+    je .skip_di_inc
+    inc di
+.skip_di_inc:
+
+    inc bl
+
+    mov ch,al
+    or ch,dl
+    jz .found_end
+
+    cmp al,dl
+    je .compare_names_loop
+    xor cx,cx
+    jmp .compare_names_loop
+
+.found_end:
+    cmp cl,1
+    jne .not_equal_names
+    mov word [error_string_address],same_name_error
+    jmp .get_names
 
 .not_equal_names:
-    xor cx,cx
-    inc bx
-    inc di
-    inc si
-    jmp .comapre_names_loop
-
+    add bl,3
+    mov byte [name_padding_len],bl
     jmp .reset
 
 .win:
@@ -87,6 +148,8 @@ start_tictactoe:
 
     mov di,[si]
     mov si,win_string
+    mov byte [si],0x20
+    inc si
     call copy_str
 
     add si,bx
@@ -99,6 +162,11 @@ start_tictactoe:
 
 .draw:
     mov word [error_string_address],draw_string
+    jmp .reset
+
+.reset_score:
+    mov word [player1_score],0
+    mov word [player2_score],0
 
 .reset:
     mov di,empty_board
@@ -149,36 +217,14 @@ tictactoe_redraw:
     call reset_page
 
     mov si,instruction_string
+.print_instructions_loop:
+    cmp byte [si],0xff
+    je .end_print_instructions_loop
     call print_str
     call endl
-    call endl
+    jmp .print_instructions_loop
 
-    mov si,board
-    xor dx,dx
-.draw_board_loop:
-    call tab
-    call draw_tictactoe_line
-    cmp dl,9
-    je .end_loop
-
-    call tab
-    mov bh,1
-    mov ax,0x0e2d   ; I didnt bother with a loop because too lazy, maybe fix sometime (would only save a few lines tho)
-    int 0x10
-    mov al,0x2b ; "+"
-    int 0x10
-    mov al,0x2d ; "-"
-    int 0x10
-    mov al,0x2b
-    int 0x10
-    mov al,0x2d
-    int 0x10
-    call endl
-
-    jmp .draw_board_loop
-
-.end_loop:
-
+.end_print_instructions_loop
     call endl
 
     xor cx,cx
@@ -197,6 +243,16 @@ tictactoe_redraw:
     push cx
     xor cx,cx
 .print_score_loop:
+    mov ax,0x0e20
+    int 0x10
+
+    mov ah,[name_padding_len]
+    dec ah
+    mov al,cl
+    shr al,1
+    add al,0x0b
+    call set_color
+
     mov si,name_map
     add si,cx
     mov si, [si]
@@ -224,18 +280,42 @@ tictactoe_redraw:
 .printed_score:
     pop cx
 
+    call endl
+
     mov si,turn_string
     call print_str
+
+
+    ; get length of name
+    mov si,name_map
+    add si,cx
+    mov si,[di]
+    call str_len
+
+    ; color name
+    mov ax,si
+    shl ax,8    ; mov al into ah
+    mov al,cl
+    shr al,1
+    add al,0x0b
+    call set_color
 
     mov di,name_map
     add di,cx
     mov si,[di]
     call print_str
 
-    mov ax,0x0e20
+    mov al,0x20
     int 0x10
     mov al,0x28   ; "("
     int 0x10
+
+    ; color symbol
+    mov ah,1
+    mov al,cl
+    shr al,1
+    add al,0x0b
+    call set_color
 
     mov si,symbol_map
     xor cx,cx
@@ -248,6 +328,41 @@ tictactoe_redraw:
     int 0x10
 
     call endl
+    call endl
+
+    mov si,board
+    xor dx,dx
+.draw_board_loop:
+    call tab
+    call draw_tictactoe_line
+    call endl
+    cmp dl,9
+    je .end_loop
+
+    call tab
+    mov bh,1
+    mov ax,0x0e2d   ; I didnt bother with a loop because too lazy, maybe fix sometime (would only save a few lines tho)
+    int 0x10
+    int 0x10
+    int 0x10
+    mov al,0x2b ; "+"
+    int 0x10
+    mov al,0x2d ; "-"
+    int 0x10
+    int 0x10
+    int 0x10
+    mov al,0x2b ; "+"
+    int 0x10
+    mov al,0x2d ; "-"
+    int 0x10
+    int 0x10
+    int 0x10
+    call endl
+
+    jmp .draw_board_loop
+
+.end_loop:
+
     call endl
 
     cmp word [error_string_address],0
@@ -271,32 +386,53 @@ draw_tictactoe_line:
     xor dh,dh
     mov ah,0x0e
 .draw_tictactoe_line_loop:
+    mov al,0x20
+    int 0x10
+
+    mov al,[turn]
+    add al,0x0b
+    mov ah,1
+    call set_color
+
     mov al,[si]
     int 0x10
 
-    inc si
+    cmp al,0x20
+    je .skip_dl_inc
     inc dl
+
+.skip_dl_inc:
+    inc si
     inc dh
     cmp dh,3
     je .end
+
+    mov al,0x20
+    int 0x10
 
     mov al,0x7c ; "|"
     int 0x10
     jmp .draw_tictactoe_line_loop
 
 .end:
-    call endl
     ret
 
 
-name_padding_len: db 10
+instruction_string:
+    db ' commands:',0
+    db '   exit       quits the game',0
+    db '   reset      resets the scores',0
+    db '   restart    restarts the game',0
+    db 0xff
 
-instruction_string: db 'type exit to quit',0
+turn_string: db ' turn: ',0
+score_string: db ' scores:',0
 
-turn_string: db 'turn: ',0
-score_string: db 'scores:',0
+tictactoe_prompt_string: db ' enter number to place token at: ',0
 
-tictactoe_prompt_string: db 'enter number to place token at: ',0
+continue_game_prompt_string: db 'continue previous game? (yes/no): ',0
+
+name_padding_len: db 0
 
 name_map: dw player1_name, player2_name
 score_map: dw player1_score, player2_score
@@ -305,10 +441,15 @@ symbol_map: db 'X','O'
 
 error_string_address: dw 0
 
-player_name_prompt_string1: db 'enter player ',0
-player_name_prompt_string2: db ' name: ',0
+player_name_prompt: 
+.start:     db 'enter ',0
+.middle:    db 'player ',0
+.end:       db ' name: ',0
 
-win_string: times 0x100 db 0
+win_string: 
+    times 0x100 db 0
 .end: db ' won!!!',0
 
-draw_string: db 'draw!!!',0
+draw_string: db ' draw!!!',0
+
+same_name_error: db "Players can't have the same name!",0

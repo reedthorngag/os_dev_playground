@@ -153,4 +153,37 @@ print_decimal:
 	pop ax
 	ret
 
+; prints character in al
+; preserves all registers
+print_char:
+	push ax
+    push bx
+    mov bh,[print_page]
+    mov ah,0x0e
+    int 0x10
+    pop bx
+    pop ax
+	ret
+
+; color in al
+; number of characters to apply it to in ah
+; preserves all registers except ah, which it sets to 0x0e
+set_color:
+	push ax
+	push bx
+	push cx
+	xor cx,cx
+	mov cl,ah
+	mov bl,al
+	mov bh,[print_page]
+	mov ax,0x0900
+	int 0x10
+
+	pop cx
+	pop bx
+	pop ax
+	mov ah,0x0e	; being helpful, as most likely you are printing something after this, and ah is now useless
+	ret
+
+
 print_page: db 0

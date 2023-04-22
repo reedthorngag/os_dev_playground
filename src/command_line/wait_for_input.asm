@@ -37,14 +37,13 @@ wait_for_input:
     cmp al,0
 	je .get_key_loop
 
-    cmp cx,0x300
-    je .buffer_full_error
+    cmp cx,[max_buffer_len]
+    je .get_key_loop
 
     cmp cx,dx
     jne .shift_buffer
 
-    mov ah,0x0e
-    int 0x10
+    call print_char
 
     mov byte [bx],al
     inc bx
@@ -53,7 +52,6 @@ wait_for_input:
 
     jmp .get_key_loop
 
-    
 
 .left_arrow:
     cmp dx,0
@@ -62,7 +60,7 @@ wait_for_input:
     push bx
     push dx
     push cx
-    xor bx,bx
+    mov bh,[print_page]
     mov ah,0x03
     int 0x10
     dec dl
@@ -73,6 +71,7 @@ wait_for_input:
     pop cx
     pop dx
     pop bx
+
     dec dx
     jmp .get_key_loop
 
@@ -83,7 +82,7 @@ wait_for_input:
     push bx
     push dx
     push cx
-    xor bx,bx
+    mov bh,[print_page]
     mov ah,0x03
     int 0x10
     inc dl
@@ -94,6 +93,7 @@ wait_for_input:
     pop cx
     pop dx
     pop bx
+
     inc dx
     jmp .get_key_loop
 
@@ -102,14 +102,10 @@ wait_for_input:
 #include "wait_for_input.shift_buffer.asm"
 
 .enter:
+    mov word [max_buffer_len],0x0300
     xor ax,ax	; set ZF
-	ret
+    ret
 
-.buffer_full_error:
-    call endl
-    mov si,buffer_full_error
-    mov ax,0
-	cmp ax,1	; unset ZF
-	ret
+max_buffer_len: dw 0x0300
 
 buffer_full_error: db 'ERR: buffer full! max input length 0x300 (384) characters',0

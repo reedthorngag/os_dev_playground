@@ -2,6 +2,8 @@
 #include "print_utils.asm"
 #include "get_random.asm"
 #include "copy_str.asm"
+#include "pause.asm"
+#include "str_len.asm"
 
 
 ; offset in si, preserves si

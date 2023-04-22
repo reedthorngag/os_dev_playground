@@ -8,19 +8,21 @@ backspace:
     push dx
     
     mov bh,[print_page]
-
     mov ah,0x03
     int 0x10
     cmp dl,0
     je .end
     dec dl
 
+    mov bh,[print_page]
     mov ah,0x02
     int 0x10
 
+    mov bh,[print_page]
     mov ax,0x0e20
     int 0x10
 
+    mov bh,[print_page]
     mov ah,0x02
     int 0x10
 

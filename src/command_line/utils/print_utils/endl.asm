@@ -7,7 +7,6 @@ endl:
     push bx
 
     mov bh,[print_page]
-
     mov ah,0x03
     int 0x10
     cmp dh,0x17
@@ -15,6 +14,7 @@ endl:
 
     inc dh
     xor dl,dl
+    mov bh,[print_page]
     mov ah,0x02
     int 0x10
 
