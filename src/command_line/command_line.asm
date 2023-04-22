@@ -10,13 +10,6 @@ command_line:
 
     call wait_for_input
 
-    push si
-    mov al,0x20
-    call print_char
-    mov si,command_buffer
-    call print_str
-    pop si
-
     call endl
 
     mov di,commands_array

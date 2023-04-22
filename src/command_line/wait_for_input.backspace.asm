@@ -15,13 +15,9 @@
     inc bx
     mov al,[bx]
     dec bx
-    mov byte [bx], al
+    mov byte [bx],al
 
-    push bx
-    mov ah,0x0e
-    int 0x10
-    pop bx
-    ;call print_char
+    call print_char
 
     inc bx
     inc dx
@@ -30,16 +26,15 @@
 .end_overwrite_loop:
     mov byte [bx],0
 
-    mov bh,[print_page]
-    mov ax,0x0e20
-    int 0x10
-    ;call print_char
+    mov al,0x20
+    call print_char
     call backspace
 
     pop dx
     push bx
     push cx
     push dx
+
     mov ax,cx
     sub ax,dx
     mov bh,[print_page]
