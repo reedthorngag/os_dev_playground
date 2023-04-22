@@ -7,7 +7,7 @@ start_tictactoe:
     int 0x10
     mov byte [print_page],1
 
-    mov bh,1
+    mov bh,[print_page]
     xor dx,dx
     mov ah,0x02     ; move cursor to start of page/file
     int 0x10
@@ -203,7 +203,7 @@ start_tictactoe:
 .end:
     call reset_page
 
-    mov bh,1
+    mov bh,[print_page]
     mov ax,0x0500   ; switch back to first page
     int 0x10
     mov byte [print_page],0
@@ -246,19 +246,23 @@ tictactoe_redraw:
     mov ax,0x0e20
     int 0x10
 
-    mov ah,[name_padding_len]
-    dec ah
+    mov si,name_map
+    add si,cx
+    mov si,[si]
+    mov di,si
+    call str_len
+    mov ax,si
+    mov si,di
+
+    shl ax,8
     mov al,cl
     shr al,1
     add al,0x0b
     call set_color
 
-    mov si,name_map
-    add si,cx
-    mov si, [si]
     call print_str
 
-    mov bh,1
+    mov bh,[print_page]
     mov ax,0x0e3a
     int 0x10
 
@@ -289,10 +293,10 @@ tictactoe_redraw:
     ; get length of name
     mov si,name_map
     add si,cx
-    mov si,[di]
+    mov si,[si]
+    mov di,si
     call str_len
 
-    ; color name
     mov ax,si
     shl ax,8    ; mov al into ah
     mov al,cl
@@ -300,9 +304,7 @@ tictactoe_redraw:
     add al,0x0b
     call set_color
 
-    mov di,name_map
-    add di,cx
-    mov si,[di]
+    mov si,di
     call print_str
 
     mov al,0x20
@@ -340,7 +342,7 @@ tictactoe_redraw:
     je .end_loop
 
     call tab
-    mov bh,1
+    mov bh,[print_page]
     mov ax,0x0e2d   ; I didnt bother with a loop because too lazy, maybe fix sometime (would only save a few lines tho)
     int 0x10
     int 0x10
@@ -384,16 +386,22 @@ tictactoe_redraw:
 ; dl stores which square is next
 draw_tictactoe_line:
     xor dh,dh
+    mov bh,[print_page]
     mov ah,0x0e
 .draw_tictactoe_line_loop:
     mov al,0x20
     int 0x10
 
-    mov al,[turn]
+    mov al,[si]
+    test al,0x40   ; 01_00_00_00b
+    jz .no_color
+
+    and al,1
     add al,0x0b
-    mov ah,1
+    mov ah,1    ; color 1 character
     call set_color
 
+.no_color:
     mov al,[si]
     int 0x10
 

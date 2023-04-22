@@ -10,6 +10,7 @@ str_len:
     cmp byte [si],0
     jz .end
     inc bx
+    inc si
     jmp .find_end
 
 .end:
