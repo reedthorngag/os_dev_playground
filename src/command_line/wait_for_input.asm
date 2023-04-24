@@ -32,12 +32,18 @@ wait_for_input:
     cmp ax,0x4d00
     je .right_arrow
 
+    cmp ax,0x4800
+    je .up_arrow
+
+    cmp ax,0x5000
+    je .down_arrow
+
 .end_special_input:
 
     cmp al,0
 	je .get_key_loop
 
-    cmp cx,[max_buffer_len]
+    cmp cx,[.max_buffer_len]
     je .get_key_loop
 
     cmp cx,dx
@@ -54,6 +60,16 @@ wait_for_input:
 
 
 .left_arrow:
+    cmp cx,0
+    jne .continue_left_arrow
+    mov si,[.left_arrow_handler]
+    cmp si,0
+    je .get_key_loop
+    mov si,[si]
+    call si
+    jmp .get_key_loop
+
+.continue_left_arrow:
     cmp dx,0
     je .get_key_loop
 
@@ -76,6 +92,16 @@ wait_for_input:
     jmp .get_key_loop
 
 .right_arrow:
+    cmp cx,0
+    jne .continue_right_arrow
+    mov si,[.right_arrow_handler]
+    cmp si,0
+    je .get_key_loop
+    mov si,[si]
+    call si
+    jmp .get_key_loop
+
+.continue_right_arrow:
     cmp dx,cx
     je .get_key_loop
 
@@ -97,15 +123,52 @@ wait_for_input:
     inc dx
     jmp .get_key_loop
 
+.up_arrow:
+    cmp cx,0
+    jne .continue_up_arrow
+    mov si,[.up_arrow_handler]
+    cmp si,0
+    je .get_key_loop
+    mov si,[si]
+    call si
+    jmp .get_key_loop
+
+.continue_up_arrow:
+    jmp .get_key_loop
+
+.down_arrow:
+    cmp cx,0
+    jne .continue_down_arrow
+    mov si,[.down_arrow_handler]
+    cmp si,0
+    je .get_key_loop
+    mov si,[si]
+    call si
+    jmp .get_key_loop
+
+.continue_down_arrow:
+    jmp .get_key_loop
+
 
 #include "wait_for_input.backspace.asm"
 #include "wait_for_input.shift_buffer.asm"
 
 .enter:
-    mov word [max_buffer_len],0x0300
+    mov word [.max_buffer_len],0x0300
     xor ax,ax	; set ZF
     ret
 
-max_buffer_len: dw 0x0300
+.reset:
+    mov word [.left_arrow_handler],0
+    mov word [.right_arrow_handler],0
+    mov word [.up_arrow_handler],0
+    mov word [.down_arrow_handler],0
+    ret
 
-buffer_full_error: db 'ERR: buffer full! max input length 0x300 (384) characters',0
+.max_buffer_len: dw 0x0300
+
+.left_arrow_handler dw 0
+.right_arrow_handler dw 0
+.up_arrow_handler dw 0
+.down_arrow_handler dw 0
+

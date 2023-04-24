@@ -1,6 +1,8 @@
 ; this runs the entire command line, and runs forever (will hang on crash/error)
 command_line:
 
+        call rubiks_cube
+
 .main_loop:
 
     call clear_buffer
@@ -53,12 +55,14 @@ command_line:
 
 #include "file_editor/file_editor.asm"
 #include "tictactoe/tictactoe.asm"
+#include "rubiks_cube/rubiks_cube.asm"
 
 #include "commands/clear.asm"
 #include "commands/echo.asm"
 #include "commands/help.asm"
 #include "commands/ls.asm"
 #include "commands/tictactoe.asm"
+#include "commands/rubiks_cube.asm"
 
 #include "commands/file_editor/edit.asm"
 #include "commands/file_editor/pull.asm"
@@ -99,6 +103,7 @@ commands_array:
     dw commands.pull
     dw commands.push
     dw commands.tictactoe
+    dw commands.rubiks_cube
 
     dw 0xffff
 
@@ -156,4 +161,10 @@ commands:
         dw tictactoe
         db 0
         db 'a simple tic tac toe game (definitely not just showing off)',0
+
+.rubiks_cube:
+        db 'rubiks_cube',0
+        dw rubiks_cube
+        db 0
+        db 'think you are good enough to solve a rubiks cube?',0
 

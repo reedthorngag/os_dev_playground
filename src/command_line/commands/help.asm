@@ -17,13 +17,12 @@ help:
     xor ax,ax
     ret
 
-
-
 print_command:
     call tab
 
     call print_str  ; print command name
 
+    mov bh,[print_page]
     mov ax,0x0e20
     int 0x10
 
@@ -31,7 +30,7 @@ print_command:
     call print_str  ; print command parameters
 
 
-    mov al,0x20     ; pad to 32 characters
+    mov al,0x18     ; pad to 24 characters
     call pad_line
     jno .print_description
     call endl       ; if name + parameters goes over the 32 character limit go to next line and print description there
@@ -44,7 +43,7 @@ print_command:
 
 .print_extended_description:
     call endl
-    mov al,0x24
+    mov al,0x1a     ; pad to 24+2 characters
     call pad_line
     mov word [print_str.max_len],0x002b     ; 0x4f - 0x24
     call print_str

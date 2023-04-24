@@ -71,7 +71,7 @@ start_tictactoe:
 
     push cx
     push dx
-    mov word [max_buffer_len],0x0020
+    mov word [wait_for_input.max_buffer_len],0x0020
     call wait_for_input     ; doesnt preserve any registers
     pop dx
     pop cx
@@ -135,9 +135,9 @@ start_tictactoe:
     jmp .get_names
 
 .not_equal_names:
-    add bl,3
+    add bl,5
     mov byte [name_padding_len],bl
-    jmp .reset
+    jmp .reset_score
 
 .win:
     xor ax,ax
@@ -216,7 +216,7 @@ start_tictactoe:
 tictactoe_redraw:
     call reset_page
 
-    mov si,instruction_string
+    mov si,rubiks_cube_instruction_string
 .print_instructions_loop:
     cmp byte [si],0xff
     je .end_print_instructions_loop
@@ -224,7 +224,7 @@ tictactoe_redraw:
     call endl
     jmp .print_instructions_loop
 
-.end_print_instructions_loop
+.end_print_instructions_loop:
     call endl
 
     xor cx,cx
@@ -243,8 +243,7 @@ tictactoe_redraw:
     push cx
     xor cx,cx
 .print_score_loop:
-    mov ax,0x0e20
-    int 0x10
+    call tab
 
     mov si,name_map
     add si,cx
@@ -343,22 +342,20 @@ tictactoe_redraw:
 
     call tab
     mov bh,[print_page]
-    mov ax,0x0e2d   ; I didnt bother with a loop because too lazy, maybe fix sometime (would only save a few lines tho)
+    mov ax,0x0e2d
+    xor cx,cx
+.print_spacer_loop:
     int 0x10
     int 0x10
     int 0x10
+    inc cx
+    cmp cx,3
+    je .end_spacer_loop
     mov al,0x2b ; "+"
     int 0x10
     mov al,0x2d ; "-"
-    int 0x10
-    int 0x10
-    int 0x10
-    mov al,0x2b ; "+"
-    int 0x10
-    mov al,0x2d ; "-"
-    int 0x10
-    int 0x10
-    int 0x10
+    jmp .print_spacer_loop
+.end_spacer_loop:
     call endl
 
     jmp .draw_board_loop
@@ -370,6 +367,8 @@ tictactoe_redraw:
     cmp word [error_string_address],0
     je .print_prompt
 
+    mov al,0x20
+    call print_char
     mov si,[error_string_address]
     call print_str
     call endl
@@ -426,7 +425,7 @@ draw_tictactoe_line:
     ret
 
 
-instruction_string:
+rubiks_cube_instruction_string:
     db ' commands:',0
     db '   exit       quits the game',0
     db '   reset      resets the scores',0
@@ -438,7 +437,7 @@ score_string: db ' scores:',0
 
 tictactoe_prompt_string: db ' enter number to place token at: ',0
 
-continue_game_prompt_string: db 'continue previous game? (yes/no): ',0
+continue_game_prompt_string: db 'continue previous game? (y/n): ',0
 
 name_padding_len: db 0
 

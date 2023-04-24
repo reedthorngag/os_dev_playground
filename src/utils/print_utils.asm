@@ -121,33 +121,52 @@ print_decimal:
 	push ax
 	push bx
 	push dx
+	push cx
+
+	xor cx,cx
 	mov ax,bx
 	mov bx,0x2710
 	xor dx,dx	; this is necessery for some reason (div instruction dies without it)
 
-.hex_print_loop:
+.print_loop:
 	div bx		; divide ax by bx, quotent in ax, remainder in dx
 	push bx
 	add al,0x30
-	mov bx,[print_page]
 	mov ah,0x0e
-	int 0x10
 
-	pop ax
+	; dont print if its a zero and not a placeholder
+	pop bx
+	push bx
+	cmp bx,0x01
+	je .print_anyway
+	cmp al,0x30
+	jne .inc_cx
+	cmp cx,0
+	je .skip_output
+.inc_cx:
+	inc cx
+
+.print_anyway:
+	mov bh,[print_page]
+	int 0x10
+.skip_output:
+
+	pop ax	; was bx
 	push dx
 	xor dx,dx
 	mov bx,0x0a
 	div bx
 	mov bx,ax
-	pop ax
+	pop ax	; was dx (remainder from main div)
 	cmp bx,0x00
-	jne .hex_print_loop
+	jne .print_loop
 
 .end:
 	mov bh,[print_page]
 	mov ax,0x0e20
 	int 0x10		; add a space at the end for nice output
 
+	pop cx
 	pop dx
 	pop bx
 	pop ax

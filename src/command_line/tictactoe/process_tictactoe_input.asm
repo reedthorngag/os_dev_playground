@@ -86,6 +86,7 @@ tictactoe_commands_array:
 
     dw 0xffff
 
+
 tictactoe_commands:
 
 .empty_input:
