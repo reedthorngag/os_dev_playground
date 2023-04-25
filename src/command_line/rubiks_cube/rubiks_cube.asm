@@ -1,5 +1,6 @@
 
 #include "start_rubiks_cube.asm"
+#include "check_complete.asm"
 
 axis:
 
@@ -16,8 +17,8 @@ axis:
 
 
 pos:
-.x db 1    ; dw 0x0000
-.y db 1    ; sides.front
+.x db 1
+.y db 1
 
 
 get_top:
@@ -50,10 +51,32 @@ get_bottom:
     ret
 
 
+get_current:
+    push bx
+    mov al,[pos.y]
+    xor ah,ah
+    shl ax,1
+    mov si,axis.y
+    add si,ax
+
+    mov al,[pos.x]
+    xor ah,ah
+    shl ax,1
+    mov bx,axis.x
+    add bx,ax
+
+    cmp byte [pos.x],1
+    cmovne si,bx
+    mov si,[si]
+    mov ax,[pos]
+    pop bx
+    ret
 
 get_left:
+    push dx
     xor ax,ax
     mov al,[pos.x]
+    mov ah,1
     dec al
     cmp al,0xff
     jne get_right.skip_wraparound
@@ -61,36 +84,58 @@ get_left:
 
 
 get_right:
+    push dx
     xor ax,ax
     mov al,[pos.x]
+    mov ah,1
     inc al
     cmp al,3
     jne .skip_wraparound
 
 .wraparound:
-    call get_bottom
-    mov [pos],ax
-    call get_bottom
-    mov [pos],ax
-    mov ax,1
+    mov ah,3
+    mov al,1
 .skip_wraparound:
-    cmp ax,1
+    cmp al,1
     je .y_axis
 
 .x_axis:
     mov si,axis.x
+    xor ah,ah
+    mov dl,al
+    xor cx,cx
     jmp .get_side
 
 .y_axis:
+    cmp ah,3
+    je .do_y_axis
+    mov ah,1
+.do_y_axis:
     mov si,axis.y
+    shr ax,8
+    mov dl,al
+    mov cx,1
 
 .get_side:
     shl ax,1
     add si,ax
     mov si,[si]
 
+
     shr ax,1
-    mov ah,[pos.y]
+    cmp cx,1
+    je .y_axis_end
+
+.x_axis_end:
+    mov ah,1
+    jmp .end
+
+.y_axis_end:
+    mov ah,dl
+    mov al,1
+    
+.end:
+    pop dx
     ret
 
 
@@ -99,49 +144,80 @@ handlers:
 .left_key:
     call get_left
     mov word [pos],ax
-    ret
+    pop ax
+    pop ax
+    jmp start_rubiks_cube.cube_loop
 
 .right_key:
     call get_right
     mov word [pos],ax
-    ret
+    pop ax
+    pop ax
+    jmp start_rubiks_cube.cube_loop
 
 .up_key:
     call get_top
     mov word [pos],ax
-    ret
+    pop ax
+    pop ax
+    jmp start_rubiks_cube.cube_loop
 
 .down_key:
     call get_bottom
     mov word [pos],ax
+    pop ax
+    pop ax
+    jmp start_rubiks_cube.cube_loop
+
+
+get_color:
+    push si
+    mov si,color_map
+.loop:
+    cmp byte [si],al
+    je .found
+    add si,2
+    jmp .loop
+.found:
+    inc si
+    mov al,[si]
+    pop si
     ret
 
+
+color_map:
+    db 'B'
+    db 0x03
+    db 'W'
+    db 0x0f
+    db 'G'
+    db 0x02
+    db 'Y'
+    db 0x0e
+    db 'R'
+    db 0x04
+    db 'O'
+    db 0x06
 
 sides:
 
 .bottom:
-    db 0x01
-    times 9 db 'B'
+    times 10 db 'B'
 
 .front:
-    db 0xff
-    times 9 db 'W'
+    times 10 db 'W'
 
 .top:
-    db 0x02
-    times 9 db 'G'
+    times 10 db 'G'
 
 .back:
-    db 0x0E
-    times 9 db 'Y'
+    times 10 db 'Y'
 
 .left:
-    db 0x04
-    times 9 db 'R'
+    times 10 db 'R'
 
 .right:
-    db 0x06
-    times 9 db 'O'
+    times 10 db 'O'
 
 
 

@@ -30,19 +30,19 @@ process_rubiks_cube_input:
     cmovg ax,cx
 
 
-    cmp al,0x42
+    cmp al,'B'
     je .rotate_bottom
 
-    cmp al,0x57
+    cmp al,'F'
     je .rotate_front
 
-    cmp al,0x47
+    cmp al,'T'
     je .rotate_top
 
-    cmp al,0x52
+    cmp al,'L'
     je .rotate_left
 
-    cmp al,0x4F
+    cmp al,'R'
     je .rotate_right
 
 
@@ -83,19 +83,22 @@ process_rubiks_cube_input:
 
 
 rotate:
-    mov ax,1
+    mov cx,1
     mov bx,3
     cmp byte [command_buffer+1],"'"
-    cmove ax,bx
+    cmove cx,bx
 
     add si,0x7c00
 .loop:
-    call si
-    dec ax
+    call si ; must preserve cx
+    dec cx
     jz .end
     jmp .loop
 .end:
     ret
+
+
+#include "actions/scramble_cube.asm"
 
 
 rubiks_cube_exit:
@@ -113,6 +116,10 @@ rubiks_cube_commands:
 
 .exit:  db 'exit',0
         dw rubiks_cube_exit
+
+.scramble:
+        db 'scramble',0
+        dw scramble_cube
 
 
 rubiks_cube_invalid_input: db 'Invalid input!',0

@@ -1,0 +1,3 @@
+
+scramble_cube:
+    ret

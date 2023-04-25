@@ -65,7 +65,7 @@ wait_for_input:
     mov si,[.left_arrow_handler]
     cmp si,0
     je .get_key_loop
-    mov si,[si]
+    add si,0x7c00
     call si
     jmp .get_key_loop
 
@@ -97,7 +97,7 @@ wait_for_input:
     mov si,[.right_arrow_handler]
     cmp si,0
     je .get_key_loop
-    mov si,[si]
+    add si,0x7c00
     call si
     jmp .get_key_loop
 
@@ -129,7 +129,7 @@ wait_for_input:
     mov si,[.up_arrow_handler]
     cmp si,0
     je .get_key_loop
-    mov si,[si]
+    add si,0x7c00
     call si
     jmp .get_key_loop
 
@@ -142,7 +142,7 @@ wait_for_input:
     mov si,[.down_arrow_handler]
     cmp si,0
     je .get_key_loop
-    mov si,[si]
+    add si,0x7c00
     call si
     jmp .get_key_loop
 
