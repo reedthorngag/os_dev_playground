@@ -203,21 +203,27 @@ sides:
 
 .bottom:
     times 10 db 'B'
+    db 0
 
 .front:
-    times 10 db 'W'
+    times 3 db 'WGW'
+    db 'W',0
 
 .top:
     times 10 db 'G'
+    db 0
 
 .back:
     times 10 db 'Y'
+    db 0
 
 .left:
     times 10 db 'R'
+    db 0
 
 .right:
     times 10 db 'O'
+    db 0
 
 
 

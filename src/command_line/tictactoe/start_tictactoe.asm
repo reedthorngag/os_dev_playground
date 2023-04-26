@@ -425,7 +425,7 @@ draw_tictactoe_line:
     ret
 
 
-rubiks_cube_instruction_string:
+instruction_string:
     db ' commands:',0
     db '   exit       quits the game',0
     db '   reset      resets the scores',0

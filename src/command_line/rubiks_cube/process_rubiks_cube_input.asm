@@ -64,6 +64,7 @@ process_rubiks_cube_input:
 .rotate_front:
     mov si,rotate_front
     call rotate
+    call print_hex
     jmp .end
 
 .rotate_top:
@@ -90,7 +91,12 @@ rotate:
 
     add si,0x7c00
 .loop:
-    call si ; must preserve cx
+    push si
+    push cx
+    call si
+    pop cx
+    pop si
+
     dec cx
     jz .end
     jmp .loop

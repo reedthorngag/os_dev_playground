@@ -31,6 +31,8 @@ start_rubiks_cube:
 
 .cube_loop:
 
+    call clear_buffer
+
     call check_complete
 
     call rubiks_cube_redraw
@@ -38,6 +40,8 @@ start_rubiks_cube:
     call wait_for_input
 
     call process_rubiks_cube_input
+
+    call print_hex
 
     jmp .cube_loop
 
@@ -94,6 +98,8 @@ rubiks_cube_redraw:
     ret
 
 draw_cube:
+    mov si,sides.front
+    call print_str
     call endl
     call get_current
     inc si
@@ -210,7 +216,7 @@ print_side_char:
     ret
 
 
-instruction_string:
+rubiks_cube_instruction_string:
     db ' instructions:',0
     db '   type exit to give up (will save the cube if not completed)',0
     db '   use arrow keys to change faces',0
