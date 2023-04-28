@@ -176,11 +176,18 @@ get_color:
 .loop:
     cmp byte [si],al
     je .found
+    cmp byte [si],0xff
+    je .not_found
     add si,2
     jmp .loop
 .found:
     inc si
     mov al,[si]
+    pop si
+    ret
+
+.not_found:
+    mov al,0x07
     pop si
     ret
 
@@ -198,6 +205,7 @@ color_map:
     db 0x04
     db 'O'
     db 0x06
+    db 0xff
 
 sides:
 
