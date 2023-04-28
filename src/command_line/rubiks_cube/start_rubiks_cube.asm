@@ -98,8 +98,6 @@ rubiks_cube_redraw:
     ret
 
 draw_cube:
-    mov si,sides.front
-    call print_str
     call endl
     call get_current
     inc si
@@ -172,17 +170,6 @@ draw_cube_line:
     call print_char
 
     mov al,[si]
-    push bx
-    push dx
-    mov bx,si
-    mov dx,sides.front
-    inc dx
-    sub bx,dx
-    shl bx,8
-    mov bl,al
-    call print_hex
-    pop dx
-    pop bx
     call print_colored_char
 
     mov al,0x20

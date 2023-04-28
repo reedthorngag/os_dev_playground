@@ -5,9 +5,23 @@
 #include "rotate_right.asm"
 #include "rotate_top.asm"
 
+
+mov_read_line:
+    mov di,line_2
+    mov si,line
+    call copy_str
+    ret
+
 ; face in si
 ; x/y pos of line in al/ah
 read_line:
+    mov bx,line
+    jmp read_line_2.start
+
+read_line_2:
+    mov bx,line_2
+
+.start:
     push ax
     push si
 
@@ -41,20 +55,12 @@ read_line:
 
 .get_data:
 
-    mov bx,line
     cmp dh,1
     je .get_data_loop
     add bx,2
 .get_data_loop:
     mov al,[si]
     mov [bx],al
-
-    push bx
-    mov bx,si
-    shl bx,8
-    mov bl,al
-    call print_hex
-    pop bx
 
     inc dl
     cmp dl,3
@@ -74,12 +80,6 @@ read_line:
 
 .end:
 
-    mov al,0x20
-    call print_char
-    mov si,line
-    call print_str
-    mov al,0x20
-    call print_char
     pop si
     pop ax
     ret
@@ -89,7 +89,16 @@ write_line:
     push ax
     push si
 
+    cmp di,0
+    je .set_si
+    mov si,di
+    inc si
+    jmp .set_face
+
+.set_si:
     mov si,new_face
+
+.set_face:
 
     xor dx,dx
 
@@ -144,14 +153,13 @@ write_line:
     jmp .get_data_loop
 
 .end:
-
-    mov si,new_face
-    call print_str
     pop si
     pop ax
     ret
 
 
 line: times 4 db 0
+
+line_2: times 4 db 0
 
 new_face: times 10 db 0

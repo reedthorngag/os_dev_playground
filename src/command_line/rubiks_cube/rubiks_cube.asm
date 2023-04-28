@@ -47,7 +47,7 @@ get_bottom:
     mov si,[si]
 
     shl ax,7
-    mov al,[pos.x]
+    mov al,1
     ret
 
 
@@ -214,8 +214,8 @@ sides:
     db 0
 
 .front:
-    times 3 db 'WGW'
-    db 'W',0
+    times 10 db 'W'
+    db 0
 
 .top:
     times 10 db 'G'
