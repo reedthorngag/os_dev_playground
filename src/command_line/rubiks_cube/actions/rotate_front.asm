@@ -68,9 +68,6 @@ rotate_front:
     call calc_horizontal
     call write_line
 
-
-    call pause
-
     ret
 
 
@@ -136,8 +133,6 @@ calc_horizontal:
 
 
 .alternate:
-    mov bx,ax
-    call print_hex
     cmp al,1
     jl .alternate_even
 

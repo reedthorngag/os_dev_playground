@@ -41,8 +41,6 @@ start_rubiks_cube:
 
     call process_rubiks_cube_input
 
-    call print_hex
-
     jmp .cube_loop
 
 
