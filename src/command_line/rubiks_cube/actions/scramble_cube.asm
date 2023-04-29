@@ -1,17 +1,15 @@
 
 scramble_cube:
 
-    mov cx,0x010
+    mov cx,0x0200
     jmp .gen
 .loop:
     dec cx
     jz .end
 .gen:
     call get_random
-    mov bx,ax
-    call print_hex
     shr ax,12   ; 4 bits of data, 16 values
-    cmp ax,9
+    cmp ax,8
     jg .gen
 
     push ax
@@ -36,7 +34,6 @@ scramble_cube:
 
 .end:
     mov word [pos],0x0101
-    call pause
     ret
 
 

@@ -12,12 +12,12 @@ start_rubiks_cube:
     mov ah,0x02     ; move cursor to start of page/file
     int 0x10
 
-    mov word [error_string_address],0
 
     call check_complete
     jne .skip_scramble
+    mov word [error_string_address],0
     call scramble_cube
-    call .done_scramble_stuff
+    jmp .done_scramble_stuff
 
 .skip_scramble:
     mov word [error_string_address],saved_old_state_message_string

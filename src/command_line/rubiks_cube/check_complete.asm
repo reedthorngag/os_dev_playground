@@ -1,5 +1,6 @@
 
 check_complete:
+    call print_hex
 
     mov si,sides
     dec si
@@ -25,10 +26,12 @@ check_complete:
 
 .complete:
     mov word [error_string_address],complete
+    call print_hex
     xor ax,ax
     ret
 
 .not_complete:
+    mov word [error_string_address],0
     xor ax,ax
     cmp ax,1
     ret

@@ -15,7 +15,7 @@ get_random:
     mov bx,ax
     mul bx
     shr ax,8
-    mov dl,ah
+    mov ah,dl
     mov word [state],ax
 
     pop dx
@@ -26,7 +26,9 @@ get_random:
 set_seed:
     mov ah,0x00
     int 0x1a
+    mov ax,dx
     mov word [state],ax
+    ret
 
 state: dw 0x0000
 
