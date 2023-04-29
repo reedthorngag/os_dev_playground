@@ -1,8 +1,6 @@
 ; this runs the entire command line, and runs forever (will hang on crash/error)
 command_line:
 
-    call rubiks_cube
-
 .main_loop:
 
     call clear_buffer
