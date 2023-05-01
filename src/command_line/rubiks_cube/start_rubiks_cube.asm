@@ -46,6 +46,12 @@ start_rubiks_cube:
 
 .end:
     call wait_for_input.reset
+    call reset_page
+
+    mov ax,0x0500   ; switch back to first page
+    int 0x10
+    mov byte [print_page],1
+
     ret
 
 
