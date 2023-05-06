@@ -107,9 +107,9 @@ def process(input_dir,input_file,current_scope,unique_id_num,write=False):
 
         elif line!='\n':
             if '%' in line:
-                vars = re.findall("\%[G_|P_]?[^\], \n]+",line)
+                vars = re.findall("\%[G_|P_]?[^\], .\n]+",line)
                 # "[G_|P_]?"    finds zero or one occurences of P_ or G_
-                # "[^\], \n]+"  matches all characters except "]", ",", " " and "\n"
+                # "[^\], \n]+"  matches all characters except "]", ",", " ", "." and "\n"
 
                 for var in vars:
                     if var[2]=='_':
