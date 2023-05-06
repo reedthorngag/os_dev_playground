@@ -21,6 +21,9 @@ update_cursor_pos:
 
 cursor_pos: 
     .x: db 0x00 
-    .y: db 0x00 ; column, row, if read into register, column is in al, row in ah
+    .y: db 0x00 ; column, row, if read into register, x is in al, y in ah
+
+num_lines db 0x18
+line_width db 0x4f
 
 cursor_offset: dw 0x0000    ; cursor_pos.y * 0x80 + cursor_pos.x

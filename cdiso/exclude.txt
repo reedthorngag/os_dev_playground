@@ -1,4 +1,3 @@
-test_os_1.iso
-test_os_1.asm
-output.asm
 exclude.txt
+output.asm
+os.iso
