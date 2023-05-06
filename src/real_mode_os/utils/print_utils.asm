@@ -1,4 +1,4 @@
-hex_characters db '0123456789abcdef'
+hex_characters: db '0123456789abcdef'
 
 ; number to print in bx
 ; preserves all registers

@@ -38,7 +38,7 @@ hang:
 #include "file_system/get_file.asm"
 
 
-disk db 0x00
+disk: db 0x00
 
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
@@ -52,7 +52,7 @@ disk db 0x00
 #include "file_system/utils/utils.asm"
 
 
-file_system_start dw 0x1000		; segment the file system starts at
+file_system_start: dw 0x1000		; segment the file system starts at
 
 compare_paths_exception: db 'ERR: compare paths exception! (malformed path probably)',0
 corrupt_file_sys: db 'ERR: file system corrupted!',0
