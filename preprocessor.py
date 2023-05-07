@@ -77,6 +77,9 @@ def process(input_dir,input_file,current_scope,unique_id_num,write=False):
 
             for _ in range(1):  # so branches can easily "return" early
 
+                if line[:8]=='section ':
+                    break
+
                 if line in includes_data:
                     line = ''.join(includes_data[line])+'\n'
                     break
@@ -116,7 +119,8 @@ def process(input_dir,input_file,current_scope,unique_id_num,write=False):
 
                         if var[1]=='G':
                             if var[3:] in current_scope:
-                                line.replace(var,current_scope[var[3:]])
+                                line = line.replace(var,current_scope[var[3:]])
+
                             else:
                                 print(f'Error: {input_dir}/{input_file}:{line_num}:  Unknown global label: {var}')
                                 error = True
@@ -124,16 +128,16 @@ def process(input_dir,input_file,current_scope,unique_id_num,write=False):
 
                         elif var[1]=='P':
                             if var[3:] in private_scope:
-                                line.replace(var,current_scope[var[3:]])
+                                line = line.replace(var,current_scope[var[3:]])
                             else:
                                 print(f'Error: {input_dir}/{input_file}:{line_num}:  Unknown private label: {var}')
                                 error = True
                             continue
                     
                     if var[1:] in local_scope:
-                        line.replace(var[1:],local_scope[var[1:]])
+                        line = line.replace(var[1:],local_scope[var[1:]])
                     elif var[1:] in current_scope:
-                        line.replace(var[1:],current_scope[var[1:]])
+                        line = line.replace(var[1:],current_scope[var[1:]])
                     else:
                         print(f'Error: {input_dir}/{input_file}:{line_num}:  Unknown local label: {var}')
                         error = True
