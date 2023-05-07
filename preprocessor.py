@@ -80,6 +80,9 @@ def process(input_dir,input_file,current_scope,unique_id_num,write=False):
                 if line[:8]=='section ':
                     break
 
+                if line[:7]=='extern ':
+                    break
+
                 if line in includes_data:
                     line = ''.join(includes_data[line])+'\n'
                     break
