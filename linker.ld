@@ -16,6 +16,9 @@ SECTIONS {
     {
         *(.resources)
     }
+
+    . = 0x10000
+
     .kernel :
     {
         *(.kernel)

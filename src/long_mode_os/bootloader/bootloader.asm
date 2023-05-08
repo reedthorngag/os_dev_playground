@@ -23,8 +23,6 @@ start:
     times 510-($-$$) db 0
     dw 0xaa55
 
-bootloader_extra_data_start:
-
 #include "utils.asm"
 
 #include "setup_VESA_VBE.asm"
@@ -39,4 +37,5 @@ drive_number: db 0
 
 extern main
 
-data_to_load_end:
+bootloader_end:
+    times (0x8400 - bootloader_end) db 0 
