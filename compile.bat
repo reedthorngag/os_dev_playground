@@ -6,13 +6,15 @@ cls
 
 python preprocessor.py || GOTO end
 
-cd cdiso
+nasm -f elf32 cdiso/output.asm -o asm.o || GOTO end
 
-nasm -f bin -o os.flp output.asm
+gcc -c -g -Wall -m16 src/long_mode_os/kernel/*.c asm.o -o cdiso/kernel.o -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic -fno-pie || GOTO end
 
-mkisofs -no-emul-boot -boot-load-size 70 -exclude-list exclude.txt -o os.iso -b os.flp %cd%
+ld -static -nostdlib -build-id=none -T linker.ld -R *.o -o os.img  || GOTO end
 
-cd ..
+pause
+
+mkisofs -no-emul-boot -boot-load-size 70 -exclude-list exclude.txt -o os.iso -b os.img %cd%/cdiso
 
 :end
 

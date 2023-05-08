@@ -16,22 +16,27 @@ start:
 
     mov [drive_number],dl
 
-    call setup_VESA_VBE
+    call main
 
 
 
     times 510-($-$$) db 0
     dw 0xaa55
 
-data_to_load_start:
+bootloader_extra_data_start:
 
 #include "utils.asm"
 
 #include "setup_VESA_VBE.asm"
 
+#include "get_mem_map.asm"
+
+#include "read_acpi_tables.asm"
 
 
 global drive_number
 drive_number: db 0
+
+extern main
 
 data_to_load_end:

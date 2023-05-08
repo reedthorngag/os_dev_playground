@@ -1,4 +1,5 @@
 
+global setup_VESA_VBE
 setup_VESA_VBE:
 
     mov ax,0x07c0
