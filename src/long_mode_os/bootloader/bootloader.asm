@@ -16,7 +16,7 @@ start:
 
     mov [drive_number],dl
 
-    call main
+    call _main
 
 
 
@@ -35,7 +35,7 @@ start:
 global drive_number
 drive_number: db 0
 
-extern main
+extern _main
 
 bootloader_end:
-    times (0x8400 - bootloader_end) db 0 
+    times 0x8400 - ($$-$) db 0 

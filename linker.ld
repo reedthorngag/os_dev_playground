@@ -1,26 +1,28 @@
 OUTPUT_FORMAT(binary)
-ENTRY(start)
+ENTRY(asm)
 SECTIONS {
     . = 0x7C00;
     
     .boot :
     {
         *(.boot)
-        *(.text)
-    }
-    .data : 
-    {
-        *(.data)
-    }
-    .resources :
-    {
-        *(.resources)
     }
 
-    . = 0x10000
-
-    .kernel :
+    .data :
     {
         *(.kernel)
+    }
+
+    . = 0x10000;
+
+    .rodata :
+    {
+        *(.rodata)
+    }
+
+    .resources :
+    {
+        *(.data)
+        *(.resources)
     }
 }
