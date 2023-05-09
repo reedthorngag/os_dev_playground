@@ -12,5 +12,5 @@ get_mem_map:
 
 global mem_map
 mem_map:
-    times 256 db 0
+    times 0x100 db 0
 

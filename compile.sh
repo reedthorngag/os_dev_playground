@@ -12,6 +12,7 @@ ld -m elf_x86_64 -static -nostdlib -T linker.ld bin/*.o -o bin/os.img
 
 rm ./bin/*.o
 
-#mkisofs -no-emul-boot -v -input-charset utf-8 -boot-load-size 10 -exclude-list bin/exclude.txt -o bin/os.iso -b os.img ./bin
+mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 10 -exclude-list exclude.txt -o bin/os.iso -b os.img ./bin
 
+rm ./bin/os.img
 

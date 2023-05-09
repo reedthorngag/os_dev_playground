@@ -21,16 +21,13 @@ start:
     call setup_VESA_VBE
 
 
+#include "utils.asm"
 
     times 510-($-$$) db 0
     dw 0xaa55
 
-#include "utils.asm"
-
 #include "setup_VESA_VBE.asm"
-
 #include "get_mem_map.asm"
-
 #include "read_acpi_tables.asm"
 
 
@@ -40,4 +37,5 @@ drive_number: db 0
 extern _main
 
 bootloader_end:
-    times 0x8400 - ($$-$) db 0 
+
+

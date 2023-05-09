@@ -14,8 +14,6 @@ start:
     mov [drive_number],dl
     ;call _main
     call setup_VESA_VBE
-    times 510-($-$$) db 0
-    dw 0xaa55
 
 hex_characters: db '0123456789abcdef'
 ; number to print in bx
@@ -66,6 +64,8 @@ print_str:
 .end:
     ret
 
+    times 510-($-$$) db 0
+    dw 0xaa55
 
 global setup_VESA_VBE
 setup_VESA_VBE:
@@ -131,7 +131,7 @@ VBE_controller_info:
     .video_modes_ptr dd 0
     .total_mem      dw 0 ; num of 64Kib blocks
     dw 0xffff
-    .extra_data: times 512-($-VBE_controller_info) db 0
+    .extra_data: times 0x200-($-VBE_controller_info) db 0
 current_VBE_mode dw 0
 VBE_mode_info:
     .attributes:        dw 0
@@ -181,7 +181,7 @@ get_mem_map:
     ret
 global mem_map
 mem_map:
-    times 256 db 0
+    times 0x100 db 0
 
 
 read_acpi_tables:
@@ -191,5 +191,4 @@ global drive_number
 drive_number: db 0
 extern _main
 bootloader_end:
-    times 0x8400 - ($$-$) db 0 
 

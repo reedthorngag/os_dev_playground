@@ -7,24 +7,18 @@ SECTIONS {
         *(.boot)
     }
 
-    . = ALIGN(0x8000);
+    . = 0xa000;
 
     .out :
     {
         bin/kernel.o
-        *(.kernel)
+        *(.out)
     }
 
-    . = ALIGN(0x10000);
-
-    .rodata :
-    {
-        *(.rodata)
-    }
+    . = 0x10000;
 
     .resources :
     {
-        *(.data)
         *(.resources)
     }
 }

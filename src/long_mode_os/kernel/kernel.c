@@ -1,7 +1,7 @@
 
 #include <stdint.h>
 
-__attribute__((section(".kernel")))
+// __attribute__((section(".kernel")))
 
 volatile void setup_VESA_VBE();
 

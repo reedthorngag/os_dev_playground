@@ -86,7 +86,7 @@ VBE_controller_info:
     .total_mem      dw 0 ; num of 64Kib blocks
     dw 0xffff
 
-    .extra_data: times 512-($-VBE_controller_info) db 0
+    .extra_data: times 0x200-($-VBE_controller_info) db 0
 
 
 current_VBE_mode dw 0
