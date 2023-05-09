@@ -19,5 +19,5 @@ def process(input_dir,input,output):
             
     input.close()
 
-output = open('cdiso/output.asm','w')
+output = open('bin/output.asm','w')
 process('src','os.asm',output)

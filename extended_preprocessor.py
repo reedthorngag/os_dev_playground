@@ -4,7 +4,7 @@ from time import time
 
 error = False
 
-output = open('cdiso/output.asm','w')
+output = open('bin/output.asm','w')
 
 def process(input_dir,input_file,current_scope,unique_id_num,write=False):
     global error

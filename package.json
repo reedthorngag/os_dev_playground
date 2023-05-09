@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "run-when-changed --watch \"src/**/*.asm\" --exec \"compile.bat\""
+    "build": "run-when-changed --watch \"cdiso/os.img\" --exec \"run-qemu.bat\""
   },
   "author": "",
   "license": "ISC",

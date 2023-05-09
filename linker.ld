@@ -1,5 +1,4 @@
 OUTPUT_FORMAT(binary)
-ENTRY(asm)
 SECTIONS {
     . = 0x7C00;
     
@@ -8,12 +7,15 @@ SECTIONS {
         *(.boot)
     }
 
-    .data :
+    . = ALIGN(0x8000);
+
+    .out :
     {
+        bin/kernel.o
         *(.kernel)
     }
 
-    . = 0x10000;
+    . = ALIGN(0x10000);
 
     .rodata :
     {

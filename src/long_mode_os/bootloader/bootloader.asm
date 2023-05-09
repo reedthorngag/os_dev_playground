@@ -1,6 +1,7 @@
     [BITS 16]
 section .boot
 
+global start
 start:
 
     cli
@@ -16,7 +17,8 @@ start:
 
     mov [drive_number],dl
 
-    call _main
+    ;call _main
+    call setup_VESA_VBE
 
 
 

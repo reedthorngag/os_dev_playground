@@ -2,19 +2,16 @@
 
 clear
 
-rm ./cdiso/*.o
-
 python3 preprocessor.py
 
-nasm -f elf32 cdiso/output.asm -o cdiso/asm.o
+nasm -f elf64 bin/output.asm -o bin/asm.o
 
-gcc -c -g -Wall -m32 src/long_mode_os/kernel/*.c -o cdiso/kernel.o -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic -fno-pie
+gcc -c -g -Wall -m64 src/long_mode_os/kernel/*.c -o bin/kernel.o -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic
 
-echo 2
+ld -m elf_x86_64 -static -nostdlib -T linker.ld bin/*.o -o bin/os.img
 
-ld -m elf_i386 -r -static -nostdlib -T linker.ld -R cdiso/asm.o -o cdiso/os.img
+rm ./bin/*.o
 
-echo 3
+#mkisofs -no-emul-boot -v -input-charset utf-8 -boot-load-size 10 -exclude-list bin/exclude.txt -o bin/os.iso -b os.img ./bin
 
-mkisofs -no-emul-boot -boot-load-size 10 -exclude-list cdiso/exclude.txt -o cdiso/os.iso -b cdiso/os.img ./
 
