@@ -14,6 +14,9 @@ start:
     mov [drive_number],dl
     ;call _main
     call setup_VESA_VBE
+    call drop_into_long_mode
+    cli
+    hlt
 
 hex_characters: db '0123456789abcdef'
 ; number to print in bx
@@ -63,6 +66,17 @@ print_str:
     jmp .loop
 .end:
     ret
+
+
+drop_into_long_mode:
+    mov eax,0x80000000
+    cpuid
+    cmp eax,0x80000001
+    jb .no_long_mode    
+    
+.no_long_mode:
+    cli
+    hlt
 
     times 510-($-$$) db 0
     dw 0xaa55

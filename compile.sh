@@ -14,5 +14,4 @@ rm ./bin/*.o
 
 mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 10 -exclude-list exclude.txt -o bin/os.iso -b os.img ./bin
 
-rm ./bin/os.img
 

@@ -20,8 +20,13 @@ start:
     ;call _main
     call setup_VESA_VBE
 
+    call drop_into_long_mode
+
+    cli
+    hlt
 
 #include "utils.asm"
+#include "drop_into_long_mode.asm"
 
     times 510-($-$$) db 0
     dw 0xaa55
