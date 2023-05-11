@@ -12,8 +12,11 @@ start:
 	mov ax, 0x0000
 	mov ds, ax		; this should already be set, but better safe than sorry
     mov [drive_number],dl
-    ;call _main
-    call setup_VESA_VBE
+    mov di,bootloader_end
+    mov ecx,1
+    mov eax,0x30
+    call read_ata
+    ;call setup_VESA_VBE
     call drop_into_long_mode
     cli
     hlt
@@ -68,18 +71,92 @@ print_str:
     ret
 
 
+; ecx = LBA
+; edi = Destination
+; dl = Drive Number
+; eax number of sectors
+read_ata:
+    ; Get IO Port (primary or secondary) and whether drive is primary or secondary
+    ; IO port start is stored in ebx, Prim or secon stored in edx (bit 5)!
+	push eax
+    mov al, dl
+    cmp al, 0x80
+    jne .second_test
+    mov ebx, 0x1F0
+    xor edx, edx
+    jmp .end_probe
+.second_test:
+    cmp al, 0x81
+    jne .third_test
+    mov ebx, 0x1F0
+    mov edx, 0b10000
+    jmp .end_probe
+.third_test:
+    cmp al, 0x82
+    jne .fourth_test
+    mov ebx, 0x170
+    xor edx, edx
+    jmp .end_probe
+.fourth_test:
+    mov ebx, 0x170
+    mov edx, 0b10000
+.end_probe:
+    and ecx, 0x0FFFFFFF
+    mov eax, ecx
+    shr eax, 24
+    or al, 0b11100000
+    or al, dl
+    mov edx, ebx
+    add edx, 6
+    out dx, al
+    mov edx, ebx
+    add edx, 2
+    mov al, 1
+    out dx, al
+    mov eax, ecx
+    mov edx, ebx
+    add edx, 3
+    out dx, al
+    mov eax, ecx
+    shr eax, 8
+    mov edx, ebx
+    add edx, 4
+    out dx, al
+    mov eax, ecx
+    shr eax, 16
+    mov edx, ebx
+    add edx, 5
+    out dx, al
+    mov edx, ebx
+    add edx, 7
+    mov al, 0x20 ; Read with retry
+    out dx, al
+.wait_drq_set:
+    in al, dx
+    test al, 8
+    jz .wait_drq_set
+	pop ecx
+	shl ecx,8
+    mov edx, ebx
+    rep insw
+    ret
+
+    times 510-($-$$) db 0
+    dw 0xaa55
+bootloader_end:
+
 drop_into_long_mode:
-    mov eax,0x80000000
-    cpuid
-    cmp eax,0x80000001
-    jb .no_long_mode    
-    mov eax,0x80000001
-    cpuid
-    test eax,1<<29
-    jz .no_long_mode
     ; activate A20
     mov ax,0x2403
     int 0x15
+    mov eax,0x80000000
+    cpuid
+    cmp eax,0x80000001
+    jb .no_long_mode    ; extended functions not available
+    mov eax,0x80000001
+    cpuid
+    test edx,1<<29
+    jz .no_long_mode    ; long mode not available
     ; setup page tables stuff
     mov edi,0x1000
     mov cr3,edi
@@ -93,11 +170,11 @@ drop_into_long_mode:
     add edi,0x1000
     mov dword [edi],0x4003
     add edi,0x1000
-    mov bx,0x00000003
+    mov eax,0x00000003
     mov ecx,0x200
 .add_entry:
-    mov dword [edi],edx
-    add ebx,0x1000
+    mov dword [edi],eax
+    add eax,0x1000
     add edi,8
     loop .add_entry
     mov eax,cr4
@@ -108,8 +185,14 @@ drop_into_long_mode:
     or eax,1<<8
     wrmsr
     mov eax,cr0
-    or eax,1<<31 | 1
+    or eax,(1<<31) | (1<<0)
     mov cr0,eax
+    mov ax,[GDT.data]
+    mov ds,ax
+    mov es,ax
+    mov fs,ax
+    mov gs,ax
+    jmp $
     lgdt [GDT.pointer]
     jmp GDT.code:long_mode_start
     
@@ -151,19 +234,16 @@ GDT:
         dw $ - GDT - 1
         dq GDT
 
-    times 510-($-$$) db 0
-    dw 0xaa55
 
 global setup_VESA_VBE
 setup_VESA_VBE:
-    mov ax,0x07c0
-    mov es,ax   ; set es to boot sector offset
+    xor ax,ax
+    mov es,ax
     mov ax,0x4f00
     mov di,VBE_controller_info
     int 0x10
     cmp ax,0x004f
     jne .VESA_VBE_failed
-    xor di,di
     mov si,[VBE_controller_info.video_modes_ptr]
 .find_end_loop:
     mov cx,[si]
@@ -171,8 +251,6 @@ setup_VESA_VBE:
     je .loop
     add si,2
     jmp .find_end_loop
-    xor ax,ax
-    mov es,ax
 .loop:
     sub si,2
     cmp si,[VBE_controller_info.video_modes_ptr]
@@ -181,18 +259,11 @@ setup_VESA_VBE:
     mov di,VBE_mode_info
     mov ax,0x4f01
     int 0x10
-    mov bx,ax
-    call print_hex
-    mov bl,[VBE_mode_info.bits_per_pixel]
-    call print_hex
     cmp byte [VBE_mode_info.bits_per_pixel],0x0f
     jne .loop
     mov al,[VBE_mode_info.attributes]
     and al,0x10
     jz .loop
-    mov bx,[VBE_mode_info.win_mem]
-    call print_hex
-    call hang
     mov bx,cx
     mov ax,0x4f02
     int 0x10
@@ -203,8 +274,20 @@ setup_VESA_VBE:
     mov word [screen_res_x],ax
     mov ax,[VBE_mode_info.y_res]
     mov word [screen_res_y],ax
-    mov ax,[VBE_mode_info.mem_base_ptr]
-    mov word [screen_buff_ptr],ax
+    mov eax,[VBE_mode_info.mem_base_ptr]
+    mov dword [screen_buffer_ptr],eax
+    mov bx,[VBE_mode_info.mem_base_ptr+2]
+    call print_hex
+    mov bx,[VBE_mode_info.mem_base_ptr]
+    call print_hex
+    xor eax,eax
+    mov ax,[VBE_mode_info.win_mem]
+    shl eax,10
+    mov dword [screen_buffer_size],eax
+    mov bx,ax
+    call print_hex
+    
+    ;call hang
     ret
 .no_supported_modes:
     mov si,VBE_errors.no_supported_modes
@@ -267,8 +350,10 @@ global screen_res_x
 screen_res_x dw 0
 global screen_res_y
 screen_res_y dw 0
-global screen_buff_ptr
-screen_buff_ptr dd 0
+global screen_buffer_ptr
+screen_buffer_ptr dd 0
+global screen_buffer_size
+screen_buffer_size dd 0
 
 
 get_mem_map:
@@ -286,14 +371,18 @@ read_acpi_tables:
 global drive_number
 drive_number: db 0
 extern _main
-bootloader_end:
 
+[BITS 64]
 long_mode_start:
-    mov ds,[GDT.data]
-    mov di,[screen_buff_ptr]
-    mov ecx,0x500
-    mov ax,0b0_11111_00000_00000
+    jmp $
+    ;mov ds,[GDT.data]
+    mov edi,[screen_buffer_ptr]
+    mov ecx,[screen_buffer_size]
+    shr ecx,1
+    mov ax,0xffff
     
     rep stosw
+    cli
+    hlt
 
 

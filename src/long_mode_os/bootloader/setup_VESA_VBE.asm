@@ -2,8 +2,8 @@
 global setup_VESA_VBE
 setup_VESA_VBE:
 
-    mov ax,0x07c0
-    mov es,ax   ; set es to boot sector offset
+    xor ax,ax
+    mov es,ax
 
     mov ax,0x4f00
     mov di,VBE_controller_info
@@ -11,8 +11,6 @@ setup_VESA_VBE:
 
     cmp ax,0x004f
     jne .VESA_VBE_failed
-
-    xor di,di
 
     mov si,[VBE_controller_info.video_modes_ptr]
 
@@ -22,10 +20,6 @@ setup_VESA_VBE:
     je .loop
     add si,2
     jmp .find_end_loop
-
-
-    xor ax,ax
-    mov es,ax
 
 .loop:
     sub si,2
@@ -39,10 +33,6 @@ setup_VESA_VBE:
 
     mov ax,0x4f01
     int 0x10
-    mov bx,ax
-    call print_hex
-    mov bl,[VBE_mode_info.bits_per_pixel]
-    call print_hex
 
     cmp byte [VBE_mode_info.bits_per_pixel],0x0f
     jne .loop
@@ -50,11 +40,6 @@ setup_VESA_VBE:
     mov al,[VBE_mode_info.attributes]
     and al,0x10
     jz .loop
-
-
-    mov bx,[VBE_mode_info.win_mem]
-    call print_hex
-    call hang
 
     mov bx,cx
     mov ax,0x4f02
@@ -69,8 +54,24 @@ setup_VESA_VBE:
     mov ax,[VBE_mode_info.y_res]
     mov word [screen_res_y],ax
 
-    mov ax,[VBE_mode_info.mem_base_ptr]
-    mov word [screen_buff_ptr],ax
+    mov eax,[VBE_mode_info.mem_base_ptr]
+    mov dword [screen_buffer_ptr],eax
+
+    mov bx,[VBE_mode_info.mem_base_ptr+2]
+    call print_hex
+    mov bx,[VBE_mode_info.mem_base_ptr]
+    call print_hex
+
+    xor eax,eax
+    mov ax,[VBE_mode_info.win_mem]
+    shl eax,10
+    mov dword [screen_buffer_size],eax
+
+    mov bx,ax
+    call print_hex
+    
+    ;call hang
+
     ret
 
 
@@ -148,6 +149,8 @@ screen_res_x dw 0
 global screen_res_y
 screen_res_y dw 0
 
-global screen_buff_ptr
-screen_buff_ptr dd 0
+global screen_buffer_ptr
+screen_buffer_ptr dd 0
 
+global screen_buffer_size
+screen_buffer_size dd 0

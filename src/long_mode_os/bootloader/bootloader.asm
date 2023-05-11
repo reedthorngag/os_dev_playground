@@ -17,8 +17,12 @@ start:
 
     mov [drive_number],dl
 
-    ;call _main
-    call setup_VESA_VBE
+    mov di,bootloader_end
+    mov ecx,1
+    mov eax,0x30
+    call read_ata
+
+    ;call setup_VESA_VBE
 
     call drop_into_long_mode
 
@@ -26,10 +30,12 @@ start:
     hlt
 
 #include "utils.asm"
-#include "drop_into_long_mode.asm"
+#include "lba_interface.asm"
 
     times 510-($-$$) db 0
     dw 0xaa55
+bootloader_end:
+#include "drop_into_long_mode.asm"
 
 #include "setup_VESA_VBE.asm"
 #include "get_mem_map.asm"
@@ -39,7 +45,5 @@ global drive_number
 drive_number: db 0
 
 extern _main
-
-bootloader_end:
 
 #include "long_mode_start.asm"

@@ -1,13 +1,19 @@
-
+[BITS 64]
 long_mode_start:
 
-    mov ds,[GDT.data]
+    jmp $
 
-    mov di,[screen_buff_ptr]
-    mov ecx,0x500
-    mov ax,0b0_11111_00000_00000
+    ;mov ds,[GDT.data]
+
+    mov edi,[screen_buffer_ptr]
+    mov ecx,[screen_buffer_size]
+    shr ecx,1
+    mov ax,0xffff
     
     rep stosw
+
+    cli
+    hlt
 
 
 

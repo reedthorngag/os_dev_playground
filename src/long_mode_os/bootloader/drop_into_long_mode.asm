@@ -1,19 +1,19 @@
 
 drop_into_long_mode:
 
-    mov eax,0x80000000
-    cpuid
-    cmp eax,0x80000001
-    jb .no_long_mode    
-
-    mov eax,0x80000001
-    cpuid
-    test eax,1<<29
-    jz .no_long_mode
-
     ; activate A20
     mov ax,0x2403
     int 0x15
+
+    mov eax,0x80000000
+    cpuid
+    cmp eax,0x80000001
+    jb .no_long_mode    ; extended functions not available
+
+    mov eax,0x80000001
+    cpuid
+    test edx,1<<29
+    jz .no_long_mode    ; long mode not available
 
     ; setup page tables stuff
     mov edi,0x1000
@@ -30,12 +30,12 @@ drop_into_long_mode:
     mov dword [edi],0x4003
     add edi,0x1000
 
-    mov bx,0x00000003
+    mov eax,0x00000003
     mov ecx,0x200
 
 .add_entry:
-    mov dword [edi],edx
-    add ebx,0x1000
+    mov dword [edi],eax
+    add eax,0x1000
     add edi,8
     loop .add_entry
 
@@ -50,10 +50,19 @@ drop_into_long_mode:
     wrmsr
 
     mov eax,cr0
-    or eax,1<<31 | 1
+    or eax,(1<<31) | (1<<0)
     mov cr0,eax
 
+    mov ax,[GDT.data]
+    mov ds,ax
+    mov es,ax
+    mov fs,ax
+    mov gs,ax
+
+    jmp $
+
     lgdt [GDT.pointer]
+
     jmp GDT.code:long_mode_start
 
     
