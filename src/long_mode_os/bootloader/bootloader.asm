@@ -11,7 +11,7 @@ start:
 			    ; (directly below bootloader)
 	sti
 
-	mov ax, 0x07c0
+	mov ax, 0x0000
 	mov ds, ax		; this should already be set, but better safe than sorry
 
 
@@ -35,7 +35,6 @@ start:
 #include "get_mem_map.asm"
 #include "read_acpi_tables.asm"
 
-
 global drive_number
 drive_number: db 0
 
@@ -43,4 +42,4 @@ extern _main
 
 bootloader_end:
 
-
+#include "long_mode_start.asm"

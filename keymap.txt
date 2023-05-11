@@ -75,7 +75,7 @@ left shift: 2a
 right shift: 36
 enter: 1c
 ctrl: 1d
-alt: 3b
+alt: 38
 
 special keys:
 

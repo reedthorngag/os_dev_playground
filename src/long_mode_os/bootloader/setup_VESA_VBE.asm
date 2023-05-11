@@ -24,23 +24,37 @@ setup_VESA_VBE:
     jmp .find_end_loop
 
 
+    xor ax,ax
+    mov es,ax
+
 .loop:
     sub si,2
 
-    cmp si,VBE_controller_info.video_modes_ptr
+    cmp si,[VBE_controller_info.video_modes_ptr]
     je .no_supported_modes
 
     mov cx,[si]
 
     mov di,VBE_mode_info
+
     mov ax,0x4f01
     int 0x10
+    mov bx,ax
+    call print_hex
+    mov bl,[VBE_mode_info.bits_per_pixel]
+    call print_hex
+
     cmp byte [VBE_mode_info.bits_per_pixel],0x0f
     jne .loop
 
     mov al,[VBE_mode_info.attributes]
     and al,0x10
     jz .loop
+
+
+    mov bx,[VBE_mode_info.win_mem]
+    call print_hex
+    call hang
 
     mov bx,cx
     mov ax,0x4f02
