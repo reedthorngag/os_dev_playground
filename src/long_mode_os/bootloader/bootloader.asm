@@ -17,14 +17,7 @@ start:
 
     mov [drive_number],dl
 
-    mov di,bootloader_end
-    mov ecx,1
-    mov eax,0x30
-    call read_ata
-
-    mov bx,[map_screen_buffer_ptr+4]
-    call print_hex
-    call hang
+    call read_lba_blocks
 
     call setup_VESA_VBE
 
@@ -48,4 +41,4 @@ bootloader_end:
 global drive_number
 drive_number: db 0
 
-extern _main
+extern main

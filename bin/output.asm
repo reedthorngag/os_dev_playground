@@ -12,13 +12,7 @@ start:
 	mov ax, 0x0000
 	mov ds, ax		; this should already be set, but better safe than sorry
     mov [drive_number],dl
-    mov di,bootloader_end
-    mov ecx,1
-    mov eax,0x30
-    call read_ata
-    mov bx,[map_screen_buffer_ptr+4]
-    call print_hex
-    call hang
+    call read_lba_blocks
     call setup_VESA_VBE
     call drop_into_long_mode
     cli
@@ -74,75 +68,36 @@ print_str:
     ret
 
 
-; ecx = LBA
-; edi = Destination
-; dl = Drive Number
-; eax number of sectors
-read_ata:
-    ; Get IO Port (primary or secondary) and whether drive is primary or secondary
-    ; IO port start is stored in ebx, Prim or secon stored in edx (bit 5)!
-	push eax
-    mov al, dl
-    cmp al, 0x80
-    jne .second_test
-    mov ebx, 0x1F0
-    xor edx, edx
-    jmp .end_probe
-.second_test:
-    cmp al, 0x81
-    jne .third_test
-    mov ebx, 0x1F0
-    mov edx, 0b10000
-    jmp .end_probe
-.third_test:
-    cmp al, 0x82
-    jne .fourth_test
-    mov ebx, 0x170
-    xor edx, edx
-    jmp .end_probe
-.fourth_test:
-    mov ebx, 0x170
-    mov edx, 0b10000
-.end_probe:
-    and ecx, 0x0FFFFFFF
-    mov eax, ecx
-    shr eax, 24
-    or al, 0b11100000
-    or al, dl
-    mov edx, ebx
-    add edx, 6
-    out dx, al
-    mov edx, ebx
-    add edx, 2
-    mov al, 1
-    out dx, al
-    mov eax, ecx
-    mov edx, ebx
-    add edx, 3
-    out dx, al
-    mov eax, ecx
-    shr eax, 8
-    mov edx, ebx
-    add edx, 4
-    out dx, al
-    mov eax, ecx
-    shr eax, 16
-    mov edx, ebx
-    add edx, 5
-    out dx, al
-    mov edx, ebx
-    add edx, 7
-    mov al, 0x20 ; Read with retry
-    out dx, al
-.wait_drq_set:
-    in al, dx
-    test al, 8
-    jz .wait_drq_set
-	pop ecx
-	shl ecx,8
-    mov edx, ebx
-    rep insw
-    ret
+; buffer in es:di
+; number of sectors in cx
+; drive number in dl
+; lba sector in bx
+read_lba_blocks:
+	mov dl,[drive_number]
+	mov ah,0x42
+	mov si,disk_address_packet
+	int 0x13
+	jc .failed
+    mov bx,[disk_address_packet.number_of_blocks]
+    call print_hex
+	ret
+.failed:
+	mov bx,ax
+	call print_hex
+	call hang
+; lba disk address packet
+disk_address_packet:
+	db 0x10
+	db 0x00
+.number_of_blocks:
+	dw 0x0010
+.transfer_buffer_offset:
+	dw 0x7e00
+.transfer_buffer_segment:
+	dw 0x0000
+.LBA_address:
+	dq 1
+	dq 0
 
     times 510-($-$$) db 0
     dw 0xaa55
@@ -208,15 +163,15 @@ long_mode_start:
     mov fs,ax
     mov gs,ax
     call map_screen_buffer_ptr
-    jmp $
     mov edi,[virtual_scrn_buf_ptr]
     mov ecx,[screen_buffer_size]
-    shr ecx,2
+    shl ecx,4
     mov ax,0xffff
     rep stosw
-    jmp $
     cli
     hlt
+end:
+    jmp $
 [BITS 16]
 
 ; Access bits
@@ -388,5 +343,5 @@ read_acpi_tables:
 
 global drive_number
 drive_number: db 0
-extern _main
+extern main
 

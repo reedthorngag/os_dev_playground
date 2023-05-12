@@ -11,18 +11,17 @@ long_mode_start:
 
     call map_screen_buffer_ptr
 
-    jmp $
-
     mov edi,[virtual_scrn_buf_ptr]
     mov ecx,[screen_buffer_size]
-    shr ecx,2
+    shl ecx,4
     mov ax,0xffff
     rep stosw
 
-    jmp $
-
     cli
     hlt
+
+end:
+    jmp $
 
 
 [BITS 16]
