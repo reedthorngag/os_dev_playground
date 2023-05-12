@@ -16,7 +16,10 @@ start:
     mov ecx,1
     mov eax,0x30
     call read_ata
-    ;call setup_VESA_VBE
+    mov bx,[map_screen_buffer_ptr+4]
+    call print_hex
+    call hang
+    call setup_VESA_VBE
     call drop_into_long_mode
     cli
     hlt
@@ -157,6 +160,11 @@ drop_into_long_mode:
     cpuid
     test edx,1<<29
     jz .no_long_mode    ; long mode not available
+    jmp .long_mode
+.no_long_mode:
+    cli
+    hlt
+.long_mode:
     ; setup page tables stuff
     mov edi,0x1000
     mov cr3,edi
@@ -184,21 +192,33 @@ drop_into_long_mode:
     rdmsr
     or eax,1<<8
     wrmsr
+    cli
+    lgdt [GDT.desc]
     mov eax,cr0
     or eax,(1<<31) | (1<<0)
     mov cr0,eax
-    mov ax,[GDT.data]
+    jmp GDT.code:long_mode_start
+
+[BITS 64]
+extern map_screen_buffer_ptr
+long_mode_start:
+    mov ax,GDT.data
     mov ds,ax
     mov es,ax
     mov fs,ax
     mov gs,ax
+    call map_screen_buffer_ptr
     jmp $
-    lgdt [GDT.pointer]
-    jmp GDT.code:long_mode_start
-    
-.no_long_mode:
+    mov edi,[virtual_scrn_buf_ptr]
+    mov ecx,[screen_buffer_size]
+    shr ecx,2
+    mov ax,0xffff
+    rep stosw
+    jmp $
     cli
     hlt
+[BITS 16]
+
 ; Access bits
 PRESENT  equ 1 << 7
 NOT_SYS  equ 1 << 4
@@ -230,7 +250,7 @@ GDT:
     .TSS: equ $ - GDT
         dd 0x00000068
         dd 0x00CF8900
-    .pointer:
+    .desc:
         dw $ - GDT - 1
         dq GDT
 
@@ -276,10 +296,6 @@ setup_VESA_VBE:
     mov word [screen_res_y],ax
     mov eax,[VBE_mode_info.mem_base_ptr]
     mov dword [screen_buffer_ptr],eax
-    mov bx,[VBE_mode_info.mem_base_ptr+2]
-    call print_hex
-    mov bx,[VBE_mode_info.mem_base_ptr]
-    call print_hex
     xor eax,eax
     mov ax,[VBE_mode_info.win_mem]
     shl eax,10
@@ -352,6 +368,8 @@ global screen_res_y
 screen_res_y dw 0
 global screen_buffer_ptr
 screen_buffer_ptr dd 0
+global virtual_scrn_buf_ptr
+virtual_scrn_buf_ptr dd 0
 global screen_buffer_size
 screen_buffer_size dd 0
 
@@ -371,18 +389,4 @@ read_acpi_tables:
 global drive_number
 drive_number: db 0
 extern _main
-
-[BITS 64]
-long_mode_start:
-    jmp $
-    ;mov ds,[GDT.data]
-    mov edi,[screen_buffer_ptr]
-    mov ecx,[screen_buffer_size]
-    shr ecx,1
-    mov ax,0xffff
-    
-    rep stosw
-    cli
-    hlt
-
 

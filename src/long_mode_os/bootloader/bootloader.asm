@@ -22,7 +22,11 @@ start:
     mov eax,0x30
     call read_ata
 
-    ;call setup_VESA_VBE
+    mov bx,[map_screen_buffer_ptr+4]
+    call print_hex
+    call hang
+
+    call setup_VESA_VBE
 
     call drop_into_long_mode
 
@@ -45,5 +49,3 @@ global drive_number
 drive_number: db 0
 
 extern _main
-
-#include "long_mode_start.asm"

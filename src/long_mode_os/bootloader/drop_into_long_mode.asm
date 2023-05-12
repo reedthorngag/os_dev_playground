@@ -15,6 +15,14 @@ drop_into_long_mode:
     test edx,1<<29
     jz .no_long_mode    ; long mode not available
 
+    jmp .long_mode
+
+.no_long_mode:
+    cli
+    hlt
+
+.long_mode:
+
     ; setup page tables stuff
     mov edi,0x1000
     mov cr3,edi
@@ -49,28 +57,16 @@ drop_into_long_mode:
     or eax,1<<8
     wrmsr
 
+    cli
+    lgdt [GDT.desc]
+
     mov eax,cr0
     or eax,(1<<31) | (1<<0)
     mov cr0,eax
 
-    mov ax,[GDT.data]
-    mov ds,ax
-    mov es,ax
-    mov fs,ax
-    mov gs,ax
-
-    jmp $
-
-    lgdt [GDT.pointer]
-
     jmp GDT.code:long_mode_start
 
-    
-.no_long_mode:
-    cli
-    hlt
-
-
+#include "long_mode_start.asm"
 
 ; Access bits
 PRESENT  equ 1 << 7
@@ -103,7 +99,7 @@ GDT:
     .TSS: equ $ - GDT
         dd 0x00000068
         dd 0x00CF8900
-    .pointer:
+    .desc:
         dw $ - GDT - 1
         dq GDT
 

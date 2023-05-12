@@ -1,3 +1,3 @@
 
-qemu-system-x86_64 -smp cpus=2 -enable-kvm -cpu max -drive file=bin/os.img,format=raw -m 4G -no-reboot -monitor stdio
+qemu-system-x86_64 -smp cpus=2 -enable-kvm -cpu max -drive file=bin/os.img,format=raw -m 4G -no-reboot -no-shutdown -monitor stdio
 

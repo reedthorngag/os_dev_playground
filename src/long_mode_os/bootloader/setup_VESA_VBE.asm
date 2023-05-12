@@ -57,11 +57,6 @@ setup_VESA_VBE:
     mov eax,[VBE_mode_info.mem_base_ptr]
     mov dword [screen_buffer_ptr],eax
 
-    mov bx,[VBE_mode_info.mem_base_ptr+2]
-    call print_hex
-    mov bx,[VBE_mode_info.mem_base_ptr]
-    call print_hex
-
     xor eax,eax
     mov ax,[VBE_mode_info.win_mem]
     shl eax,10
@@ -151,6 +146,9 @@ screen_res_y dw 0
 
 global screen_buffer_ptr
 screen_buffer_ptr dd 0
+
+global virtual_scrn_buf_ptr
+virtual_scrn_buf_ptr dd 0
 
 global screen_buffer_size
 screen_buffer_size dd 0
