@@ -1,51 +1,28 @@
-
+#include <stdbool.h>
 #include <stdint.h>
 
+#include <paging.h>
+
 #define int uint32_t
+#define long uint64_t
 
+volatile void kernel_start() {
+    map_screen_buffer_ptr();
 
-struct pml4t {
-    uint32_t pdpt[0x200];
-};
+    uint16_t* screen_buf = (uint16_t*)screen_buffer_ptr;
 
-extern void setup_VESA_VBE();
+    uint64_t screen_buf_end = (long)screen_buffer_ptr + (long)screen_buffer_size;
 
-volatile void main() {
-    uint16_t a = 5;
-    asm volatile inline ("add $0xaa55, %0":"=r" (a));
-    return;
-}
-
-extern uint32_t screen_buffer_ptr;
-extern uint32_t screen_buffer_size;
-extern uint32_t virtual_scrn_buf_ptr;
-
-volatile void map_screen_buffer_ptr() {
-    
-    int scrn_buf_virtual_address = (screen_buffer_ptr - screen_buffer_ptr % 0x1000) | 3;
-
-    int* pdbt = (int*)0x3008;
-    *pdbt = (int)0x5003;
-
-    int* page_file_end = (int*)0x5000;
-
-    int virtual_address = (0x200000 + screen_buffer_ptr % 0x1000);  
-
-
-    for (int i=0; i<(screen_buffer_size>>7);i++,scrn_buf_virtual_address+=0x1000,page_file_end+=2) {
-        *page_file_end = scrn_buf_virtual_address;
+    for (;screen_buf<screen_buf_end;screen_buf++) {
+        *screen_buf = (uint16_t)(0x00 | 0x00 << 5 | 0xff << 10 & 0x7fff);
     }
 
-    virtual_scrn_buf_ptr = virtual_address;
+    asm volatile ("cli");
+    while (true) {
+        asm volatile ("hlt");
+    }
 
     return;
-
 }
-
-
-volatile void map_section() {
-
-}
-
 
 

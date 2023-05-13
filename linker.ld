@@ -13,10 +13,14 @@ SECTIONS {
         *(.out)
     }
 
-    . = 0x10000;
-
     .resources :
     {
         *(.resources)
+    }
+
+    .data :
+    {
+        *(.rodata)
+        *(.data)
     }
 }

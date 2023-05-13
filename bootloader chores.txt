@@ -1,6 +1,5 @@
 get memory map
-load kernel
 set video mode
 get apci tables
-maybe set up higher half mapping
+set up higher half mapping
 load the kernel
