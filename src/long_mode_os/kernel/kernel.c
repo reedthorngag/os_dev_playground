@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 #include <paging.h>
-
+ 
 #define int uint32_t
 #define long uint64_t
 
@@ -21,7 +21,7 @@ volatile void kernel_start() {
     while (true) {
         asm volatile ("hlt");
     }
-
+    
     return;
 }
 

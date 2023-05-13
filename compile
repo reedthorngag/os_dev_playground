@@ -6,7 +6,7 @@ python3 preprocessor.py
 
 nasm -f elf64 bin/output.asm -o bin/asm.o
 
-gcc -c -g -Wall -m64 src/long_mode_os/kernel/*.c -o bin/kernel.o -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic
+gcc -c -g -Wall -m64 src/long_mode_os/kernel/*.c -I ./src/long_mode_os/includes/ -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic
 
 ld -m elf_x86_64 -static -nostdlib -T linker.ld bin/*.o -o bin/os.img
 
