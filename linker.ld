@@ -9,7 +9,7 @@ SECTIONS {
 
     .out :
     {
-        bin/kernel.o
+        kernel.o
         *(.out)
     }
 

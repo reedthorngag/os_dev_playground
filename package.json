@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "run-when-changed --watch \"src/**/*.*\" --exec \"bash compile\""
+    "build": "run-when-changed --watch \"src/**/*\" --exec \"bash compile\""
   },
   "author": "",
   "license": "ISC",
