@@ -5,6 +5,8 @@ extern uint32_t screen_buffer_size;
 extern uint32_t virtual_scrn_buf_ptr;
 
 volatile void map_screen_buffer_ptr() {
+
+    while (true) asm volatile ("hlt");
     
     int scrn_buf_virtual_address = (screen_buffer_ptr - screen_buffer_ptr % 0x1000) | 3;
 

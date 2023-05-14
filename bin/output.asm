@@ -162,7 +162,10 @@ long_mode_start:
     mov es,ax
     mov fs,ax
     mov gs,ax
-    call kernel_start
+    jmp kernel_start
+    xor eax,eax
+    mov eax,kernel_start
+    jmp $
     cli
     hlt
 [BITS 16]
@@ -179,7 +182,6 @@ ACCESSED equ 1 << 0
 GRAN_4K    equ 1 << 7
 SZ_32      equ 1 << 6
 LONG_MODE  equ 1 << 5
- 
 GDT:
     .null: equ $ - GDT
         dq 0
