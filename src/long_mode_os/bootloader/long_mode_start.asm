@@ -9,10 +9,7 @@ long_mode_start:
     mov fs,ax
     mov gs,ax
 
-    jmp kernel_start
-
-    xor eax,eax
-    mov eax,kernel_start
+    call kernel_start
 
     jmp $
 
