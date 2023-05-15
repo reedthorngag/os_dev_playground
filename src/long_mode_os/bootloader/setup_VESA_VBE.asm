@@ -55,17 +55,15 @@ setup_VESA_VBE:
     mov word [screen_res_y],ax
 
     mov eax,[VBE_mode_info.mem_base_ptr]
-    mov dword [screen_buffer_ptr],eax
+    mov dword [screen_buffer_ptr_real],eax
 
     xor eax,eax
     mov ax,[VBE_mode_info.win_mem]
     shl eax,10
     mov dword [screen_buffer_size],eax
 
-    mov bx,ax
-    call print_hex
-    
-    ;call hang
+    mov ax,[VBE_mode_info.bytes_per_scanline]
+    mov word [bytes_per_line],ax
 
     ret
 
@@ -140,15 +138,17 @@ VBE_mode_info:
 
 
 global screen_res_x
-screen_res_x dw 0
 global screen_res_y
-screen_res_y dw 0
-
-global screen_buffer_ptr
-screen_buffer_ptr dd 0
-
+global screen_buffer_ptr_real
 global virtual_scrn_buf_ptr
-virtual_scrn_buf_ptr dd 0
-
 global screen_buffer_size
+global bytes_per_line
+global bytes_per_pixel
+
+screen_res_x dw 0
+screen_res_y dw 0
+screen_buffer_ptr_real dd 0
+virtual_scrn_buf_ptr dd 0
 screen_buffer_size dd 0
+bytes_per_line dw 0
+bytes_per_pixel db 2

@@ -1,4 +1,4 @@
-#include <kernel.h>
+#include <typedefs.h>
 
 
 volatile void map_section() {

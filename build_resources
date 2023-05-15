@@ -1,0 +1,13 @@
+#!/bin/sh
+
+clear
+
+cd src/long_mode_os/resources/fonts/
+
+objcopy -O elf64-x86-64 -B i386 -I binary zap-vga16.psf ../../../../bin/font.o
+
+cd ../../../../
+
+readelf -S -s bin/font.o
+
+

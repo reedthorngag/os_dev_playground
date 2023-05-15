@@ -1,8 +1,6 @@
-#include <stdbool.h>
-#include <stdint.h>
 
-#define int uint32_t
-#define long uint64_t
+#include <paging.h>
+#include <screen.h>
 
 volatile void kernel_start();
 

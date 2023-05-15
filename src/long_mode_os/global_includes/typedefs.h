@@ -6,4 +6,7 @@
 #define int uint32_t
 #define long uint64_t
 
-uint16_t RGB(char r,char g,char b);
+#define RGB(r,g,b) (word)(((char)r << 10 | (char)g << 5 | (char)b) & 0x7fff)
+
+#define hcf() while (true) asm volatile ("hlt");
+

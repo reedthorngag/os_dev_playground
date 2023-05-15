@@ -12,7 +12,7 @@ gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_in
 
 ld -m elf_x86_64 -static -nostdlib -T ../linker.ld *.o -o os.img
 
-#rm ./bin/*.o
+#rm ./*.o
 
 mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 10 -exclude-list ../exclude.txt -o os.iso -b os.img .
 
