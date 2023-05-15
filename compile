@@ -8,7 +8,7 @@ cd bin
 
 nasm -f elf64 output.asm -o asm.o
 
-gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/kernel/ -I ../src/long_mode_os/drivers/ -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic
+gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_includes/ -I ../src/long_mode_os/kernel/ -I ../src/long_mode_os/drivers/ -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic
 
 ld -m elf_x86_64 -static -nostdlib -T ../linker.ld *.o -o os.img
 

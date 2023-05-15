@@ -17,10 +17,10 @@ volatile void kernel_start() {
     // x/10%500
 
     for (int count=0;(long)screen_buf<screen_buf_end;screen_buf++,count++) {
-        *screen_buf = (uint16_t)((0x00 << 10 | 0xff << 5 | 0x00 ) & 0x7fff);
+        *screen_buf = (uint16_t)((0xff << 10 | 0x00 << 5 | 0x00 ) & 0x7fff);
     }
 
-    //(uint16_t)((0x00 | 0xff << 5 | 0xff << 10) & 0x7fff);
+    //(uint16_t)((0x00 << 10 | 0xff << 5 | 0xff) & 0x7fff);
     
     return;
 }
