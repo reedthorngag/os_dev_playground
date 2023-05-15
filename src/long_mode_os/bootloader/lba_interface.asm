@@ -11,9 +11,6 @@ read_lba_blocks:
 	int 0x13
 	jc .failed
 
-    mov bx,[disk_address_packet.number_of_blocks]
-    call print_hex
-
 	ret
 
 .failed:
@@ -28,7 +25,7 @@ disk_address_packet:
 	db 0x10
 	db 0x00
 .number_of_blocks:
-	dw 0x0010
+	dw 0x070
 .transfer_buffer_offset:
 	dw 0x7e00
 .transfer_buffer_segment:

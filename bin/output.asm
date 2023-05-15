@@ -13,6 +13,10 @@ start:
 	mov ds, ax		; this should already be set, but better safe than sorry
     mov [drive_number],dl
     call read_lba_blocks
+    extern _binary_zap_vga16_psf_start
+    mov bx,_binary_zap_vga16_psf_start
+    call print_hex
+    ;call hang
     call setup_VESA_VBE
     call drop_into_long_mode
     cli
@@ -78,8 +82,6 @@ read_lba_blocks:
 	mov si,disk_address_packet
 	int 0x13
 	jc .failed
-    mov bx,[disk_address_packet.number_of_blocks]
-    call print_hex
 	ret
 .failed:
 	mov bx,ax
@@ -90,7 +92,7 @@ disk_address_packet:
 	db 0x10
 	db 0x00
 .number_of_blocks:
-	dw 0x0010
+	dw 0x070
 .transfer_buffer_offset:
 	dw 0x7e00
 .transfer_buffer_segment:

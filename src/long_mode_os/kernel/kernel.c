@@ -14,16 +14,14 @@ volatile void kernel_start() {
 
 
     for (int count=0;(long)screen_buf<screen_buf_end;screen_buf++,count++) {
-        *screen_buf = RGB(0,0,0);
+        *screen_buf = RGB(0,0,31);
     }
 
-    draw_pixel(50,100,RGB(0xff,0xff,0xff));
+    draw_rect(100,100,50,50,RGB(31,0,0));
+
+    draw_glyph(0,0,0x42,RGB(0,31,0),RGB(0,0,0));
 
     hcf();
-
-    for (word x=0,y=50;x<5000;x++) {
-        draw_pixel(x,y,RGB(0xff,0,0));
-    }
     
     return;
 }

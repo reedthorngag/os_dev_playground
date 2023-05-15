@@ -1,15 +1,15 @@
 
 #include <typedefs.h>
 
-extern word x_res;
-extern word y_res;
+extern word screen_res_x;
+extern word screen_res_y;
 extern int screen_buffer_ptr_real;
 extern int screen_buffer_size;
 extern int virtual_scrn_buf_ptr;
 extern word bytes_per_line;
 extern char bytes_per_pixel;
 
-extern long _binary_zap_vga16_psf_start;
+extern char* _binary_zap_vga16_psf_start;
 extern long _binary_zap_vga16_psf_end;
 extern long _binary_zap_vga16_psf_size;
 
@@ -19,7 +19,11 @@ void screen_init();
 
 void draw_pixel(word x,word y,word color);
 
-void draw_glyph(word x,word y,char character);
+void draw_rect(word x,word y, word width,word height, word color);
+
+void draw_glyph(word x,word y,char character,word color,word background);
+
+void decode_line(word* pointer,char* char_ptr,word color,word background);
 
 void map_screen_buffer();
 

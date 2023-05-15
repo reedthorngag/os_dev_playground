@@ -2,15 +2,15 @@
 #include <typedefs.h>
 #include <screen.h>
 
-extern word x_res;
-extern word y_res;
+extern word screen_res_x;
+extern word screen_res_y;
 extern int screen_buffer_ptr_real;
 extern int screen_buffer_size;
 extern int virtual_scrn_buf_ptr;
 extern word bytes_per_line;
 extern char bytes_per_pixel;
 
-extern long _binary_zap_vga16_psf_start;
+extern char* _binary_zap_vga16_psf_start;
 extern long _binary_zap_vga16_psf_end;
 extern long _binary_zap_vga16_psf_size;
 
@@ -43,11 +43,38 @@ void screen_init() {
 
 void draw_pixel(word x,word y,word color) {
     word* pointer = screen_buffer_ptr;
-    if (bytes_per_pixel==0) while (true);
-    pointer += x*bytes_per_pixel;
-    pointer += y*bytes_per_line;
+    pointer += x;
+    pointer += y*screen_res_x;
     *pointer = color;
 }
 
-void draw_glyph(word x,word y,char character) {}
+void draw_rect(word x,word y, word width,word height, word color) {
+    word* pointer = screen_buffer_ptr;
+    pointer += x;
+    pointer += y*screen_res_x;
+
+    for (;height--;pointer+=screen_res_x-width)
+        for (word x=width;x--;pointer++)
+            *pointer = color;
+}
+
+void draw_glyph(word x,word y,char character,word color,word background) {
+    word* pointer = screen_buffer_ptr;
+    pointer += x;
+    pointer += y*screen_res_x;
+    char* char_ptr = (char*)0x8f00;//_binary_zap_vga16_psf_start;
+    char_ptr += 100*16;
+
+    for (char n=16;n--;) {
+        decode_line(pointer,char_ptr,color,background);
+        pointer+=screen_res_x;
+    }
+}
+
+void decode_line(word* pointer,char* char_ptr,word color,word background) {
+    char line = *char_ptr++;
+    for (char n=8;n--;) {
+        *pointer++ = (line & 1<<n) > 0 ? color : background;
+    }
+}
 

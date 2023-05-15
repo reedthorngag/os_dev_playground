@@ -14,10 +14,14 @@ start:
 	mov ax, 0x0000
 	mov ds, ax		; this should already be set, but better safe than sorry
 
-
     mov [drive_number],dl
 
     call read_lba_blocks
+
+    extern _binary_zap_vga16_psf_start
+    mov bx,_binary_zap_vga16_psf_start
+    call print_hex
+    ;call hang
 
     call setup_VESA_VBE
 
