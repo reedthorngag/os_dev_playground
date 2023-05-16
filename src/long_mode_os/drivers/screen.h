@@ -23,7 +23,7 @@ void draw_rect(word x,word y, word width,word height, word color);
 
 void draw_glyph(word x,word y,char character,word color,word background);
 
-void decode_line(word* pointer,char* char_ptr,word color,word background);
+void decode_line(word* pointer,char** char_ptr,word color,word background);
 
 void map_screen_buffer();
 

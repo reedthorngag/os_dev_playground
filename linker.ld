@@ -15,8 +15,8 @@ SECTIONS {
 
     .resources :
     {
-        *(.resources)
         font.o
+        *(.resources)
     }
 
     .data :

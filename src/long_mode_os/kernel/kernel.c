@@ -15,7 +15,7 @@ volatile void kernel_start() {
 
     for (int count=0;(long)screen_buf<screen_buf_end;screen_buf++,count++) {
         *screen_buf = RGB(0,0,31);
-    }
+    } 
 
     draw_rect(100,100,50,50,RGB(31,0,0));
 

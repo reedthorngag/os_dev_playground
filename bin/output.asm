@@ -14,9 +14,14 @@ start:
     mov [drive_number],dl
     call read_lba_blocks
     extern _binary_zap_vga16_psf_start
+    mov si,0x8f00
+    mov bx,[si]
+    call print_hex
     mov bx,_binary_zap_vga16_psf_start
     call print_hex
-    ;call hang
+    mov bx,[_binary_zap_vga16_psf_start]
+    call print_hex
+    call pause
     call setup_VESA_VBE
     call drop_into_long_mode
     cli
@@ -69,6 +74,18 @@ print_str:
     int 0x10
     jmp .loop
 .end:
+    ret
+; pauses until a key is pressed
+; preserves all registers
+global pause
+pause:
+    push ax
+.wait_for_key_loop:
+    hlt
+    mov ah,0x01
+    int 0x16
+    jz .wait_for_key_loop
+    pop ax
     ret
 
 

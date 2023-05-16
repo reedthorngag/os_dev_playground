@@ -19,9 +19,14 @@ start:
     call read_lba_blocks
 
     extern _binary_zap_vga16_psf_start
+    mov si,0x8f00
+    mov bx,[si]
+    call print_hex
     mov bx,_binary_zap_vga16_psf_start
     call print_hex
-    ;call hang
+    mov bx,[_binary_zap_vga16_psf_start]
+    call print_hex
+    call pause
 
     call setup_VESA_VBE
 
