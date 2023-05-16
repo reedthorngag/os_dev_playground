@@ -62,28 +62,7 @@ void draw_glyph(word x,word y,char character,word color,word background) {
     word* pointer = screen_buffer_ptr;
     pointer += x;
     pointer += y*screen_res_x;
-    char* char_ptr = (char*)(0x8eea+3+0x42*16);//_binary_zap_vga16_psf_start;
-    //if ((long)_binary_zap_vga16_psf_start==(long)0x8f00) while (true);
-
-    /*char array[16] = {
-        0b00011000,
-        0b00111100,
-        0b01100110,
-        0b01100110,
-        0b11000011,
-        0b11000011,
-        0b11000011,
-        0b01100110,
-        0b01100110,
-        0b00111100,
-        0b00011010,
-        0b00000000,
-        0b00000000,
-        0b00000000,
-        0b00000000,
-        0b00000000
-    };
-    char_ptr = array;*/
+    char* char_ptr = (char*)(long)(0x9101+3+character*16);//_binary_zap_vga16_psf_start;
 
     for (char n=16;n--;) {
         decode_line(pointer,&char_ptr,color,background);
