@@ -11,5 +11,9 @@
 
 #define hcf() asm volatile ("cli"); while (true) asm volatile ("hlt")
 
-#define outb(port,value) asm volatile ("outb %0,%1" :: "a"((char)value),"Nd"((word)port))
+
+#define outb(port,value) asm volatile ("outb %0,%1" :: "a"((char)(value)),"Nd"((word)(port)))
+
+#define inb(port,out) asm volatile ("inb %0,%1" : "=r" (out) :"Nd"((word)(port)))
+
 

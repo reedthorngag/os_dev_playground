@@ -8,10 +8,9 @@ void int_to_hex(long value,char* out) {
         shift_mod-=4;
         char nibble = value>>shift_mod;
         char num = "0123456789abcdef"[nibble];
-        if (out[0]!='0' || num != '0'){
-            outb(0xe9,i);
+        outb(0xe9,nibble+0x30);
+        if (out[0]!=0 || num != '0')
             out[i++] = num;
-        }
 
         value ^= nibble<<shift_mod;
 

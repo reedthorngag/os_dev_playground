@@ -15,6 +15,7 @@ extern long _binary_zap_vga16_psf_end;
 extern long _binary_zap_vga16_psf_size;
 
 word* screen_buffer_ptr;
+word screen_default_background = RGB(0,0,0);
 
 
 void map_screen_buffer() {
@@ -35,10 +36,20 @@ void map_screen_buffer() {
     return;
 }
 
-
 void screen_init() {
     map_screen_buffer();
     screen_buffer_ptr = (word*)(long)virtual_scrn_buf_ptr;
+    wipe_screen();
+}
+
+void wipe_screen() {
+    word* screen_buf = screen_buffer_ptr;
+
+    long screen_buf_end = (long)screen_buf + (long)(screen_buffer_size<<5);
+
+    for (int count=0;(long)screen_buf<screen_buf_end;screen_buf++,count++) {
+        *screen_buf = screen_default_background;
+    }
 }
 
 void draw_pixel(word x,word y,word color) {
@@ -58,11 +69,21 @@ void draw_rect(word x,word y, word width,word height, word color) {
             *pointer = color;
 }
 
+
+void write_string(word x,word y,char* string, int len, word color, word background) {
+    for (int i=0;i<len;i++){
+        outb(0xe9,string[i]);
+        outb(0xe9,"|"[0]);
+        outb(0xe9,string[i]+0x30);
+        outb(0xe9,","[0]);
+        draw_glyph(x+i*8,y,string[i],color,background);}
+}
+
 void draw_glyph(word x,word y,char character,word color,word background) {
     word* pointer = screen_buffer_ptr;
-    pointer += x;
+    pointer += x+1;
     pointer += y*screen_res_x;
-    char* char_ptr = (char*)(long)(0x9101+3+character*16);//_binary_zap_vga16_psf_start;
+    char* char_ptr = (char*)(long)(0x90fb+3+character*16);//_binary_zap_vga16_psf_start;
 
     for (char n=16;n--;) {
         decode_line(pointer,&char_ptr,color,background);
@@ -73,7 +94,7 @@ void draw_glyph(word x,word y,char character,word color,word background) {
 void decode_line(word* pointer,char** char_ptr,word color,word background) {
     char line = *((*char_ptr)++);
     for (char n=8;n--;) {
-        *(pointer++) = (line & 1<<n) ? background : color;
+        *(pointer++) = (line & 1<<n) ? color : background;
     }
 }
 
