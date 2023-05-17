@@ -9,7 +9,7 @@ extern int virtual_scrn_buf_ptr;
 extern word bytes_per_line;
 extern char bytes_per_pixel;
 
-extern char* _binary_zap_vga16_psf_start;
+extern long _binary_zap_vga16_psf_start;
 extern long _binary_zap_vga16_psf_end;
 extern long _binary_zap_vga16_psf_size;
 
@@ -23,7 +23,7 @@ void draw_pixel(word x,word y,word color);
 
 void draw_rect(word x,word y, word width,word height, word color);
 
-void write_string(word x,word y,char* string, int len, word color, word background);
+void write_string(word x,word y,char* string, word color, word background);
 
 void draw_glyph(word x,word y,char character,word color,word background);
 

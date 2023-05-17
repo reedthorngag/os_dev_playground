@@ -10,7 +10,7 @@ extern int virtual_scrn_buf_ptr;
 extern word bytes_per_line;
 extern char bytes_per_pixel;
 
-extern char* _binary_zap_vga16_psf_start;
+extern long _binary_zap_vga16_psf_start;
 extern long _binary_zap_vga16_psf_end;
 extern long _binary_zap_vga16_psf_size;
 
@@ -70,8 +70,8 @@ void draw_rect(word x,word y, word width,word height, word color) {
 }
 
 
-void write_string(word x,word y,char* string, int len, word color, word background) {
-    for (int i=0;i<len;i++){
+void write_string(word x,word y,char* string, word color, word background) {
+    for (int i=0;string[i];i++){
         draw_glyph(x+i*8,y,string[i],color,background);}
 }
 
@@ -79,7 +79,7 @@ void draw_glyph(word x,word y,char character,word color,word background) {
     word* pointer = screen_buffer_ptr;
     pointer += x+1;
     pointer += y*screen_res_x;
-    char* char_ptr = (char*)(long)(0x912c+3+character*16);//_binary_zap_vga16_psf_start;
+    char* char_ptr = ((char*)&_binary_zap_vga16_psf_start)+character*16;
 
     for (char n=16;n--;) {
         decode_line(pointer,&char_ptr,color,background);
