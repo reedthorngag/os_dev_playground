@@ -72,10 +72,6 @@ void draw_rect(word x,word y, word width,word height, word color) {
 
 void write_string(word x,word y,char* string, int len, word color, word background) {
     for (int i=0;i<len;i++){
-        outb(0xe9,string[i]);
-        outb(0xe9,"|"[0]);
-        outb(0xe9,string[i]+0x30);
-        outb(0xe9,","[0]);
         draw_glyph(x+i*8,y,string[i],color,background);}
 }
 
@@ -83,7 +79,7 @@ void draw_glyph(word x,word y,char character,word color,word background) {
     word* pointer = screen_buffer_ptr;
     pointer += x+1;
     pointer += y*screen_res_x;
-    char* char_ptr = (char*)(long)(0x90fb+3+character*16);//_binary_zap_vga16_psf_start;
+    char* char_ptr = (char*)(long)(0x912c+3+character*16);//_binary_zap_vga16_psf_start;
 
     for (char n=16;n--;) {
         decode_line(pointer,&char_ptr,color,background);

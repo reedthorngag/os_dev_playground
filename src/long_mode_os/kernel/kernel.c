@@ -14,9 +14,17 @@ volatile void kernel_start() {
 
     char buff[16] = {0};
 
-    int_to_hex((long)_binary_zap_vga16_psf_start,buff);
+    //int_to_hex((long)_binary_zap_vga16_psf_start,buff);
 
-    int_to_hex(0x100000000000dead,buff);
+    long value = 0x100000000000dead;
+
+    int_to_hex(&value,buff);
+
+    for (char n=16;n--;)
+        outb(0xe9,buff[n]);
+
+    //word_to_hex(0x8001,buff);
+    hcf();
 
     write_string(0,0,buff,16,RGB(31,31,31),RGB(0,0,0));
 

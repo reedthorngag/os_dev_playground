@@ -1,19 +1,16 @@
 
 #include <typedefs.h>
+#include <debugging.h>
+#include <convertions.h>
 
-void int_to_hex(long value,char* out) {
-    int shift_mod = 64;
-    char i = 0;
-    do {
-        shift_mod-=4;
-        char nibble = value>>shift_mod;
-        char num = "0123456789abcdef"[nibble];
-        outb(0xe9,nibble+0x30);
-        if (out[0]!=0 || num != '0')
-            out[i++] = num;
+void int_to_hex(long* value,char* out) {
+    for (char i=4;i--;out+=4)
+        word_to_hex((word)(*value&(0xffff<<(i<<4))),out);
+}
 
-        value ^= nibble<<shift_mod;
-
-    } while (shift_mod!=0);
+void word_to_hex(word value,char* out) {
+    for (char i=4;i--;value=value>>2) {
+        out[i] = "0123456789abcdef"[value&0xf];
+    }
 }
 
