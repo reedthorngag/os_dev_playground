@@ -18,22 +18,21 @@ start:
 
     call read_lba_blocks
 
-    extern _binary_zap_vga16_psf_start
-    mov si,0x8f00
-    mov bx,[si]
-    call print_hex
-    mov bx,_binary_zap_vga16_psf_start
-    call print_hex
-    mov bx,[_binary_zap_vga16_psf_start]
+    mov word [disk_address_packet.number_of_blocks],0x0080
+    mov word [disk_address_packet.transfer_buffer_offset],0x0000
+    mov word [disk_address_packet.transfer_buffer_segment],0x1000
+    mov word [disk_address_packet.LBA_address+6],0x0005
+
+    call read_lba_blocks
+
+    call pause
+    mov bx,long_mode_start
     call print_hex
     call pause
 
     call setup_VESA_VBE
 
-    call drop_into_long_mode
-
-    cli
-    hlt
+    jmp drop_into_long_mode
 
 #include "utils.asm"
 #include "lba_interface.asm"
@@ -51,3 +50,5 @@ global drive_number
 drive_number: db 0
 
 extern main
+
+    times 512+512*4-($-$$) db 0

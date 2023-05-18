@@ -7,6 +7,8 @@ SECTIONS {
         *(.boot)
     }
 
+    . = 0x10000;
+
     .out :
     {
         kernel.o
