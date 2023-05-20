@@ -18,15 +18,7 @@ start:
 
     call read_lba_blocks
 
-    mov word [disk_address_packet.number_of_blocks],0x0080
-    mov word [disk_address_packet.transfer_buffer_offset],0x0000
-    mov word [disk_address_packet.transfer_buffer_segment],0x1000
-    mov word [disk_address_packet.LBA_address+6],0x0005
-
-    call read_lba_blocks
-
-    call pause
-    mov bx,long_mode_start
+    mov bx,[disk_address_packet.LBA_address]
     call print_hex
     call pause
 

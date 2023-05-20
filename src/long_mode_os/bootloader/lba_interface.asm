@@ -1,8 +1,4 @@
 
-; buffer in es:di
-; number of sectors in cx
-; drive number in dl
-; lba sector in bx
 read_lba_blocks:
 
 	mov dl,[drive_number]
