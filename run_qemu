@@ -2,7 +2,7 @@
 if [ -e bin/compiled ]
 then
     rm -f memdump
-    qemu-system-x86_64 -smp cpus=2 -enable-kvm -cpu max -drive file=bin/os.img,format=raw -m 4G -debugcon file:/dev/stdout -no-reboot -no-shutdown -monitor stdio
+    qemu-system-x86_64 -smp cpus=2 -cpu max -drive file=bin/os.img,format=raw -m 4G -debugcon file:/dev/stdout -no-reboot -no-shutdown -monitor stdio
 else
     echo "compiler errors!"
 fi

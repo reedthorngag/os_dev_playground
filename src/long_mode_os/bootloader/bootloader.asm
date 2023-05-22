@@ -23,10 +23,6 @@ start:
     mov si,disk_address_packet
     call read_lba_blocks
 
-    mov bx,[disk_address_packet.LBA_address]
-    call print_hex
-    call pause
-
     call setup_VESA_VBE
 
     jmp drop_into_long_mode
@@ -35,6 +31,7 @@ start:
 #include "lba_interface.asm"
 
     times 510-($-$$) db 0
+    dw 0xaa55
     dw 0xaa55
 bootloader_end:
 #include "drop_into_long_mode.asm"

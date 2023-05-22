@@ -5,3 +5,6 @@ cdiso/
 
 package-lock.json
 
+bin/*.o
+!bin/font.o
+

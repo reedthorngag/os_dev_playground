@@ -9,21 +9,26 @@ SECTIONS {
 
     . = 0x10000;
 
-    .out :
+    .data :
     {
         kernel.o
-        *(.out)
+        *(.data)
+    }
+
+    .text :
+    {
+        *(.text)
+    }
+
+    .bss :
+    {
+        *(.bss)
     }
 
     .resources :
     {
         font.o
-        *(.resources)
-    }
-
-    .data :
-    {
         *(.rodata)
-        *(.data)
+        *(.resources)
     }
 }

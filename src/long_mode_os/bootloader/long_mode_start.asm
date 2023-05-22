@@ -9,11 +9,8 @@ long_mode_start:
     mov fs,ax
     mov gs,ax
 
-    call kernel_start
+    ;jmp $
 
-    jmp $
-
-    cli
-    hlt
+    jmp kernel_start
 
 [BITS 16]

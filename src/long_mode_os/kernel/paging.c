@@ -3,9 +3,9 @@
 // translate virtual address to an array of pml 1-4 addresses
 void linear_translate_v_to_pmap(int virtual_address,word map[4]) {
     int out = virtual_address>>12; // divide virtual_address by 4096 to get the absolute page number
-    
-    for (char i=4;i--;out>>=9)
-        map[i] = (word)(out&0x01ff)-1;
+
+    for (char i=0;i<4;out>>=9,i++)
+        map[i] = (word)(out&0x01ff);
 
 }
 

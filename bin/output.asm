@@ -16,9 +16,6 @@ start:
     call read_lba_blocks
     mov si,disk_address_packet
     call read_lba_blocks
-    mov bx,[disk_address_packet.LBA_address]
-    call print_hex
-    call pause
     call setup_VESA_VBE
     jmp drop_into_long_mode
 
@@ -118,10 +115,11 @@ disk_address_packet_2:
 .transfer_buffer_segment:
 	dw 0x1000
 .LBA_address:
-	dq 5
+	dq 0x42
 	dq 0
 
     times 510-($-$$) db 0
+    dw 0xaa55
     dw 0xaa55
 bootloader_end:
 
@@ -184,10 +182,8 @@ long_mode_start:
     mov es,ax
     mov fs,ax
     mov gs,ax
-    call kernel_start
-    jmp $
-    cli
-    hlt
+    ;jmp $
+    jmp kernel_start
 [BITS 16]
 
 ; Access bits
