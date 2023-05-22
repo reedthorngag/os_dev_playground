@@ -9,11 +9,16 @@ volatile void kernel_start() {
 
     screen_init();
 
-    draw_rect(100,100,50,50,RGB(31,0,0));
+    paging_init();
+
+    char* hello = (char*)"Hello World!";
+    write_string(0,0,hello,RGB(31,31,31),RGB(0,0,0));
 
     char buff[4] = {0};
 
-    word* out = linear_translate_v_to_pmap(0x00020000);
+    word out[4] = {0};
+    
+    linear_translate_v_to_pmap(0x00020000,out);
 
     for (char i=4;i--;) {
         word_to_hex(out[i],buff);
@@ -21,7 +26,6 @@ volatile void kernel_start() {
             outb(0xe9,buff[n]);
     }
 
-    write_string(0,0,buff,RGB(31,31,31),RGB(0,0,0));
 
     hcf();
     

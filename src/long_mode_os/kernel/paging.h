@@ -1,7 +1,8 @@
 #include <typedefs.h>
 
+void paging_init();
 
-word* linear_translate_v_to_pmap(int virtual_address);
+void linear_translate_v_to_pmap(int virtual_address,word map[4]);
 
 void map_section();
 
