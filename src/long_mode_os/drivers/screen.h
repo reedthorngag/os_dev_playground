@@ -15,14 +15,6 @@ extern long _binary_zap_vga16_psf_size;
 
 extern word* screen_buffer_ptr;
 
-typedef struct {
-    short* screen_buffer_ptr;
-    short screen_default_background;
-    word x_res;
-    word y_res;
-    word byte_per_line;
-} screen_data_s;
-
 typedef enum word {
     Color_BLACK = RGB(0,0,0),
     Color_WHITE = RGB(255,255,255),
