@@ -18,6 +18,12 @@ word* screen_buffer_ptr;
 word screen_default_background = RGB(0,0,0);
 
 
+const screen_data_s screen_data = {
+    0,
+    RGB(0,0,0)
+};
+
+
 void map_screen_buffer() {
     
     int scrn_buf_virtual_address = (screen_buffer_ptr_real - screen_buffer_ptr_real % 0x1000) | 3;

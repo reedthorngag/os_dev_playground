@@ -12,7 +12,7 @@ volatile void kernel_start() {
     paging_init();
 
     char* hello = (char*)"Hello World!";
-    write_string(0,0,hello,RGB(31,31,31),RGB(0,0,0));
+    write_string(0,0,hello,RGB(100,100,100),RGB(0,0,0));
 
     char buff[4] = {0};
 
