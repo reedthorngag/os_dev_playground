@@ -17,3 +17,14 @@ void debug_short(short out) {
     outb(0xe9,'\n');
     return;
 }
+
+void debug_long(long out) {
+    char out_buf[16];
+    for (char n=4;n--;out>>=16)
+        word_to_hex(out,&out_buf[n<<2]);
+    
+    for (char i=0;i<16;)
+        outb(0xe9,out_buf[i++]);
+    outb(0xe9,'\n');
+    return;
+}
