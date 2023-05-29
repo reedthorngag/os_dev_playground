@@ -12,7 +12,17 @@ nasm -f elf64 output.asm -o asm.o
 
 gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_includes/ -I ../src/long_mode_os/kernel/ -I ../src/long_mode_os/kernel/memory/ -I ../src/long_mode_os/drivers/ -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic && touch compiled
 
-ld -m elf_x86_64 -static -nostdlib -T ../linker.ld *.o -o os.img
+ld -m elf_x86_64 -static -nostdlib -T ../linker.ld *.k.o -o bootloader.img
+
+ld -m elf_x86_64 -static -nostdlib -T ../kernel_linker.ld *.k.o -o kernel.img
+
+rm os.img
+touch os.img
+
+truncate -s 1K bootloader.img
+
+cat bootloader.img >> os.img
+cat kernel.img >> os.img
 
 mv font.o font.o.preserve
 rm *.o

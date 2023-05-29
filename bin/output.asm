@@ -324,6 +324,22 @@ VBE_mode_info:
     .mem_base_ptr       dd 0    ; address of video buffer
     .off_scrn_mem_ptr   dd 0    ; address of off screen memory
     .off_scrn_mem_size  dw 0    ; size of off screen memory in KB
+
+
+get_mem_map:
+.loop:
+.end:
+    ret
+global mem_map
+mem_map:
+    times 0x100 db 0
+
+
+read_acpi_tables:
+    
+
+
+section .kernel_data
 global screen_res_x
 global screen_res_y
 global screen_buffer_ptr_real
@@ -338,21 +354,8 @@ virtual_scrn_buf_ptr dd 0
 screen_buffer_size dd 0
 bytes_per_line dw 0
 bytes_per_pixel db 2
-
-get_mem_map:
-.loop:
-.end:
-    ret
-global mem_map
-mem_map:
-    times 0x100 db 0
-
-
-read_acpi_tables:
-    
-
 global drive_number
 drive_number: db 0
-extern main
+
     times 512+512*4-($-$$) db 0
 

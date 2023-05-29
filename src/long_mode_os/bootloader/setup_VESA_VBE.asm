@@ -135,20 +135,3 @@ VBE_mode_info:
     .mem_base_ptr       dd 0    ; address of video buffer
     .off_scrn_mem_ptr   dd 0    ; address of off screen memory
     .off_scrn_mem_size  dw 0    ; size of off screen memory in KB
-
-
-global screen_res_x
-global screen_res_y
-global screen_buffer_ptr_real
-global virtual_scrn_buf_ptr
-global screen_buffer_size
-global bytes_per_line
-global bytes_per_pixel
-
-screen_res_x dw 0
-screen_res_y dw 0
-screen_buffer_ptr_real dd 0
-virtual_scrn_buf_ptr dd 0
-screen_buffer_size dd 0
-bytes_per_line dw 0
-bytes_per_pixel db 2

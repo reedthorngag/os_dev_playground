@@ -40,9 +40,7 @@ bootloader_end:
 #include "get_mem_map.asm"
 #include "read_acpi_tables.asm"
 
-global drive_number
-drive_number: db 0
+#include "shared_data.asm"
 
-extern main
 
     times 512+512*4-($-$$) db 0
