@@ -7,11 +7,12 @@ SECTIONS {
         *(.boot)
     }
 
-    . = 0x10000;
+    . = 0xffff80000000;    
 
     .data :
     {
         kernel.o
+        *(.kernel)
         *(.data)
     }
 

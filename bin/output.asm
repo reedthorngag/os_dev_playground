@@ -123,6 +123,7 @@ disk_address_packet_2:
     dw 0xaa55
 bootloader_end:
 
+extern kernel_start
 drop_into_long_mode:
     ; activate A20
     mov ax,0x2403
@@ -147,11 +148,11 @@ drop_into_long_mode:
     mov ecx,0x1000
     rep stosd
     mov edi,cr3
-    mov dword [edi],0x2003
+    mov dword [edi+0x1ff*4],0x00002003
     add edi,0x1000
-    mov dword [edi],0x3003
+    mov dword [edi+0x1fe*4],0x00003003
     add edi,0x1000
-    mov dword [edi],0x4003
+    mov dword [edi],0x00004003
     add edi,0x1000
     mov eax,0x00000003
     mov ecx,0x200
@@ -169,23 +170,20 @@ drop_into_long_mode:
     wrmsr
     cli
     lgdt [GDT.desc]
-    mov eax,cr0
-    or eax,(1<<31) | (1<<0)
-    mov cr0,eax
-    jmp GDT.code:long_mode_start
-
-[BITS 64]
-extern kernel_start
-long_mode_start:
     mov ax,GDT.data
     mov ds,ax
     mov es,ax
     mov fs,ax
     mov gs,ax
-    ;jmp $
-    jmp kernel_start
+    mov eax,cr0
+    or eax,(1<<31) | (1<<0)
+    mov cr0,eax
+    jmp GDT.code:long_mode
+[BITS 64]
+long_mode:
+    ;mov rsi,kernel_start
+    jmp rsi
 [BITS 16]
-
 ; Access bits
 PRESENT  equ 1 << 7
 NOT_SYS  equ 1 << 4

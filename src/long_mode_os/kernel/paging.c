@@ -5,10 +5,11 @@
 
 #include <debugging.h>
 
+// 1ff 1fe
+
 void paging_init() {
     word pml_map[4] = {0};
-    translate_vaddr_to_pmap(0xffffffff80000000,pml_map);
-    translate_vaddr_to_pmap(0xffffffffffffffff,pml_map);
+    translate_vaddr_to_pmap(0xffff80000000,pml_map);
     char buff[5] = {0};
 
     for (char i=4;i--;) {
@@ -24,6 +25,7 @@ void translate_vaddr_to_pmap(long virtual_address,word pml_map[4]) {
 
     for (char i=0;i<4;virtual_address>>=9,i++)
         pml_map[i] = (short)(virtual_address&0x01ff);
+    
     return;
 }
 

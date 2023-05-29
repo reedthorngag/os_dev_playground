@@ -9,7 +9,9 @@ volatile void kernel_start() {
 
     screen_init();
 
-    paging_init();
+    hcf();
+
+    //paging_init();
 
     char* hello = (char*)"Hello World!";
     write_string(0,0,hello,RGB(100,100,100),RGB(0,0,0));
