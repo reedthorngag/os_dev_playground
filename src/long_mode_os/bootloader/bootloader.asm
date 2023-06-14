@@ -40,7 +40,6 @@ bootloader_end:
 #include "get_mem_map.asm"
 #include "read_acpi_tables.asm"
 
+ times 0x1000-($-$$) db 0
+
 #include "shared_data.asm"
-
-
-    times 512+512*4-($-$$) db 0

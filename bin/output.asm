@@ -338,6 +338,7 @@ mem_map:
 read_acpi_tables:
     
 
+ times 0x1000-($-$$) db 0
 
 section .kernel_data
 global screen_res_x
@@ -357,5 +358,4 @@ bytes_per_pixel db 2
 global drive_number
 drive_number: db 0
 
-    times 512+512*4-($-$$) db 0
 

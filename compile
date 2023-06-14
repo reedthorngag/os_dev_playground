@@ -8,13 +8,14 @@ python3 preprocessor.py
 
 cd bin
 
-nasm -f elf64 output.asm -o asm.o
+nasm -f elf64 output.asm -o asm.ob
 
 gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_includes/ -I ../src/long_mode_os/kernel/ -I ../src/long_mode_os/kernel/memory/ -I ../src/long_mode_os/drivers/ -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic && touch compiled
 
-ld -m elf_x86_64 -static -nostdlib -T ../linker.ld *.k.o -o bootloader.img
+ld -m elf_x86_64 -static -nostdlib -T ../bootloader_linker.ld asm.ob -o bootloader.img
 
-ld -m elf_x86_64 -static -nostdlib -T ../kernel_linker.ld *.k.o -o kernel.img
+#ld -m elf_x86_64 -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img
+
 
 rm os.img
 touch os.img
@@ -24,6 +25,8 @@ truncate -s 1K bootloader.img
 cat bootloader.img >> os.img
 cat kernel.img >> os.img
 
+
+rm asm.ob
 mv font.o font.o.preserve
 rm *.o
 mv font.o.preserve font.o
