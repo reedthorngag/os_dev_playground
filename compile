@@ -10,12 +10,13 @@ cd bin
 
 nasm -f elf64 output.asm -o asm.ob
 
+nasm -f elf64 ./../src/long_mode_os/bootloader/shared_data.asm -o asm.o
+
 gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_includes/ -I ../src/long_mode_os/kernel/ -I ../src/long_mode_os/kernel/memory/ -I ../src/long_mode_os/drivers/ -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic && touch compiled
 
 ld -m elf_x86_64 -static -nostdlib -T ../bootloader_linker.ld asm.ob -o bootloader.img
 
-#ld -m elf_x86_64 -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img
-
+ld -m elf_x86_64 -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img
 
 rm os.img
 touch os.img
@@ -28,10 +29,10 @@ cat kernel.img >> os.img
 
 rm asm.ob
 mv font.o font.o.preserve
-rm *.o
+#rm *.o
 mv font.o.preserve font.o
 
-mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 10 -exclude-list ../exclude.txt -o os.iso -b os.img .
+#mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 10 -exclude-list ../exclude.txt -o os.iso -b os.img .
 
 truncate -s 1M os.img
 

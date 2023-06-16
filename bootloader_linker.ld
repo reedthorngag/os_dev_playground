@@ -7,7 +7,7 @@ SECTIONS {
         *(.boot)
     }
 
-    . = 0x10000;
+    . = 0x1000;
 
     .data :
     {
