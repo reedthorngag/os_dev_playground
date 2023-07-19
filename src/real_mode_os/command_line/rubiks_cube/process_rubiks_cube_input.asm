@@ -116,6 +116,8 @@ rubiks_cube_commands_array:
 
     dw rubiks_cube_commands.exit
 
+    dw rubiks_cube_commands.scramble
+
     dw 0xffff
 
 rubiks_cube_commands:

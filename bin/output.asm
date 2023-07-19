@@ -2299,6 +2299,8 @@ scramble_cube:
     jg .gen
     push ax
     shl ax,1
+    mov bx,ax
+    call print_hex
     mov bx,move_func_map
     add bx,ax
     mov si,[bx]
@@ -2312,6 +2314,7 @@ scramble_cube:
     mov word [pos],ax
     jmp .loop
 .end:
+    call pause
     mov word [pos],0x0101
     ret
 move_func_map:
@@ -2331,6 +2334,7 @@ rubiks_cube_exit:
     jmp start_rubiks_cube.end
 rubiks_cube_commands_array:
     dw rubiks_cube_commands.exit
+    dw rubiks_cube_commands.scramble
     dw 0xffff
 rubiks_cube_commands:
 .exit:  db 'exit',0
