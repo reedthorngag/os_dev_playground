@@ -1,3 +1,5 @@
+from sys import argv
+
 
 def process(input_dir,input,output):
 
@@ -20,4 +22,4 @@ def process(input_dir,input,output):
     input.close()
 
 output = open('bin/output.asm','w')
-process('src','os.asm',output)
+process(argv[2],argv[1],output)

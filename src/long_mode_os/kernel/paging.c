@@ -5,8 +5,6 @@
 
 #include <debugging.h>
 
-// 1ff 1fe
-
 void paging_init() {
     word pml_map[4] = {0};
     translate_vaddr_to_pmap(0xffff80000000,pml_map);

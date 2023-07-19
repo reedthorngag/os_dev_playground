@@ -159,7 +159,7 @@ def process(input_dir,input_file,current_scope,unique_id_num,write=False):
 
 start = time()
 
-process('src','os.asm',{},0,write=True)
+process(sys.argv[2],sys.argv[1],{},0,write=True)
 output.close()
 
 end = time()

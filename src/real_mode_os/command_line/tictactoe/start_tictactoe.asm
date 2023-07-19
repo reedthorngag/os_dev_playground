@@ -216,7 +216,7 @@ start_tictactoe:
 tictactoe_redraw:
     call reset_page
 
-    mov si,rubiks_cube_instruction_string
+    mov si,tictactoe_instruction_string
 .print_instructions_loop:
     cmp byte [si],0xff
     je .end_print_instructions_loop
@@ -425,7 +425,7 @@ draw_tictactoe_line:
     ret
 
 
-instruction_string:
+tictactoe_instruction_string:
     db ' commands:',0
     db '   exit       quits the game',0
     db '   reset      resets the scores',0

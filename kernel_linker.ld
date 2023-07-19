@@ -16,15 +16,15 @@ SECTIONS {
         *(.text)
     }
 
+    .resources :
+    {
+        *(.rodata)
+        *(.resources)
+        font.o
+    }
+
     .bss :
     {
         *(.bss)
-    }
-
-    .resources :
-    {
-        font.o
-        *(.rodata)
-        *(.resources)
     }
 }

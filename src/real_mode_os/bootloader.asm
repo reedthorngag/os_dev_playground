@@ -18,6 +18,8 @@ start:
 	mov si,how_tf
 	call exception
 
+
+
 ; load exception error message into ds:si
 exception:
 	lodsb

@@ -32,9 +32,9 @@ drop_into_long_mode:
     rep stosd
     mov edi,cr3
 
-    mov dword [edi+0x1ff*4],0x00002003
+    mov dword [edi],0x00002003
     add edi,0x1000
-    mov dword [edi+0x1fe*4],0x00003003
+    mov dword [edi],0x00003003
     add edi,0x1000
     mov dword [edi],0x00004003
     add edi,0x1000
@@ -75,7 +75,8 @@ drop_into_long_mode:
 
 [BITS 64]
 long_mode:
-    ;mov rsi,kernel_start
+    call hang
+    mov rsi,0xffff80000000
     jmp rsi
 
 [BITS 16]

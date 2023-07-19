@@ -1,5 +1,5 @@
 ; this runs the entire command line, and runs forever (will hang on crash/error)
-global command_line:
+command_line:
 
 .main_loop:
 
