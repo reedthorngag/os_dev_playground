@@ -16,12 +16,19 @@ start:
 
     mov [drive_number],dl
 
-
     mov si,disk_address_packet_2
     call read_lba_blocks
 
     mov si,disk_address_packet
     call read_lba_blocks
+
+    mov ax,0x1000
+    mov es,ax
+    xor si,si
+
+    mov bx,[es:si]
+    call print_hex
+    call pause
 
     call setup_VESA_VBE
 

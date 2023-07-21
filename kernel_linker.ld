@@ -5,10 +5,10 @@ SECTIONS {
 
     .data :
     {
-        *(.kernel_data)
         kernel.o
         *(.kernel)
         *(.data)
+        *(.kernel_data)
     }
 
     .text :

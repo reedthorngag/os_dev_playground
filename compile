@@ -4,7 +4,7 @@ clear
 
 rm bin/compiled
 
-python3 preprocessor.py "bootloader/bootloader.asm" src/long_mode_os
+python3 preprocessor.py "bootloader.asm" src/long_mode_os/bootloader
 
 cd bin
 
@@ -18,6 +18,7 @@ ld -m elf_x86_64 -static -nostdlib -T ../bootloader_linker.ld asm.ob -o bootload
 
 ld -m elf_x86_64 -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img
 
+cat bootloader.img > boot.img
 
 truncate -s 1K bootloader.img
 

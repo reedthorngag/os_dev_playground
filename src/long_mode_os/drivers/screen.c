@@ -26,7 +26,7 @@ void map_screen_buffer() {
     *pdbt = (int)0x5003;
 
     int* page_file_end = (int*)0x5000;
-    int virtual_address = (0x200000 + screen_buffer_ptr_real % 0x1000);  
+    int virtual_address = (0x200000 + screen_buffer_ptr_real % 0x1000);
 
     for (int i=0; i<(screen_buffer_size>>7);i++,scrn_buf_virtual_address+=0x1000,page_file_end+=2) {
         *page_file_end = scrn_buf_virtual_address;

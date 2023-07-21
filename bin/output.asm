@@ -1522,6 +1522,9 @@ process_tictactoe_input:
     ret
 
 tictactoe_exit:
+    mov ax,0x0500   ; switch back to first page
+    int 0x10
+    mov byte [print_page],0
     mov ax,0
 	cmp ax,1	; unset ZF
     ret
@@ -2299,8 +2302,6 @@ scramble_cube:
     jg .gen
     push ax
     shl ax,1
-    mov bx,ax
-    call print_hex
     mov bx,move_func_map
     add bx,ax
     mov si,[bx]
@@ -2314,7 +2315,6 @@ scramble_cube:
     mov word [pos],ax
     jmp .loop
 .end:
-    call pause
     mov word [pos],0x0101
     ret
 move_func_map:
@@ -2376,7 +2376,7 @@ start_rubiks_cube:
     call reset_page
     mov ax,0x0500   ; switch back to first page
     int 0x10
-    mov byte [print_page],1
+    mov byte [print_page],0
     ret
 rubiks_cube_redraw:
     call reset_page

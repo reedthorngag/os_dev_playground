@@ -40,6 +40,6 @@ disk_address_packet_2:
 .transfer_buffer_segment:
 	dw 0x1000
 .LBA_address:
-	dq 0x42
+	dq 0x2
 	dq 0
 
