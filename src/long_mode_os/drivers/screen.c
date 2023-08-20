@@ -19,8 +19,8 @@ word screen_default_background = RGB(0,0,0);
 
 
 void map_screen_buffer() {
-    
-    int scrn_buf_virtual_address = (screen_buffer_ptr_real - screen_buffer_ptr_real % 0x1000) | 3;
+
+    int scrn_buf_virtual_address = (screen_buffer_ptr_real - (screen_buffer_ptr_real & 0x1fff)) | 3;
 
     int* pdbt = (int*)0x3008;
     *pdbt = (int)0x5003;
@@ -40,6 +40,7 @@ void screen_init() {
     map_screen_buffer();
     screen_buffer_ptr = (word*)(long)virtual_scrn_buf_ptr;
     wipe_screen();
+    draw_pixel(0,0,RGB(255,0,0));
 }
 
 void wipe_screen() {

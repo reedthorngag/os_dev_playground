@@ -7,13 +7,13 @@
 
 volatile void kernel_start() {
 
-    int a = 0x7692; // 0x0410
+    while (true);
 
-    screen_init(); // 0x2120
+    outb(0xe9,'a');
 
-    hcf();
+    paging_init();
 
-    //paging_init();
+    screen_init();
 
     char* hello = (char*)"Hello World!";
     write_string(0,0,hello,RGB(100,100,100),RGB(0,0,0));

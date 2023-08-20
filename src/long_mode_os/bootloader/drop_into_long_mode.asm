@@ -75,7 +75,6 @@ drop_into_long_mode:
 
 [BITS 64]
 long_mode:
-    ;call hang
     mov rsi,0x10000;0xffff80000000
     jmp rsi
 

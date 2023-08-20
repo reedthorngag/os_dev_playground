@@ -12,6 +12,10 @@ void paging_init() {
 
     for (char i=4;i--;) {
         word_to_hex(pml_map[i],buff);
+        for (char i=0;i++<4;) {
+            outb(0xe9,buff[i]);
+        }
+        outb(0xe9,' ');
         write_string(0,(i+1)*16,buff,Color_WHITE,Color_BLACK);
     }
 }
