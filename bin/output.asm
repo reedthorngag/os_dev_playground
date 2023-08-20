@@ -120,11 +120,10 @@ disk_address_packet_2:
 .transfer_buffer_segment:
 	dw 0x1000
 .LBA_address:
-	dq 0x2
+	dq 0x8
 	dq 0
 
     times 510-($-$$) db 0
-    dw 0xaa55
     dw 0xaa55
 bootloader_end:
 
@@ -343,7 +342,7 @@ mem_map:
 read_acpi_tables:
     
 
- times 0x1000-($-$$) db 0
+ times 0xf00-($-$$) db 0
 
 section .kernel_data
 global screen_res_x

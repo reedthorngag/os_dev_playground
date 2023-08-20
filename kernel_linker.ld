@@ -1,14 +1,15 @@
 OUTPUT_FORMAT(binary)
 SECTIONS {
 
-    . = 0x10000;
+    . = 0xf00;
 
     .data :
     {
+        *(.kernel_data)
+        . = 0x1000;
         kernel.o
         *(.kernel)
         *(.data)
-        *(.kernel_data)
     }
 
     .text :

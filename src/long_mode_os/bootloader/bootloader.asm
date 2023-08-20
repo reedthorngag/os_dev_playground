@@ -39,7 +39,6 @@ start:
 
     times 510-($-$$) db 0
     dw 0xaa55
-    dw 0xaa55
 bootloader_end:
 #include "drop_into_long_mode.asm"
 
@@ -47,6 +46,6 @@ bootloader_end:
 #include "get_mem_map.asm"
 #include "read_acpi_tables.asm"
 
- times 0x1000-($-$$) db 0
+ times 0xf00-($-$$) db 0
 
 #include "shared_data.asm"
