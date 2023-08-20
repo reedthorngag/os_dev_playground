@@ -46,6 +46,6 @@ bootloader_end:
 #include "get_mem_map.asm"
 #include "read_acpi_tables.asm"
 
- times 0xf00-($-$$) db 0
-
 #include "shared_data.asm"
+
+ times 0x100-($-$$) db 0

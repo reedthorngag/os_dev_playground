@@ -118,9 +118,9 @@ disk_address_packet_2:
 .transfer_buffer_offset:
 	dw 0x0000
 .transfer_buffer_segment:
-	dw 0x1000
+	dw 0x1100
 .LBA_address:
-	dq 0x8
+	dq 0x4
 	dq 0
 
     times 510-($-$$) db 0
@@ -342,7 +342,6 @@ mem_map:
 read_acpi_tables:
     
 
- times 0xf00-($-$$) db 0
 
 section .kernel_data
 global screen_res_x
@@ -362,3 +361,4 @@ bytes_per_pixel db 2
 global drive_number
 drive_number: db 0
 
+ times 0x100-($-$$) db 0

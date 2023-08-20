@@ -18,7 +18,9 @@ ld -m elf_x86_64 -static -nostdlib -T ../bootloader_linker.ld asm.ob -o bootload
 
 ld -m elf_x86_64 -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img
 
-truncate -s 1KiB bootloader.img
+tail -c +257 kernel.img > kernel_tmp.img
+mv kernel_tmp.img kernel.img
+
 cat bootloader.img > os.img
 cat kernel.img >> os.img
 

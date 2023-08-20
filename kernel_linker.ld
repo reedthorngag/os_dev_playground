@@ -1,12 +1,12 @@
 OUTPUT_FORMAT(binary)
 SECTIONS {
 
-    . = 0xf00;
+    . = 0x8b00;
 
     .data :
     {
         *(.kernel_data)
-        . = 0x1000;
+        . = 0x100;
         kernel.o
         *(.kernel)
         *(.data)
