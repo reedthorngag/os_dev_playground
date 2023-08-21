@@ -11,12 +11,13 @@ start:
 	mov ax, 0x0000
 	mov ds, ax		; this should already be set, but better safe than sorry
     mov [drive_number],dl
-    ;mov si,disk_address_packet_2
-    ;call read_lba_blocks
+    mov si,disk_address_packet_2
+    call read_lba_blocks
     mov si,disk_address_packet
     call read_lba_blocks
-    mov ax,0x8C00
-    mov si,ax
+    mov ax,0x1000
+    mov es,ax
+    xor si,si
     mov bx,[es:si]
     call print_hex
     call pause
@@ -101,7 +102,7 @@ disk_address_packet:
 	db 0x10
 	db 0x00
 .number_of_blocks:
-	dw 0x00080
+	dw 0x0004
 .transfer_buffer_offset:
 	dw 0x7e00
 .transfer_buffer_segment:
@@ -117,9 +118,9 @@ disk_address_packet_2:
 .transfer_buffer_offset:
 	dw 0x0000
 .transfer_buffer_segment:
-	dw 0x8C00
+	dw 0x1100
 .LBA_address:
-	dq 0x8
+	dq 0x4
 	dq 0
 
     times 510-($-$$) db 0
@@ -184,7 +185,7 @@ drop_into_long_mode:
     jmp GDT.code:long_mode
 [BITS 64]
 long_mode:
-    mov rsi,0x8C00;0xffff80000000
+    mov rsi,0x10000;0xffff80000000
     jmp rsi
 [BITS 16]
 ; Access bits

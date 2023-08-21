@@ -21,7 +21,7 @@ disk_address_packet:
 	db 0x10
 	db 0x00
 .number_of_blocks:
-	dw 0x00080
+	dw 0x0004
 .transfer_buffer_offset:
 	dw 0x7e00
 .transfer_buffer_segment:
@@ -38,8 +38,8 @@ disk_address_packet_2:
 .transfer_buffer_offset:
 	dw 0x0000
 .transfer_buffer_segment:
-	dw 0x8C00
+	dw 0x1100
 .LBA_address:
-	dq 0x8
+	dq 0x4
 	dq 0
 
