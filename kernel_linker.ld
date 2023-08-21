@@ -3,17 +3,12 @@ SECTIONS {
 
     . = 0x8b00;
 
-    .data :
+    .text :
     {
         *(.kernel_data)
         . = 0x100;
         kernel.o
         *(.kernel)
-        *(.data)
-    }
-
-    .text :
-    {
         *(.text)
     }
 
@@ -27,5 +22,12 @@ SECTIONS {
     .bss :
     {
         *(.bss)
+    }
+
+    .data :
+    {
+        *(.data)
+        . = ALIGN(0x1000);
+        pml_tables.o
     }
 }

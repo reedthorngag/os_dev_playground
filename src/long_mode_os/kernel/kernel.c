@@ -4,13 +4,12 @@
 #include <screen.h>
 #include <convertions.h>
 #include <paging.h>
+#include <debugging.h>
 
 volatile void kernel_start() {
 
-    while (true);
-
     paging_init();
-    hcf();
+    
     screen_init();
 
     char* hello = (char*)"Hello World!";

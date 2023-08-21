@@ -2,6 +2,7 @@
 #include <typedefs.h>
 #include <screen.h>
 #include <debugging.h>
+#include <paging.h>
 
 extern word screen_res_x;
 extern word screen_res_y;
@@ -29,6 +30,15 @@ void map_screen_buffer() {
     int* page_file_end = (int*)0x5000;
     int virtual_address = (0x200000 + screen_buffer_ptr_real % 0x1000);
 
+    word map[4] = {0};
+    translate_vaddr_to_pmap(0x80000000,map);
+
+    debug_int(0);
+    for (uchar i=0;i<4;i++)
+        debug_short(map[i]);
+    
+    hcf();
+
     for (int i=0; i<(screen_buffer_size>>7);i++,scrn_buf_virtual_address+=0x1000,page_file_end+=2) {
         *page_file_end = scrn_buf_virtual_address;
     }
@@ -38,14 +48,14 @@ void map_screen_buffer() {
 }
 
 void screen_init() {
-    hcf();
+    
     map_screen_buffer();
-    //word* a = (word*)(long)virtual_scrn_buf_ptr;
-    //word* b = a;
-    //debug_long((long)a);
-    //char* c = "damnit!\n";
-    //if (a!=b) debug_str(c);
-    //screen_buffer_ptr = a;hcf();
+    
+    word* a = (word*)(long)virtual_scrn_buf_ptr;
+    debug_long((long)a);
+    screen_buffer_ptr = (word*)(long)virtual_scrn_buf_ptr;
+    debug_long((long)screen_buffer_ptr);
+    
     wipe_screen();
     draw_pixel(0,0,RGB(255,0,0));
 }
@@ -53,9 +63,15 @@ void screen_init() {
 void wipe_screen() {
     word* screen_buf = screen_buffer_ptr;
 
-    long screen_buf_end = (long)screen_buf + (long)(screen_buffer_size<<4);
+    debug_long((long)screen_buffer_ptr_real);
+    debug_long((long)screen_buf);
+    debug_short((short)0xdead);
 
-    for (int count=0;(long)screen_buf<screen_buf_end;screen_buf++,count++) {
+    long screen_buf_end = (long)screen_buf + (long)(screen_buffer_size<<5);
+
+    debug_long(screen_buf_end);
+
+    for (;(long)screen_buf<screen_buf_end;screen_buf++) {
         *screen_buf = screen_default_background;
     }
 }

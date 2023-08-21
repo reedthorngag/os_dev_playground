@@ -11,8 +11,18 @@ void debug_binary(char b) {
 
 void debug_short(short out) {
     char out_buf[4];
-    word_to_hex(out,out_buf);
+    word_to_hex(out,&out_buf[0]);
     for (uchar i=0;i<4;)
+        outb(0xe9,out_buf[i++]);
+    outb(0xe9,'\n');
+    return;
+}
+
+void debug_int(int out) {
+    char out_buf[8];
+    word_to_hex((short)(out>>4),&out_buf[0]);
+    word_to_hex((short)(out&0xffff),&out_buf[4]);
+    for (uchar i=0;i<8;)
         outb(0xe9,out_buf[i++]);
     outb(0xe9,'\n');
     return;
@@ -29,7 +39,7 @@ void debug_long(long out) {
     return;
 }
 
-void debug(uchar* str) {
+void debug_str(char* str) {
     for (int n=0,c=str[n];c!=0;c=str[++n])
         outb(0xe9,c);
 }
