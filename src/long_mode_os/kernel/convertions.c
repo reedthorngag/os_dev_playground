@@ -15,7 +15,7 @@ void int_to_hex(int* value,char* out) {
 }
 
 void word_to_hex(word value,char* out) {
-    for (uchar i=4;i--;value=value>>4)
+    for (uchar i=4;i--;value>>=4)
         out[i] = "0123456789abcdef"[value&0xf];
 }
 

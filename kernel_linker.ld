@@ -3,20 +3,22 @@ SECTIONS {
 
     . = 0x8b00;
 
-    .text :
+    kernel_start :
     {
         *(.kernel_data)
         . = 0x100;
         kernel.o
-        *(.kernel)
-        *(.text)
     }
 
-    .resources :
+    .text :
     {
-        *(.rodata)
-        *(.resources)
-        font.o
+        *(.text .text.* .gnu.linkonce.t.*)
+    }
+
+    .data :
+    {
+        *(.data)
+        *(.rodata .rodata* .gnu.linkonce.r.*)
     }
 
     .bss :
@@ -24,10 +26,13 @@ SECTIONS {
         *(.bss)
     }
 
-    .data :
+    .resources :
     {
-        *(.data)
+        *(.resources)
+        font.o
         . = ALIGN(0x1000);
-        pml_tables.o
+        *(.pml_map)
     }
+
+    
 }

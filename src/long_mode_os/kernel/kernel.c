@@ -1,15 +1,15 @@
 #include <typedefs.h>
+#include <debugging.h>
 
 #include <paging.h>
 #include <screen.h>
 #include <convertions.h>
 #include <paging.h>
-#include <debugging.h>
 
 volatile void kernel_start() {
 
     paging_init();
-    
+
     screen_init();
 
     char* hello = (char*)"Hello World!";

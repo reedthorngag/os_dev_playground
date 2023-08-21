@@ -3,6 +3,7 @@
 clear
 
 rm bin/compiled
+rm bin/linked
 
 python3 preprocessor.py "bootloader.asm" src/long_mode_os/bootloader
 
@@ -18,7 +19,7 @@ gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_in
 
 ld -m elf_x86_64 -static -nostdlib -T ../bootloader_linker.ld asm.ob -o bootloader.img
 
-ld -m elf_x86_64 -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img
+ld -m elf_x86_64 -M -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img > linker_map.txt && touch linked
 
 tail -c +257 kernel.img > kernel_tmp.img
 mv kernel_tmp.img kernel.img
@@ -30,14 +31,14 @@ ls -lh kernel.img
 ls -lh bootloader.img
 ls -lh os.img
 
-#rm asm.ob
+rm asm.ob
 mv font.o font.o.preserve
 rm *.o
 mv font.o.preserve font.o
 
 #mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 10 -exclude-list ../exclude.txt -o os.iso -b os.img .
 
-truncate -s 1M os.img
+truncate -s 4MiB os.img
 
 ls -lh os.img
 
