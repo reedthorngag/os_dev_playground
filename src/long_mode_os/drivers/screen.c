@@ -1,6 +1,7 @@
 
 #include <typedefs.h>
 #include <screen.h>
+#include <debugging.h>
 
 extern word screen_res_x;
 extern word screen_res_y;
@@ -38,7 +39,12 @@ void map_screen_buffer() {
 
 void screen_init() {
     map_screen_buffer();
-    screen_buffer_ptr = (word*)(long)virtual_scrn_buf_ptr;
+    word* a = (word*)(long)virtual_scrn_buf_ptr;
+    word* b = a;
+    debug_long((long)a);
+    char* c = "damnit!\n";
+    if (a!=b) debug_str(c);
+    screen_buffer_ptr = a;hcf();
     wipe_screen();
     draw_pixel(0,0,RGB(255,0,0));
 }
@@ -46,7 +52,7 @@ void screen_init() {
 void wipe_screen() {
     word* screen_buf = screen_buffer_ptr;
 
-    long screen_buf_end = (long)screen_buf + (long)(screen_buffer_size<<5);
+    long screen_buf_end = (long)screen_buf + (long)(screen_buffer_size<<4);
 
     for (int count=0;(long)screen_buf<screen_buf_end;screen_buf++,count++) {
         *screen_buf = screen_default_background;

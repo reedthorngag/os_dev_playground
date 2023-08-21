@@ -7,3 +7,5 @@ void debug_binary_b(char b);
 void debug_short(short out);
 
 void debug_long(long out);
+
+void debug_str(char* str);
