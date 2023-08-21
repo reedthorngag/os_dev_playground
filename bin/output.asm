@@ -172,7 +172,7 @@ drop_into_long_mode:
     jmp GDT.code:long_mode
 [BITS 64]
 long_mode:
-    mov rsi,0x10000;0xffff80000000
+    mov rsi,0x8c00;0xffff80000000
     jmp rsi
 [BITS 16]
 ; Access bits

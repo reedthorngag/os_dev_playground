@@ -7,7 +7,7 @@
 
 volatile void kernel_start() {
 
-    //while (true);
+    while (true);
 
     paging_init();
     hcf();
