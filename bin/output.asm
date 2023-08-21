@@ -11,13 +11,12 @@ start:
 	mov ax, 0x0000
 	mov ds, ax		; this should already be set, but better safe than sorry
     mov [drive_number],dl
-    mov si,disk_address_packet_2
-    call read_lba_blocks
     mov si,disk_address_packet
     call read_lba_blocks
-    mov ax,0x1000
+    mov ax,0x07c0
     mov es,ax
-    xor si,si
+    mov ax,0x1000
+    mov si,ax
     mov bx,[es:si]
     call print_hex
     call pause
@@ -102,25 +101,13 @@ disk_address_packet:
 	db 0x10
 	db 0x00
 .number_of_blocks:
-	dw 0x0004
+	dw 0x0080
 .transfer_buffer_offset:
 	dw 0x7e00
 .transfer_buffer_segment:
 	dw 0x0000
 .LBA_address:
 	dq 1
-	dq 0
-disk_address_packet_2:
-	db 0x10
-	db 0x00
-.number_of_blocks:
-	dw 0x00080
-.transfer_buffer_offset:
-	dw 0x0000
-.transfer_buffer_segment:
-	dw 0x1100
-.LBA_address:
-	dq 0x4
 	dq 0
 
     times 510-($-$$) db 0

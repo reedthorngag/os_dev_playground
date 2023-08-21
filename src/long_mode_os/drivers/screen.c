@@ -38,13 +38,14 @@ void map_screen_buffer() {
 }
 
 void screen_init() {
+    hcf();
     map_screen_buffer();
-    word* a = (word*)(long)virtual_scrn_buf_ptr;
-    word* b = a;
-    debug_long((long)a);
-    char* c = "damnit!\n";
-    if (a!=b) debug_str(c);
-    screen_buffer_ptr = a;hcf();
+    //word* a = (word*)(long)virtual_scrn_buf_ptr;
+    //word* b = a;
+    //debug_long((long)a);
+    //char* c = "damnit!\n";
+    //if (a!=b) debug_str(c);
+    //screen_buffer_ptr = a;hcf();
     wipe_screen();
     draw_pixel(0,0,RGB(255,0,0));
 }
