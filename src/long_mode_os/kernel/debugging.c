@@ -39,7 +39,7 @@ void debug_long(long out) {
     return;
 }
 
-void debug_str(char* str) {
+void debug_str(char str[]) {
     for (int n=0,c=str[n];c!=0;c=str[++n])
         outb(0xe9,c);
 }

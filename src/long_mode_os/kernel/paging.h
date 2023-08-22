@@ -8,3 +8,6 @@ void direct_map_paddr(uint64_t address, int size);
 
 void* kmalloc(int size);
 
+void print_kmalloc_allocated_table();
+
+void kfree(void* ptr,int size);

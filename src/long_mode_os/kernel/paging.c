@@ -17,7 +17,7 @@ extern char kmalloc_data_start;
 
 char* kmalloc_table;
 void* kmalloc_data;
-short kmalloc_blk_size = 128;
+const short kmalloc_blk_size = 128;
 int kmalloc_table_size; // in blocks
 
 void paging_init() {
@@ -36,7 +36,24 @@ void paging_init() {
 
     *(uint64_t*)(0x2000) = (uint64_t)pml2_tmp | 3;
 
-    debug_long((pml0^3)-(uint64_t)&kmalloc_data_start);
+    uint64_t abs_size = (pml0^3)-(uint64_t)&kmalloc_data_start;
+    kmalloc_table_size = (int)(abs_size>>(kmalloc_blk_size>>5));
+
+    kmalloc_table = (char*)&kmalloc_data_start;
+    kmalloc_data = (void*)(&kmalloc_data_start+kmalloc_table_size);
+
+    for (int i=kmalloc_table_size;i--;)
+        kmalloc_table[i] = 0;
+    
+
+    debug_str("kmalloc data start: ");
+    debug_long((uint64_t)kmalloc_data);
+    debug_str("kmalloc returned address: ");
+    kfree(kmalloc(0x401),0x401);
+    print_kmalloc_allocated_table();
+    debug_str("kmalloc returned address: ");
+    debug_long(((uint64_t)kmalloc(0x0101)-(uint64_t)kmalloc_data)/128);
+    print_kmalloc_allocated_table();
 
     //direct_map_paddr(0x210000,0x10);
 
@@ -98,7 +115,80 @@ void direct_map_paddr(uint64_t address, int num_pages)
 }
 
 void* kmalloc(int size) {
+    // remember to fix equivelent problems in kfree() if fixing stuff
 
+    int large_blks = size >> 10; // TODO: calculate bitshift based on kmalloc_blk_size
+    int blks = ((size & (kmalloc_blk_size*8-1)) >> 7) + 1; // TODO: check not exactly equal before adding 1
+
+    if (large_blks) {
+        char find = ((1<<blks)-1)<<(8-blks);
+        char* kmalloc_ptr = kmalloc_table;
+        for (;(uint64_t)kmalloc_ptr!=(uint64_t)kmalloc_data;kmalloc_ptr++) { // loop through the kmalloc table
+            
+            if (*kmalloc_ptr) // block not free
+                continue;
+            
+            int b = (int)(kmalloc_ptr-kmalloc_table);
+            for (int j=large_blks;--j;) { // check enough are free
+                if (*++kmalloc_ptr)
+                    break;
+            }
+            if (find & *++kmalloc_ptr) // block part not free
+                continue;
+            
+            // check still smaller than the end of the table
+            if ((uint64_t)kmalloc_ptr>=(uint64_t)kmalloc_data)
+                return 0;
+            
+            *kmalloc_ptr |= find; // set block part taken
+            for (int k=large_blks;k--;) // fill taken blocks
+                *--kmalloc_ptr = 0xff;
+            
+            return (void*)(kmalloc_data+(b<<10));
+        }
+    } else {
+        char find = ((1<<blks)-1);
+        char* kmalloc_ptr = kmalloc_table;
+        for (;(uint64_t)kmalloc_ptr!=(uint64_t)kmalloc_data;kmalloc_ptr++) {
+            if (find & *kmalloc_ptr)
+                continue;
+
+            int j=0;
+            for (char c=*kmalloc_ptr; j<9-blks && !(find<<++j & c););
+            *kmalloc_ptr |= find << --j;
+            return (void*)(kmalloc_data+((int)(kmalloc_ptr-kmalloc_table)<<10)+((8-(j+blks))<<7));
+        }
+    }
+
+    // TODO: do some fancy paging shit to extend the kmalloc table/space when full
     return 0;
+}
+
+void kfree(void* ptr,int size) {
+
+    int large_blks = size >> 10;
+    int blks = ((size & (kmalloc_blk_size*8-1)) >> 7) + 1;
+
+    if (large_blks) {
+        char bits = ((1<<blks)-1)<<(8-blks);
+        char* kmalloc_ptr = kmalloc_table + ((ptr-kmalloc_data)>>7);
+        for (;large_blks--;)
+            *kmalloc_ptr++ = 0;
+        *kmalloc_ptr ^= bits;
+    } else {
+
+    }
+}
+
+void print_kmalloc_allocated_table() {
+    char* str = "kmalloc table:\n";
+    debug_str(str);
+    for (int i=0;i<kmalloc_table_size;i++) {
+        if (!kmalloc_table[i]) {
+            debug_binary(0);
+            return;
+        }
+        debug_binary(kmalloc_table[i]);
+    }
 }
 
