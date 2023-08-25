@@ -45,15 +45,9 @@ void paging_init() {
     for (int i=kmalloc_table_size;i--;)
         kmalloc_table[i] = 0;
     
-
-    debug_str("kmalloc data start: ");
-    debug_long((uint64_t)kmalloc_data);
-    debug_str("kmalloc returned address: ");
-    kfree(kmalloc(0x401),0x401);
-    print_kmalloc_allocated_table();
-    debug_str("kmalloc returned address: ");
-    debug_long(((uint64_t)kmalloc(0x0101)-(uint64_t)kmalloc_data)/128);
-    print_kmalloc_allocated_table();
+    map_pages(0x300000000L,(uint64_t)kmalloc(0x3000),3);
+    long a = *(long*)0x300000000;
+    debug_long(a);
 
     //direct_map_paddr(0x210000,0x10);
 
@@ -81,30 +75,42 @@ void translate_vaddr_to_pmap(long virtual_address,word pml_map[4]) {
     return;
 }
 
-void direct_map_paddr(uint64_t address, int num_pages)
-{
+void map_pages(uint64_t vaddress, uint64_t paddress, int num_pages) {
+
     word pml_map[4];
-    translate_vaddr_to_pmap(address,pml_map);
+    translate_vaddr_to_pmap(vaddress,pml_map);
 
     desc_table:
 
     uint64_t* pml_n = pml4;
 
-    for (uchar level=3;level>0;level--) {
-        debug_short(pml_map[level]);
-        if (pml4[pml_map[level]]) {
-            uint64_t pml_table = (uint64_t)kmalloc(0x1000);
+    for (uchar level=4;level--;) {
+        debug((int)level);
+        debug("create pt: ");
+        debug_bool(!!pml_map[level]);
+        if (!pml_n[pml_map[level]]) {
+            uint64_t pml_table = (uint64_t)kmalloc(0x2000);
             if (!pml_table) {
                 panic(-100);
             }
-            *pml_n = pml_table | 3;
+            debug("\naddress: ");
+            debug(pml_table);
+            pml_table = ((pml_table>>12)+1)<<12;
+            debug("transformed address");
+            debug(pml_table);
+            pml_n[pml_map[level]] = pml_table | 3;
         }
+        debug("\npmk_n: ");
+        debug((long)pml_n);
         pml_n = (uint64_t*)pml_n[pml_map[level]];
+        debug((long)pml_n);
     }
 
+    debug_str("\nhere!");
     do {
-        *pml_n++ = address | 3;
-        address += 0x1000;
+        *pml_n++ = paddress | 3;
+        debug((long)pml_n);
+        paddress += 0x1000;
         if (!((long)pml_n&0x1ff)) {
             pml_map[1]++;
             pml_map[0] = 0;
@@ -116,6 +122,8 @@ void direct_map_paddr(uint64_t address, int num_pages)
 
 void* kmalloc(int size) {
     // remember to fix equivelent problems in kfree() if fixing stuff
+
+    size += 4;
 
     int large_blks = size >> 10; // TODO: calculate bitshift based on kmalloc_blk_size
     int blks = ((size & (kmalloc_blk_size*8-1)) >> 7) + 1; // TODO: check not exactly equal before adding 1
@@ -144,7 +152,10 @@ void* kmalloc(int size) {
             for (int k=large_blks;k--;) // fill taken blocks
                 *--kmalloc_ptr = 0xff;
             
-            return (void*)(kmalloc_data+(b<<10));
+            int* data = (int*)(kmalloc_data+(b<<10)+4);
+            *data = large_blks*8+blks;
+
+            return (void*)(++data);
         }
     } else {
         char find = ((1<<blks)-1);
@@ -156,7 +167,9 @@ void* kmalloc(int size) {
             int j=0;
             for (char c=*kmalloc_ptr; j<9-blks && !(find<<++j & c););
             *kmalloc_ptr |= find << --j;
-            return (void*)(kmalloc_data+((int)(kmalloc_ptr-kmalloc_table)<<10)+((8-(j+blks))<<7));
+            int* data = (int*)(kmalloc_data+((int)(kmalloc_ptr-kmalloc_table)<<10)+((8-(j+blks))<<7));
+            *data = blks;
+            return (void*)(++data);
         }
     }
 
@@ -164,19 +177,23 @@ void* kmalloc(int size) {
     return 0;
 }
 
-void kfree(void* ptr,int size) {
+void kfree(void* ptr) {
 
+    int size = *(int*)(ptr-sizeof(int));
     int large_blks = size >> 10;
     int blks = ((size & (kmalloc_blk_size*8-1)) >> 7) + 1;
 
     if (large_blks) {
+        return;
         char bits = ((1<<blks)-1)<<(8-blks);
-        char* kmalloc_ptr = kmalloc_table + ((ptr-kmalloc_data)>>7);
+        char* kmalloc_ptr = kmalloc_table + ((ptr-kmalloc_data)>>10);
         for (;large_blks--;)
             *kmalloc_ptr++ = 0;
         *kmalloc_ptr ^= bits;
     } else {
-
+        char* kmalloc_ptr = kmalloc_table + ((ptr-kmalloc_data)>>10);
+        char bits = ((1<<blks)-1) << (8-((ptr-kmalloc_data)>>7 & 0b111)-blks);
+        *kmalloc_ptr ^= bits;
     }
 }
 

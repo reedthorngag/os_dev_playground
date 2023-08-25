@@ -1,6 +1,14 @@
 
 #include <typedefs.h>
 #include <convertions.h>
+#include <debugging.h>
+
+void debug_bool(bool out) {
+    if (out)
+        debug_str("true");
+    else
+        debug_str("false");
+}
 
 void debug_binary(char b) {
     for (uchar n=8;n--;)
