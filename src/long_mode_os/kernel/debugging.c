@@ -28,8 +28,8 @@ void debug_short(short out) {
 
 void debug_int(int out) {
     char out_buf[8];
-    word_to_hex((short)(out>>4),&out_buf[0]);
-    word_to_hex((short)(out&0xffff),&out_buf[4]);
+    word_to_hex((uint16_t)(out>>16),&out_buf[0]);
+    word_to_hex((uint16_t)out,&out_buf[4]);
     for (uchar i=0;i<8;)
         outb(0xe9,out_buf[i++]);
     outb(0xe9,'\n');

@@ -22,6 +22,21 @@ int kmalloc_table_size; // in blocks
 
 void paging_init() {
 
+    uint16_t buf[4];
+
+    translate_vaddr_to_pmap(0x40200000,buf);
+
+    for (uchar i=4;i--;)
+        debug(buf[i]);
+    
+    translate_vaddr_to_pmap(0x10000000000,buf);
+
+    debug("hi?\n");
+    for (uchar i=4;i--;)
+        debug(buf[i]);
+
+    debug("------\n");
+
     uint64_t pml0 = 0 | 3; // backing memory physical address
     uint64_t* pml1_tmp = &pml1;
     uint64_t* pml2_tmp = &pml2;
@@ -44,24 +59,7 @@ void paging_init() {
 
     for (int i=kmalloc_table_size;i--;)
         kmalloc_table[i] = 0;
-    
-    map_pages(0x300000000L,(uint64_t)kmalloc(0x3000),3);
-    long a = *(long*)0x300000000;
-    debug_long(a);
 
-    //direct_map_paddr(0x210000,0x10);
-
-    char* s = "done!";
-    debug_str(s);
-
-    hcf();
-
-    word pml_map[4] = {0};
-    translate_vaddr_to_pmap(0xffff80000000,pml_map);
-
-    for (uchar i=4;i--;) {
-        debug_short(pml_map[i]);
-    }
 }
 
 // translate virtual address to an array of pml 4-1 addresses, 4 is highest (index 4)
@@ -84,39 +82,28 @@ void map_pages(uint64_t vaddress, uint64_t paddress, int num_pages) {
 
     uint64_t* pml_n = pml4;
 
-    for (uchar level=4;level--;) {
-        debug((int)level);
-        debug("create pt: ");
-        debug_bool(!!pml_map[level]);
+    for (uchar level=4;--level;) {
         if (!pml_n[pml_map[level]]) {
             uint64_t pml_table = (uint64_t)kmalloc(0x2000);
             if (!pml_table) {
                 panic(-100);
             }
-            debug("\naddress: ");
-            debug(pml_table);
             pml_table = ((pml_table>>12)+1)<<12;
-            debug("transformed address");
-            debug(pml_table);
             pml_n[pml_map[level]] = pml_table | 3;
         }
-        debug("\npmk_n: ");
-        debug((long)pml_n);
-        pml_n = (uint64_t*)pml_n[pml_map[level]];
-        debug((long)pml_n);
+        pml_n = (uint64_t*)(pml_n[pml_map[level]]&~0xfff);
     }
 
-    debug_str("\nhere!");
     do {
         *pml_n++ = paddress | 3;
-        debug((long)pml_n);
         paddress += 0x1000;
-        if (!((long)pml_n&0x1ff)) {
+        if (!((long)pml_n&0xfff)) {
             pml_map[1]++;
             pml_map[0] = 0;
             goto desc_table;
         }
     } while (--num_pages);
+
     return;
 }
 
@@ -161,6 +148,7 @@ void* kmalloc(int size) {
         char find = ((1<<blks)-1);
         char* kmalloc_ptr = kmalloc_table;
         for (;(uint64_t)kmalloc_ptr!=(uint64_t)kmalloc_data;kmalloc_ptr++) {
+            
             if (find & *kmalloc_ptr)
                 continue;
 
@@ -173,7 +161,7 @@ void* kmalloc(int size) {
         }
     }
 
-    // TODO: do some fancy paging shit to extend the kmalloc table/space when full
+    // TODO: do some fancy paging shit to extend the kmalloc table/space when (nearly, or we are fucked anyway) full
     return 0;
 }
 

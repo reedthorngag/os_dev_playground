@@ -8,7 +8,6 @@ extern word screen_res_x;
 extern word screen_res_y;
 extern int screen_buffer_ptr_real;
 extern int screen_buffer_size;
-extern int virtual_scrn_buf_ptr;
 extern word bytes_per_line;
 extern char bytes_per_pixel;
 
@@ -20,7 +19,7 @@ word* screen_buffer_ptr;
 word screen_default_background = RGB(0,0,0);
 
 
-void map_screen_buffer() {
+/*void map_screen_buffer() {
 
     int scrn_buf_virtual_address = (screen_buffer_ptr_real - (screen_buffer_ptr_real & 0x1fff)) | 3;
 
@@ -45,31 +44,22 @@ void map_screen_buffer() {
 
     virtual_scrn_buf_ptr = virtual_address;
     return;
-}
+}*/
 
 void screen_init() {
-    
-    map_screen_buffer();
-    
-    word* a = (word*)(long)virtual_scrn_buf_ptr;
-    debug_long((long)a);
-    screen_buffer_ptr = (word*)(long)virtual_scrn_buf_ptr;
-    debug_long((long)screen_buffer_ptr);
-    
+
+    map_pages(0x10000000000L,screen_buffer_ptr_real&0xfff,screen_buffer_size>>2);
+    screen_buffer_ptr = (uint16_t*)0x10000000000L;
+    *screen_buffer_ptr = RGB(255,255,255);
+
     wipe_screen();
     draw_pixel(0,0,RGB(255,0,0));
 }
 
 void wipe_screen() {
-    word* screen_buf = screen_buffer_ptr;
+    uint16_t* screen_buf = screen_buffer_ptr;
 
-    debug_long((long)screen_buffer_ptr_real);
-    debug_long((long)screen_buf);
-    debug_short((short)0xdead);
-
-    long screen_buf_end = (long)screen_buf + (long)(screen_buffer_size<<5);
-
-    debug_long(screen_buf_end);
+    long screen_buf_end = (long)screen_buf + (long)(screen_buffer_size<<4);
 
     for (;(long)screen_buf<screen_buf_end;screen_buf++) {
         *screen_buf = screen_default_background;
