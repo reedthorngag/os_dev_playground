@@ -16,7 +16,7 @@ int kmalloc_table_size; // in blocks
 
 void pmm_init(uint64_t direct_mapping_end) {
 
-    uint64_t abs_size = (abs^3)-(uint64_t)&kmalloc_data_start;
+    uint64_t abs_size = (direct_mapping_end^3)-(uint64_t)&kmalloc_data_start;
     kmalloc_table_size = (int)(abs_size>>(kmalloc_blk_size>>5));
 
     kmalloc_table = (char*)&kmalloc_data_start;
