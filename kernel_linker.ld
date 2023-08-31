@@ -3,9 +3,20 @@ SECTIONS {
 
     . = 0x8b00;
 
-    kernel_start :
+    second_stage_bootloader : 
+    {
+        . = 0x100;
+        map_kernel.o
+    }
+
+    kernel_data  :
     {
         *(.kernel_data)
+    }
+
+    _physical_kernel_start = .;
+    kernel_start :
+    {
         . = 0x100;
         kernel.o
     }

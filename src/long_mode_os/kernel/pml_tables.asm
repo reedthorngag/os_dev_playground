@@ -8,7 +8,9 @@ section .pml_map
 global pml3
 global pml2
 global pml1
+global pml_space_start
 
+pml_space_start:
 pml3:
     times 0x200 dq 0
 pml2:

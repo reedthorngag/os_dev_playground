@@ -12,12 +12,13 @@ extern uint64_t pml3;
 extern uint64_t pml2;
 extern uint64_t pml1;
 
-
 void vmm_init() {
 
     uint16_t buf[4];
 
-    translate_vaddr_to_pmap(0x40200000,buf);
+    debug((uint64_t)(512<<12)<<27);
+
+    translate_vaddr_to_pmap(0x0,buf);
 
     for (uchar i=4;i--;)
         debug(buf[i]);
@@ -67,7 +68,7 @@ void map_pages(uint64_t vaddress, uint64_t paddress, int num_pages) {
 
     desc_table:
 
-    uint64_t* pml_n = pml4;
+    uint64_t* pml_n = (uint64_t*)0x1000;
 
     for (uchar level=4;--level;) {
         if (!pml_n[pml_map[level]]) {

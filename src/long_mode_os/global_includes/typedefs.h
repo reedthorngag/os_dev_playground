@@ -2,7 +2,6 @@
 #include <stdint.h>
 
 
-
 #define uchar unsigned char
 #define word uint16_t
 #define short uint16_t
