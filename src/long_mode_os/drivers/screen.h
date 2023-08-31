@@ -31,7 +31,7 @@ void draw_pixel(word x,word y,word color);
 
 void draw_rect(word x,word y, word width,word height, word color);
 
-void write_string(word x,word y,char* string, word color, word background);
+void write_string(word x,word y,char string[], word color, word background);
 
 void draw_glyph(word x,word y,char character,word color,word background);
 

@@ -32,7 +32,7 @@ SECTIONS {
         font.o
         . = ALIGN(0x1000);
         *(.pml_map)
-        . = ALIGN(0x100000);
+        . = ALIGN(0x10000);
         *(.kmalloc_data)
     }
 

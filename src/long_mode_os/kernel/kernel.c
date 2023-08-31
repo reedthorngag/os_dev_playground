@@ -12,12 +12,11 @@ volatile void kernel_start() {
 
     screen_init();
 
-    char* hello = (char*)"Hello World!";
-    write_string(0,0,hello,RGB(100,100,100),RGB(0,0,0));
+    write_string(0,0,"Hello World!",RGB(255,255,255),RGB(0,0,0));
 
     hcf();
     
-    return; 
+    return;
 }
  
 
