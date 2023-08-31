@@ -2,7 +2,7 @@
 #include <typedefs.h>
 #include <screen.h>
 #include <debugging.h>
-#include <paging.h>
+#include <vmm.h>
 
 extern word screen_res_x;
 extern word screen_res_y;

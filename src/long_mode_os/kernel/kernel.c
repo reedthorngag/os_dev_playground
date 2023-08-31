@@ -1,14 +1,13 @@
 #include <typedefs.h>
 #include <debugging.h>
 
-#include <paging.h>
 #include <screen.h>
 #include <convertions.h>
-#include <paging.h>
+#include <vmm.h>
 
 volatile void kernel_start() {
 
-    paging_init();
+    vmm_init();
 
     screen_init();
 
