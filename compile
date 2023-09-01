@@ -13,8 +13,8 @@ nasm -f elf64 output.asm -o asm.ob
 
 nasm -f elf64 ./../src/long_mode_os/bootloader/shared_data.asm -o asm.o
 
-nasm -f elf64 ./../src/long_mode_os/kernel/pml_tables.asm -o pml_tables.ob
-nasm -f elf64 ./../src/long_mode_os/kernel/kmalloc_symbols.asm -o kmalloc_symbols.ob
+nasm -f elf64 ./../src/long_mode_os/kernel/pml_tables.asm -o pml_tables.obj
+nasm -f elf64 ./../src/long_mode_os/kernel/kmalloc_symbols.asm -o kmalloc_symbols.o
 
 gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_includes/ -I ../src/long_mode_os/kernel/ -I ../src/long_mode_os/kernel/memory/ -I ../src/long_mode_os/drivers/ -mcmodel=large -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic && touch compiled
 
@@ -24,9 +24,11 @@ then
     exit 1
 fi
 
+mv map_kernel.o map_kernel.obj
+
 ld -m elf_x86_64 -static -nostdlib -T ../bootloader_linker.ld asm.ob -o bootloader.img
 
-ld -m elf_x86_64 -M -static -nostdlib -T ../second_stage_linker.ld *.o -o second_stage.img > second_stage_linker_map.txt && touch linked
+ld -m elf_x86_64 -M -static -nostdlib -T ../second_stage_linker.ld *.obj -o second_stage.img > second_stage_linker_map.txt && touch linked
 
 if [ -e linked ]
 then
@@ -49,7 +51,7 @@ tail -c +257 second_stage.img > second_stage_tmp.img
 mv second_stage_tmp.img second_stage.img
 
 cat bootloader.img > os.img
-cat second_stage.img > os.img
+cat second_stage.img >> os.img
 cat kernel.img >> os.img
 
 ls -lh bootloader.img

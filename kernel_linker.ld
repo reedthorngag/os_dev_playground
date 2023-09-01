@@ -26,14 +26,12 @@ SECTIONS {
         *(.bss)
     }
 
-    INCLUDE kmalloc_symbols.ob;
-
     .resources :
     {
         *(.resources)
         font.o
         . = ALIGN(0x10000);
-        *(.kmalloc_data)
+        kmalloc_symbols.o
     }
     
 

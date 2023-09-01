@@ -31,23 +31,6 @@ void vmm_init() {
 
     debug("------\n");
 
-    uint64_t pml0 = 0 | 3; // backing memory physical address
-    uint64_t* pml1_tmp = &pml1;
-    uint64_t* pml2_tmp = &pml2;
-
-    for (short i=0;i<0x8f;i++,pml2_tmp++) {
-        *pml2_tmp = (uint64_t)pml1_tmp | 3;
-
-        for (short j=0;j<0x200;j++,pml1_tmp++,pml0+=0x1000) {
-            *pml1_tmp = pml0;
-        }
-    }
-
-    *(uint64_t*)(0x2000) = (uint64_t)pml2_tmp | 3;
-
-
-    pmm_init(pml0);
-
 }
 
 // translate virtual address to an array of pml 4-1 addresses, 4 is highest (index 4)
