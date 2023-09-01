@@ -7,6 +7,8 @@
 
 volatile void kernel_start() {
 
+    hcf();
+
     vmm_init();
 
     screen_init();

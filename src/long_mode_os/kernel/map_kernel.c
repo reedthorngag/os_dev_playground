@@ -1,5 +1,4 @@
 #include <typedefs.h>
-#include <debugging.h>
 #include <map_kernel.h>
 
 uint64_t* pml4_tmp = (uint64_t*)0x1000;
@@ -11,20 +10,22 @@ void map() {
 
     pml_space_ptr = (uint64_t*)&pml_space_start;
 
-    debug((uint64_t)(1<<12)<<27);
+    //debug((uint64_t)(1<<12)<<27);
 
     map_kernel(0xfff7000000,(uint64_t)&_physical_kernel_start,0x80);
 
     hcf();
 
-    ((void(*)())0xfff7000000)();
+    ((void(*)())0xfff7000100)();
 
-    uint16_t buf[4];
+
+
+    //uint16_t buf[4];
 
     //translate_vaddr_to_pmap(0xfff7000000,buf);
 
-    for (uchar i=4;i--;)
-        debug(buf[i]);
+    // for (uchar i=4;i--;)
+    //     debug(buf[i]);
 
     hcf();
 

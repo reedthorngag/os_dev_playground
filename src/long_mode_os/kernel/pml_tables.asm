@@ -21,7 +21,5 @@ pml1:
 global pml_table_end
 pml_table_end:
 
-section .kmalloc_data
-
-global kmalloc_data_start
-kmalloc_data_start:
+global _physical_kernel_start
+_physical_kernel_start:
