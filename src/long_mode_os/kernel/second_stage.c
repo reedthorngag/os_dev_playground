@@ -1,23 +1,22 @@
 #include <typedefs.h>
-#include <map_kernel.h>
+#include <second_stage.h>
+#include <debugging.h>
 
 uint64_t* pml4_tmp = (uint64_t*)0x1000;
-extern uint64_t pml_space_start;
 uint64_t* pml_space_ptr;
 extern char _physical_kernel_start;
 
 void map() {
 
-    pml_space_ptr = (uint64_t*)&pml_space_start;
+    pml_space_ptr = (uint64_t*)0x80000;
 
-    //debug((uint64_t)(1<<12)<<27);
+    map_kernel(0xfff7000000,(uint64_t)&_physical_kernel_start,0x2000);
 
-    map_kernel(0xfff7000000,(uint64_t)&_physical_kernel_start,0x80);
-
-    hcf();
+    debug(*(uint64_t*)0xfff7000100);
 
     ((void(*)())0xfff7000100)();
 
+    hcf();
 
 
     //uint16_t buf[4];
@@ -31,10 +30,12 @@ void map() {
 
 }
 
+#include <convertions.c>
+#include <debugging.c>
+
 void* alloc_page() {
-    uint64_t* page = pml_space_ptr;
-    pml_space_ptr += 512;
-    return page;
+    pml_space_ptr -= 512;
+    return pml_space_ptr;
 }
 
 // translate virtual address to an array of pml 4-1 addresses, 4 is highest (index 4)

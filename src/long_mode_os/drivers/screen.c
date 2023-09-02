@@ -15,7 +15,7 @@ extern long _binary_zap_vga16_psf_start;
 extern long _binary_zap_vga16_psf_end;
 extern long _binary_zap_vga16_psf_size;
 
-word* screen_buffer_ptr = (uint16_t*)0x10000000000;
+word* screen_buffer_ptr = (uint16_t*)0x1000000;
 word screen_default_background = RGB(0,0,0);
 
 

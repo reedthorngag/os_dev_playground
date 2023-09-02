@@ -7,9 +7,9 @@ SECTIONS {
     {
         *(.kernel_data)
         . = 0x100;
-        map_kernel.obj
+        second_stage.obj
         . = ALIGN(0x1000);
-        pml_tables.obj
+        _physical_kernel_start = .;
     }
 
 }

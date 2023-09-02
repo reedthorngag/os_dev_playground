@@ -14,23 +14,8 @@ extern uint64_t pml1;
 
 void vmm_init() {
 
-    uint16_t buf[4];
-
-    debug((uint64_t)(512<<12)<<27);
-
-    translate_vaddr_to_pmap(0x0,buf);
-
-    for (uchar i=4;i--;)
-        debug(buf[i]);
-    
-    translate_vaddr_to_pmap(0x10000000000,buf);
-
-    debug("hi?\n");
-    for (uchar i=4;i--;)
-        debug(buf[i]);
-
-    debug("------\n");
-
+    pmm_init();
+    hcf();
 }
 
 // translate virtual address to an array of pml 4-1 addresses, 4 is highest (index 4)
