@@ -6,7 +6,7 @@ SECTIONS {
     second_stage_bootloader : 
     {
         *(.kernel_data)
-        . = 0x100;
+        . = 0x400;
         second_stage.obj
         . = ALIGN(0x1000);
         _physical_kernel_start = .;

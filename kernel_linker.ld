@@ -6,7 +6,7 @@ SECTIONS {
     kernel_start :
     {
         *(.kernel_data)
-        . = 0x100;
+        . = 0x400;
         kernel.o
     }
 

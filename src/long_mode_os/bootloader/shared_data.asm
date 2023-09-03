@@ -19,3 +19,5 @@ bytes_per_pixel db 2
 
 global drive_number
 drive_number: db 0
+
+times 0x400-($-$$) db 0

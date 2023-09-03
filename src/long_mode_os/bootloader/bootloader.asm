@@ -45,5 +45,3 @@ bootloader_end:
 #include "read_acpi_tables.asm"
 
 #include "shared_data.asm"
-
- times 0x100-($-$$) db 0

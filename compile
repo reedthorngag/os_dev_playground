@@ -20,6 +20,11 @@ gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_in
 if ! [ -e compiled ]
 then
     echo compile failed!
+    rm *.ob
+    rm *.obj
+    mv font.o font.o.preserve
+    rm *.o
+    mv font.o.preserve font.o
     exit 1
 fi
 
@@ -34,6 +39,11 @@ then
     rm bin/linked
 else
     echo second stage linking failed!
+    rm *.ob
+    rm *.obj
+    mv font.o font.o.preserve
+    rm *.o
+    mv font.o.preserve font.o
     exit 1
 fi
 
@@ -42,6 +52,11 @@ ld -m elf_x86_64 -M -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img >
 if ! [ -e linked ]
 then
     echo kernel linking failed!
+    rm *.ob
+    rm *.obj
+    mv font.o font.o.preserve
+    rm *.o
+    mv font.o.preserve font.o
     exit 1
 fi
 
