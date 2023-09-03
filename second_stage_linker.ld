@@ -1,7 +1,7 @@
 OUTPUT_FORMAT(binary)
 SECTIONS {
 
-    . = 0x8b00;
+    . = 0x8e00;
 
     second_stage_bootloader : 
     {

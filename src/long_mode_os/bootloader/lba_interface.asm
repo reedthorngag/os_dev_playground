@@ -22,7 +22,7 @@ disk_address_packet:
 .number_of_blocks:
 	dw 0x80
 .transfer_buffer_offset:
-	dw 0x7e00
+	dw second_stage_start
 .transfer_buffer_segment:
 	dw 0x0000
 .LBA_address:

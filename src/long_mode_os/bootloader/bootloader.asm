@@ -19,14 +19,17 @@ start:
     mov si,disk_address_packet
     call read_lba_blocks
 
+    call print_hex
+    call hang
     call get_mem_map
 
-    mov ax,0x07c0
+    mov ax,0x08e0
     mov es,ax
     mov ax,0x1000
     mov si,ax
 
-    mov bx,[es:si]
+    mov bx, [es:si]
+    mov bx, second_stage_start
     call print_hex
     call pause
 
@@ -47,3 +50,5 @@ bootloader_end:
 #include "read_acpi_tables.asm"
 
 #include "shared_data.asm"
+
+second_stage_start:

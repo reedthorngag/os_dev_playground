@@ -75,7 +75,7 @@ drop_into_long_mode:
 
 [BITS 64]
 long_mode:
-    mov rsi,0x8c00;0xffff80000000
+    mov rsi,second_stage_start
     jmp rsi
 
 [BITS 16]

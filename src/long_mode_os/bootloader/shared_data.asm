@@ -24,3 +24,4 @@ global mem_map_buffer
 mem_map_buffer:
 
 times 0x400-($-$$) db 0
+mem_map_buffer_end:
