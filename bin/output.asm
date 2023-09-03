@@ -8,11 +8,12 @@ start:
 	mov ss, ax	; intialize stack to 0x0000:0x7C00
 			    ; (directly below bootloader)
 	sti
-	mov ax, 0x0000
+	xor ax,ax
 	mov ds, ax		; this should already be set, but better safe than sorry
     mov [drive_number],dl
     mov si,disk_address_packet
     call read_lba_blocks
+    call get_mem_map
     mov ax,0x07c0
     mov es,ax
     mov ax,0x1000
@@ -317,12 +318,22 @@ VBE_mode_info:
 
 
 get_mem_map:
+    xor ax,ax
+    mov es,ax
+    mov di, mem_map_buffer
+    mov eax, 0x0000E820
+    mov edx, 0x534D4150
+    xor ebx,ebx
+    mov ecx, 0x14
 .loop:
+    int 0x15
+    jc .end ; error or finished
+    cmp ebx,0
+    jnz .loop
 .end:
+    mov bx,ax
+    call print_hex
     ret
-global mem_map
-mem_map:
-    times 0x100 db 0
 
 
 read_acpi_tables:
@@ -346,5 +357,7 @@ bytes_per_line dw 0
 bytes_per_pixel db 2
 global drive_number
 drive_number: db 0
+global mem_map_buffer
+mem_map_buffer:
 times 0x400-($-$$) db 0
 

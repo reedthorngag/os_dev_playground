@@ -20,4 +20,7 @@ bytes_per_pixel db 2
 global drive_number
 drive_number: db 0
 
+global mem_map_buffer
+mem_map_buffer:
+
 times 0x400-($-$$) db 0

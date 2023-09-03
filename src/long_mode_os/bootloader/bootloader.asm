@@ -11,13 +11,15 @@ start:
 			    ; (directly below bootloader)
 	sti
 
-	mov ax, 0x0000
+	xor ax,ax
 	mov ds, ax		; this should already be set, but better safe than sorry
 
     mov [drive_number],dl
 
     mov si,disk_address_packet
     call read_lba_blocks
+
+    call get_mem_map
 
     mov ax,0x07c0
     mov es,ax

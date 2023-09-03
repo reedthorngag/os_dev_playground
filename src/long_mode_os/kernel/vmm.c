@@ -14,7 +14,7 @@ extern uint64_t pml1;
 
 void vmm_init() {
 
-    pmm_init();
+    pmm_init(0);
     hcf();
 }
 
