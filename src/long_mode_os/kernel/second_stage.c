@@ -7,6 +7,7 @@ uint64_t* pml_space_ptr;
 extern char _physical_kernel_start;
 
 void map() {
+    hcf();
 
     pml_space_ptr = (uint64_t*)0x80000;
 
