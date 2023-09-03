@@ -13,15 +13,8 @@ start:
     mov [drive_number],dl
     mov si,disk_address_packet
     call read_lba_blocks
-    call print_hex
-    call hang
     call get_mem_map
-    mov ax,0x08e0
-    mov es,ax
-    mov ax,0x1000
-    mov si,ax
-    mov bx, [es:si]
-    mov bx, second_stage_start
+    mov bx, [second_stage_start]
     call print_hex
     call pause
     call setup_VESA_VBE
@@ -106,7 +99,7 @@ disk_address_packet:
 .number_of_blocks:
 	dw 0x80
 .transfer_buffer_offset:
-	dw second_stage_start
+	dw 0x7e00
 .transfer_buffer_segment:
 	dw 0x0000
 .LBA_address:
@@ -381,6 +374,7 @@ drive_number: db 0
 global mem_map_buffer
 mem_map_buffer:
 times 0x400-($-$$) db 0
+global mem_map_buffer_end
 mem_map_buffer_end:
 
 second_stage_start:
