@@ -4,18 +4,24 @@
 
 uint64_t* pml4_tmp = (uint64_t*)0x1000;
 uint64_t* pml_space_ptr;
+uint64_t kernel_start = 0xfff7000000;
 extern char _physical_kernel_start;
+extern uint64_t screen_res_x;
 
 void map() {
-    hcf();
 
     pml_space_ptr = (uint64_t*)0x80000;
 
-    map_kernel(0xfff7000000,(uint64_t)&_physical_kernel_start,0x2000);
+    map_kernel(kernel_start,(uint64_t)&_physical_kernel_start,0x2000);
 
-    debug(*(uint64_t*)0xfff7000100);
+    uint64_t* from = &screen_res_x;
+    uint64_t* to = (uint64_t*)kernel_start;
+    for (int i=0;i<(0x400/sizeof(uint64_t));i++)
+        *to++ = *from++;
 
-    ((void(*)())0xfff7000100)();
+    debug(*(word*)0xfff7000400);
+
+    ((void(*)())0xfff7000400)();
 
     hcf();
 
@@ -51,13 +57,14 @@ void vaddr_to_pmap(long virtual_address,word pml_map[4]) {
 }
 
 void map_kernel(uint64_t vaddress, uint64_t paddress, int num_pages) {
-
     word pml_map[4];
     vaddr_to_pmap(vaddress,pml_map);
 
     desc_table:
 
     uint64_t* pml_n = pml4_tmp;
+
+    
 
     for (uchar level=4;--level;) {
         if (!pml_n[pml_map[level]]) {

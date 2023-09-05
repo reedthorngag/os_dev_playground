@@ -7,6 +7,8 @@
 
 volatile void kernel_start() {
 
+    debug("hello from hhdm (again)!");
+
     hcf();
 
     vmm_init();
