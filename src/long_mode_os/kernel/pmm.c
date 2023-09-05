@@ -3,10 +3,8 @@
 #include <typedefs.h>
 #include <debugging.h>
 
-
-extern int pml_table_end;
-
-extern char kmalloc_data_start;
+extern char kernel_start;
+extern char kernel_end;
 
 char* kmalloc_table;
 void* kmalloc_data;
@@ -14,16 +12,28 @@ const short kmalloc_blk_size = 128;
 int kmalloc_table_size; // in blocks
 
 
-void pmm_init(uint64_t direct_mapping_end) {
+void pmm_init() {
 
-    uint64_t abs_size = (direct_mapping_end^3)-(uint64_t)&kmalloc_data_start;
+    uint64_t abs_size = ((uint64_t)&kernel_start+0x2000*0x1000)-(uint64_t)&kernel_end;
     kmalloc_table_size = (int)(abs_size>>(kmalloc_blk_size>>5));
 
-    kmalloc_table = (char*)&kmalloc_data_start;
-    kmalloc_data = (void*)(&kmalloc_data_start+kmalloc_table_size);
+    kmalloc_table = (char*)&kernel_end;
+    kmalloc_data = (void*)(&kernel_end+kmalloc_table_size);
 
-    for (int i=kmalloc_table_size;i--;)
+    debug(kmalloc_table_size);
+    debug((uint64_t)kmalloc_table);
+    debug((uint64_t)kmalloc_data);
+
+    kmalloc_table[0x64fff] = 5;
+    debug(kmalloc_table[0x64fff]);
+
+    for (int i=0x65000;i--;) {
+        debug(i);
         kmalloc_table[i] = 0;
+    }
+
+    hcf();
+    
 }
 
 void* kmalloc(int size) {

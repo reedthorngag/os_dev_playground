@@ -1,6 +1,6 @@
 #include <typedefs.h>
 
-void pmm_init(uint64_t direct_mapping_end);
+void pmm_init();
 
 void* kmalloc(int size);
 

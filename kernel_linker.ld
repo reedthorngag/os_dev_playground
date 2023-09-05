@@ -5,6 +5,7 @@ SECTIONS {
 
     kernel_start :
     {
+        kernel_start = .;
         *(.kernel_data)
         . = 0x400;
         kernel.o
@@ -31,7 +32,7 @@ SECTIONS {
         *(.resources)
         font.o
         . = ALIGN(0x10000);
-        kmalloc_symbols.o
+        kernel_end = .;
     }
     
 

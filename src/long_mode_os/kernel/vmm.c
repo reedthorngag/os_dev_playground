@@ -14,8 +14,7 @@ extern uint64_t pml1;
 
 void vmm_init() {
 
-    pmm_init(0);
-    hcf();
+    pmm_init();
 }
 
 // translate virtual address to an array of pml 4-1 addresses, 4 is highest (index 4)
