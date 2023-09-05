@@ -12,7 +12,6 @@ volatile void kernel_start() {
     hcf();
 
     vmm_init();
-
     screen_init();
 
     write_string(0,0,"Hello World!",RGB(255,255,255),RGB(0,0,0));
