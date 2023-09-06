@@ -5,6 +5,8 @@
 
 extern char kernel_start;
 extern char kernel_end;
+extern uint64_t pml_space_start;
+extern uint64_t pml_space_end;
 
 char* kmalloc_table;
 void* kmalloc_data;

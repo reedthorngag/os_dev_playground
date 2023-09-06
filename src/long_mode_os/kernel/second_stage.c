@@ -5,14 +5,19 @@
 uint64_t* pml4_tmp = (uint64_t*)0x1000;
 uint64_t* pml_space_ptr;
 uint64_t kernel_start = 0xfff7000000;
+extern uint64_t pml_space_start;
+extern uint64_t pml_space_end;
 extern char _physical_kernel_start;
 extern uint64_t screen_res_x;
 
 void map() {
 
     pml_space_ptr = (uint64_t*)0x80000;
+    pml_space_end = (uint64_t)pml_space_ptr;
 
     map_kernel(kernel_start,(uint64_t)&_physical_kernel_start,0x2000);
+
+    pml_space_start = (uint64_t)pml_space_ptr;
 
     uint64_t* from = &screen_res_x;
     uint64_t* to = (uint64_t*)kernel_start;
@@ -21,19 +26,7 @@ void map() {
 
     debug(*(word*)0xfff7000400);
 
-    ((void(*)())0xfff7000400)();
-
-    hcf();
-
-
-    //uint16_t buf[4];
-
-    //translate_vaddr_to_pmap(0xfff7000000,buf);
-
-    // for (uchar i=4;i--;)
-    //     debug(buf[i]);
-
-    hcf();
+    goto *(void*)0xfff7000400;
 
 }
 

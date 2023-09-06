@@ -371,6 +371,10 @@ bytes_per_line dw 0
 bytes_per_pixel db 2
 global drive_number
 drive_number: db 0
+global pml_space_start
+global pml_space_end
+pml_space_start: dq 0
+pml_space_end: dq 0
 global mem_map_buffer
 mem_map_buffer:
 times 0x400-($-$$) db 0
