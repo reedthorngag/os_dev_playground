@@ -16,26 +16,25 @@ int kmalloc_table_size; // in blocks
 
 void pmm_init() {
 
-    uint64_t abs_size = ((uint64_t)&kernel_start+0x2000*0x1000)-(uint64_t)&kernel_end;
+    uint64_t abs_size = ((uint64_t)&kernel_start+0x2000*0x1000)-(uint64_t)pml_space_end;
     kmalloc_table_size = (int)(abs_size>>(kmalloc_blk_size>>5));
 
-    kmalloc_table = (char*)&kernel_end;
-    kmalloc_data = (void*)(&kernel_end+kmalloc_table_size);
+    kmalloc_table = (char*)pml_space_end;
+    kmalloc_data = (void*)(pml_space_end+kmalloc_table_size);
 
-    debug(kmalloc_table_size);
-    debug((uint64_t)kmalloc_table);
-    debug((uint64_t)kmalloc_data);
+    debug(pml_space_end);
 
-    kmalloc_table[0x64fff] = 5;
-    debug(kmalloc_table[0x64fff]);
-
-    for (int i=0x65000;i--;) {
-        debug(i);
+    for (int i=kmalloc_table_size;i--;) {
+        if (kmalloc_table[i]) {
+            debug((uint64_t)kmalloc_table+i);
+            hcf();
+        }
         kmalloc_table[i] = 0;
     }
-
-    hcf();
     
+    hcf();
+
+    return;
 }
 
 void* kmalloc(int size) {

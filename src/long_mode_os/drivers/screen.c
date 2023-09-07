@@ -20,8 +20,8 @@ word screen_default_background = RGB(0,0,0);
 
 
 void screen_init() {
-
     map_pages((long)screen_buffer_ptr,screen_buffer_ptr_real&~0xfff,screen_buffer_size>>2);
+    
 
     wipe_screen();
 }

@@ -3,6 +3,7 @@
 #include <debugging.h>
 
 uint64_t* pml4_tmp = (uint64_t*)0x1000;
+uint64_t pml_space_addr;
 uint64_t* pml_space_ptr;
 uint64_t kernel_start = 0xfff7000000;
 extern uint64_t pml_space_start;
@@ -12,19 +13,18 @@ extern uint64_t screen_res_x;
 
 void map() {
 
-    pml_space_ptr = (uint64_t*)0x80000;
-    pml_space_end = (uint64_t)pml_space_ptr;
+    pml_space_addr = 0x80000;
+    pml_space_ptr = (uint64_t*)(&_physical_kernel_start+pml_space_addr);
+    pml_space_end = kernel_start+pml_space_addr;
 
     map_kernel(kernel_start,(uint64_t)&_physical_kernel_start,0x2000);
 
-    pml_space_start = (uint64_t)pml_space_ptr;
+    pml_space_start = kernel_start+pml_space_addr;
 
     uint64_t* from = &screen_res_x;
     uint64_t* to = (uint64_t*)kernel_start;
     for (int i=0;i<(0x400/sizeof(uint64_t));i++)
         *to++ = *from++;
-
-    debug(*(word*)0xfff7000400);
 
     goto *(void*)0xfff7000400;
 
@@ -34,7 +34,8 @@ void map() {
 #include <debugging.c>
 
 void* alloc_page() {
-    pml_space_ptr -= 512;
+    pml_space_addr -= 0x1000;
+    pml_space_ptr -= 0x200;
     return pml_space_ptr;
 }
 
