@@ -1,6 +1,6 @@
 
 get_mem_map:
-    mov di, mem_map_buffer       ; Set di to 0x8004. Otherwise this code will get stuck in `int 0x15` after some entries are fetched 
+    mov di, mem_map_buffer
 	xor ebx, ebx		; ebx must be 0 to start
 	xor bp, bp		; keep an entry count in bp
 	mov edx, 0x0534D4150	; Place "SMAP" into edx
@@ -47,7 +47,7 @@ get_mem_map:
     call print_str
     call hang
 .ran_out_of_space:
-    mov si, .out_of_space_str
+    mov si, .out_of_space_err_str
     call print_str
     call hang
 

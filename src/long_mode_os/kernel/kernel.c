@@ -5,16 +5,7 @@
 #include <convertions.h>
 #include <vmm.h>
 
-extern uint64_t mem_map_buffer;
-
 volatile void kernel_start() {
-
-    debug(mem_map_buffer);
-    debug(*(uint64_t*)&mem_map_buffer);
-    debug(*((uint64_t*)&mem_map_buffer+1));
-    debug(*((uint32_t*)&mem_map_buffer+4));
-
-    hcf();
 
     vmm_init();
     screen_init();

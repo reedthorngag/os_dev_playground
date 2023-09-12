@@ -13,8 +13,35 @@ void* kmalloc_data;
 const short kmalloc_blk_size = 128;
 int kmalloc_table_size; // in blocks
 
+extern uint64_t mem_map_buffer;
+extern uint16_t mem_map_size;
+
+struct mem_map_ent {
+    uint64_t addr;
+    uint64_t size;
+    uint32_t type;
+};
+
+void create_pbm() {
+    uint64_t addr = 0;
+    uint32_t index;
+    struct mem_map_ent* map = (struct mem_map_ent*)&mem_map_buffer;
+
+    for (int i=0;i<mem_map_size;i++) {
+        if (map->addr>addr) {
+            addr = map->addr;
+            index = i;
+        }
+    }
+
+    uint64_t max = addr+map[index].size;
+    debug("memory size: ");
+    debug(max);
+}
 
 void pmm_init() {
+
+    create_pbm();
 
     uint64_t abs_size = ((uint64_t)&kernel_start+0x2000*0x1000)-(uint64_t)pml_space_end;
     kmalloc_table_size = (int)(abs_size>>(kmalloc_blk_size>>5));
