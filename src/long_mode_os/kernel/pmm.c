@@ -27,16 +27,20 @@ void create_pbm() {
     uint32_t index;
     struct mem_map_ent* map = (struct mem_map_ent*)&mem_map_buffer;
 
+    uint64_t size = 0;
+
     for (int i=0;i<mem_map_size;i++) {
-        if (map->addr>addr) {
-            addr = map->addr;
-            index = i;
-        }
+        debug("\nmem_ent:\n");
+        debug_("\taddr: ",map[i].addr);
+        debug_("\tsize: ",map[i].size);
+        debug_("\ttype: ",map[i].type);
+        size += map[i].size;
     }
 
-    uint64_t max = addr+map[index].size;
     debug("memory size: ");
-    debug(max);
+    debug(size);
+
+    hcf();
 }
 
 void pmm_init() {

@@ -8,7 +8,9 @@
                             int: debug_int,     \
                             long: debug_long,   \
                             char*: debug_str   \
-                            )(x)
+                            )(x);
+
+#define debug_(x,j) debug(x);debug(j);
 
 void debug_bool(bool out);
 

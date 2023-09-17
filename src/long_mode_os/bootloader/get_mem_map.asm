@@ -20,6 +20,7 @@ get_mem_map:
 	mov dword [es:di + 20], 1	; force a valid ACPI 3.X entry
 	mov ecx, 24		; ask for 24 bytes again
 	int 0x15
+	call print_hex
 	jc short .e820f		; carry set means "end of list already reached"
 	mov edx, 0x0534D4150	; repair potentially trashed register
 .jmpin:
@@ -35,7 +36,7 @@ get_mem_map:
 	inc bp			; got a good entry: ++count, move to next storage spot
 	add di, 24
     cmp di,mem_map_buffer_end
-    jbe .ran_out_of_space
+    jge .ran_out_of_space
 .skipent:
 	test ebx, ebx		; if ebx resets to 0, list is complete
 	jne short .e820lp
@@ -49,6 +50,8 @@ get_mem_map:
 .ran_out_of_space:
     mov si, .out_of_space_err_str
     call print_str
+	mov bx,bp
+	call print_hex
     call hang
 
 .gmm_err_str: db 'function unsupported! ',0
