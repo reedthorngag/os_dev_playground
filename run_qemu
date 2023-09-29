@@ -4,7 +4,7 @@ then
     if [ -e bin/linked ]
     then
         rm -f memdump
-        qemu-system-x86_64 -smp cpus=2 -cpu max -drive file=bin/os.img,format=raw -m 6G -debugcon file:/dev/stdout -monitor stdio -no-reboot -no-shutdown
+        qemu-system-x86_64 -smp cpus=2 -cpu max -drive file=bin/os.img,format=raw -m 4G -debugcon file:/dev/stdout -monitor stdio -no-reboot -no-shutdown
     else
         echo "linker errors!"
     fi

@@ -8,10 +8,15 @@ extern char kernel_end;
 extern uint64_t pml_space_start;
 extern uint64_t pml_space_end;
 
+extern int screen_buffer_ptr_real;
+
 char* kmalloc_table;
 void* kmalloc_data;
 const short kmalloc_blk_size = 128;
 int kmalloc_table_size; // in blocks
+
+uint8_t* nibble_map_ptr; // physical memory map start ptr
+uint32_t nibble_map_size; // in bytes
 
 extern uint64_t mem_map_buffer;
 extern uint16_t mem_map_size;
@@ -22,36 +27,90 @@ struct mem_map_ent {
     uint32_t type;
 };
 
-void create_pbm() {
-    uint64_t addr = 0;
-    uint32_t index;
+void create_physical_mem_map() {
     struct mem_map_ent* map = (struct mem_map_ent*)&mem_map_buffer;
 
-    uint64_t size = 0;
+    uint64_t highestaddr = 0;
+    uint64_t highestsize = 0;
+    uint64_t largestaddr = 0;
+    uint64_t largestsize = 0;
 
     for (int i=0;i<mem_map_size;i++) {
         debug("\nmem_ent:\n");
         debug_("\taddr: ",map[i].addr);
         debug_("\tsize: ",map[i].size);
         debug_("\ttype: ",map[i].type);
-        size += map[i].size;
+
+        if (map[i].type != 1 && map[i].type != 3) continue;
+
+        if (map[i].size > largestsize) {
+            largestaddr = map[i].addr;
+            largestsize = map[i].size;
+        }
+
+        if (map[i].addr > highestaddr) {
+            highestaddr = map[i].addr;
+            highestsize = map[i].size;
+        }
     }
 
-    debug("memory size: ");
-    debug(size);
+    uint64_t size = highestaddr + highestsize;
+
+    debug_("\nmemory size: ",size);
+    debug_("addr: ",highestaddr);
+    debug_("size: ",highestsize);
+
+    nibble_map_size = (size >> 13) + 1; // divide by 4096 (= one page per byte) then by 2 (= 2 pages per byte / 1 per nibble), add one for odd numbers of pages
+
+    nibble_map_ptr = (uint8_t*)largestaddr;
+
+    debug_("nibble_map_start:",(uint64_t)nibble_map_ptr);
+    debug_("size: ",nibble_map_size);
+    map_pages((uint64_t)nibble_map_ptr, (uint64_t)nibble_map_ptr, (nibble_map_size>>12)+((nibble_map_size&0xfff)>0));
+    debug("here!\n");
+
+    uint64_t* ptr = (uint64_t*)nibble_map_ptr;
+    for (uint64_t target = (uint64_t)ptr + nibble_map_size; (uint64_t)++ptr < target;) {
+        *ptr = ~0;
+    }
+    *(uint64_t*)(nibble_map_ptr+nibble_map_size-8) = ~0;
+
+    for (int i=0;i<mem_map_size;i++) {
+        struct mem_map_ent ent = map[i];
+        map_p_range(ent.addr&(~0xfff),(ent.size>>12)+1,1); // assume (exceds the bounds if not) page aligned, thiscould/will break on real hardware
+    }
 
     hcf();
 }
 
+void map_p_range(uint64_t addr,int pages,uchar type) {
+    int rel_addr = (addr>>12) + pages;
+
+    uchar* ptr = nibble_map_ptr + (rel_addr>>1);
+
+    for (;pages--;rel_addr--) {
+        if (rel_addr&1) {
+            *ptr &= (uchar)0xf0;
+            *ptr |= type;
+        } else {
+            *ptr &= (uchar)0x0f;
+            *ptr-- |= (uchar)(type<<4);
+        }
+    }
+}
+
 void pmm_init() {
 
-    create_pbm();
-
-    uint64_t abs_size = ((uint64_t)&kernel_start+0x2000*0x1000)-(uint64_t)pml_space_end;
+    uint64_t abs_size = (uint64_t)(screen_buffer_ptr_real&~0xfff)-(uint64_t)pml_space_end;
     kmalloc_table_size = (int)(abs_size>>(kmalloc_blk_size>>5));
 
     kmalloc_table = (char*)pml_space_end;
     kmalloc_data = (void*)(pml_space_end+kmalloc_table_size);
+
+    create_physical_mem_map();
+
+    debug("made it this far?");
+    hcf();
 
     debug(pml_space_end);
 
@@ -60,7 +119,6 @@ void pmm_init() {
             debug((uint64_t)kmalloc_table+i);
             hcf();
         }
-        kmalloc_table[i] = 0;
     }
     
     hcf();
