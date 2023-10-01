@@ -77,10 +77,9 @@ void create_physical_mem_map() {
 
     for (int i=0;i<mem_map_size;i++) {
         struct mem_map_ent ent = map[i];
-        map_p_range(ent.addr&(~0xfff),(ent.size>>12)+1,1); // assume (exceds the bounds if not) page aligned, thiscould/will break on real hardware
+        if (ent.type != 1 && ent.type != 3) continue;
+        map_p_range(ent.addr&(~0xfff),(ent.size>>12)+1,0); // assume (exceds the bounds if not) page aligned, this could/will break on real hardware
     }
-
-    hcf();
 }
 
 void map_p_range(uint64_t addr,int pages,uchar type) {
@@ -95,6 +94,25 @@ void map_p_range(uint64_t addr,int pages,uchar type) {
         } else {
             *ptr &= (uchar)0x0f;
             *ptr-- |= (uchar)(type<<4);
+        }
+    }
+}
+
+uint64_t pmalloc(int pages) {
+    uchar* ptr = nibble_map_ptr;
+    for (int size=nibble_map_size<<1;size--;) {
+
+        if ((*ptr++)>0xf*(1-(size&1))) continue;
+
+        for (int n=pages<<1;--n && size--;) {
+
+            if ((*ptr++)>0xf*(1-(size&1))) break;
+        }
+
+        if (size) continue;
+
+        for (int n=pages<<1;n--;size++) {
+            *(--ptr) |= (uchar)(1<<);
         }
     }
 }
