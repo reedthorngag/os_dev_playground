@@ -1,4 +1,4 @@
 #include <typedefs.h>
 
-void map_kernel(uint64_t vaddress, uint64_t paddress, int num_pages);
+void map_kernel(u64 vaddress, u64 paddress, u32 num_pages);
 

@@ -3,10 +3,10 @@
 #include <convertions.h>
 
 #define debug(x) _Generic((x),\
-                            char: debug_binary, \
-                            short: debug_short, \
-                            int: debug_int,     \
-                            long: debug_long,   \
+                            u8: debug_binary, \
+                            u16: debug_short, \
+                            u32: debug_int,     \
+                            u64: debug_long,   \
                             char*: debug_str   \
                             )(x);
 
@@ -14,12 +14,12 @@
 
 void debug_bool(bool out);
 
-void debug_binary(char b);
+void debug_binary(u8 b);
 
-void debug_short(short out);
+void debug_short(u16 out);
 
-void debug_int(int out);
+void debug_int(u32 out);
 
-void debug_long(long out);
+void debug_long(u64 out);
 
 void debug_str(char str[]);

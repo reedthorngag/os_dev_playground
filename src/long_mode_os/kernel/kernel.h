@@ -4,4 +4,4 @@
 
 volatile void kernel_start();
 
-void panic(int code);
+void panic(u32 code);

@@ -3,39 +3,39 @@
 #include <typedefs.h>
 #include <debugging.h>
 
-extern char kernel_start;
-extern char kernel_end;
-extern uint64_t pml_space_start;
-extern uint64_t pml_space_end;
+extern u8 kernel_start;
+extern u8 kernel_end;
+extern u64 pml_space_start;
+extern u64 pml_space_end;
 
-extern int screen_buffer_ptr_real;
+extern u32 screen_buffer_ptr_real;
 
-char* kmalloc_table;
+u8* kmalloc_table;
 void* kmalloc_data;
-const short kmalloc_blk_size = 128;
-int kmalloc_table_size; // in blocks
+const u16 kmalloc_blk_size = 128;
+u32 kmalloc_table_size; // in blocks
 
-uint8_t* nibble_map_ptr; // physical memory map start ptr
-uint32_t nibble_map_size; // in bytes
+u8* nibble_map_ptr; // physical memory map start ptr
+u64 nibble_map_size; // in bytes
 
-extern uint64_t mem_map_buffer;
-extern uint16_t mem_map_size;
+extern u64 mem_map_buffer;
+extern u16 mem_map_size;
 
 struct mem_map_ent {
-    uint64_t addr;
-    uint64_t size;
-    uint32_t type;
+    u64 addr;
+    u64 size;
+    u32 type;
 };
 
 void create_physical_mem_map() {
     struct mem_map_ent* map = (struct mem_map_ent*)&mem_map_buffer;
 
-    uint64_t highestaddr = 0;
-    uint64_t highestsize = 0;
-    uint64_t largestaddr = 0;
-    uint64_t largestsize = 0;
+    u64 highestaddr = 0;
+    u64 highestsize = 0;
+    u64 largestaddr = 0;
+    u64 largestsize = 0;
 
-    for (int i=0;i<mem_map_size;i++) {
+    for (u32 i=0;i<mem_map_size;i++) {
         debug("\nmem_ent:\n");
         debug_("\taddr: ",map[i].addr);
         debug_("\tsize: ",map[i].size);
@@ -54,7 +54,7 @@ void create_physical_mem_map() {
         }
     }
 
-    uint64_t size = highestaddr + highestsize;
+    u64 size = highestaddr + highestsize;
 
     debug_("\nmemory size: ",size);
     debug_("addr: ",highestaddr);
@@ -62,79 +62,114 @@ void create_physical_mem_map() {
 
     nibble_map_size = (size >> 13) + 1; // divide by 4096 (= one page per byte) then by 2 (= 2 pages per byte / 1 per nibble), add one for odd numbers of pages
 
-    nibble_map_ptr = (uint8_t*)largestaddr;
+    nibble_map_ptr = (u8*)largestaddr;
 
-    debug_("nibble_map_start:",(uint64_t)nibble_map_ptr);
+    debug_("nibble_map_start:",(u64)nibble_map_ptr);
     debug_("size: ",nibble_map_size);
-    map_pages((uint64_t)nibble_map_ptr, (uint64_t)nibble_map_ptr, (nibble_map_size>>12)+((nibble_map_size&0xfff)>0));
+    map_pages((u64)nibble_map_ptr, (u64)nibble_map_ptr, (nibble_map_size>>12)+((nibble_map_size&0xfff)>0));
     debug("here!\n");
 
-    uint64_t* ptr = (uint64_t*)nibble_map_ptr;
-    for (uint64_t target = (uint64_t)ptr + nibble_map_size; (uint64_t)++ptr < target;) {
+    u64* ptr = (u64*)nibble_map_ptr;
+    for (u64 target = (u64)ptr + nibble_map_size; (u64)++ptr < target;) {
         *ptr = ~0;
     }
-    *(uint64_t*)(nibble_map_ptr+nibble_map_size-8) = ~0;
+    *(u64*)(nibble_map_ptr+nibble_map_size-8) = ~0;
 
-    for (int i=0;i<mem_map_size;i++) {
+    for (u32 i=0;i<mem_map_size;i++) {
         struct mem_map_ent ent = map[i];
         if (ent.type != 1 && ent.type != 3) continue;
         map_p_range(ent.addr&(~0xfff),(ent.size>>12)+1,0); // assume (exceds the bounds if not) page aligned, this could/will break on real hardware
     }
 }
 
-void map_p_range(uint64_t addr,int pages,uchar type) {
-    int rel_addr = (addr>>12) + pages;
+void map_p_range(u64 addr,u32 pages,u8 type) {
+    u32 rel_addr = (addr>>12) + pages;
 
-    uchar* ptr = nibble_map_ptr + (rel_addr>>1);
+    u8* ptr = nibble_map_ptr + (rel_addr>>1);
 
     for (;pages--;rel_addr--) {
         if (rel_addr&1) {
-            *ptr &= (uchar)0xf0;
-            *ptr |= type;
+            *ptr &= (u8)0x0f;
+            *ptr-- |= (u8)(type<<4);
         } else {
-            *ptr &= (uchar)0x0f;
-            *ptr-- |= (uchar)(type<<4);
+            *ptr &= (u8)0xf0;
+            *ptr |= type;
         }
     }
 }
 
-uint64_t pmalloc(int pages) {
-    uchar* ptr = nibble_map_ptr;
-    for (int size=nibble_map_size<<1;size--;) {
+u64 pmalloc(u32 pages) {
+    u8* ptr = nibble_map_ptr;
+    for (u32 size=nibble_map_size<<1;size--;) {
 
-        if ((*ptr++)>0xf*(1-(size&1))) continue;
+        if ((*ptr++)>0xf*(size&1)) continue;
 
-        for (int n=pages<<1;--n && size--;) {
+        u32 n=pages;
+        for (;--n && size--;) {
 
-            if ((*ptr++)>0xf*(1-(size&1))) break;
+            if ((*ptr++)>0xf*(size&1)) break;
         }
 
-        if (size) continue;
+        if (n) continue;
 
-        for (int n=pages<<1;n--;size++) {
-            *(--ptr) |= (uchar)(1<<);
+        for (;pages--;size++) {
+            *(--ptr) |= (u8)(1<<(4*(size&1)));
         }
+
+        debug_("ptr: ",(u64)ptr);
+        
+        return ((((u64)ptr-(u64)nibble_map_ptr)<<1)+(size&1))<<12;
     }
+
+    return -1;
+}
+
+void pfree(u64 start_addr,u32 num) {
+    u32 rel_addr = (u32)(start_addr>>12) + num;
+
+    u8* ptr = nibble_map_ptr + (rel_addr>>1);
+
+    for (;num--;rel_addr--) {
+        debug_("ptr: ",(u64)ptr);
+        *ptr-- &= (u8)(0xf<<(4*(1-(rel_addr&1))));
+    }
+
 }
 
 void pmm_init() {
 
-    uint64_t abs_size = (uint64_t)(screen_buffer_ptr_real&~0xfff)-(uint64_t)pml_space_end;
-    kmalloc_table_size = (int)(abs_size>>(kmalloc_blk_size>>5));
+    u64 abs_size = (u64)(screen_buffer_ptr_real&~0xfff)-(u64)pml_space_end;
+    kmalloc_table_size = (u32)(abs_size>>(kmalloc_blk_size>>5));
 
-    kmalloc_table = (char*)pml_space_end;
+    kmalloc_table = (u8*)pml_space_end;
     kmalloc_data = (void*)(pml_space_end+kmalloc_table_size);
 
     create_physical_mem_map();
 
-    debug("made it this far?");
+    debug("testing pmalloc...\n");
+
+    debug((u64)pmalloc(3));
+
+    debug((u64)pmalloc(2));
+
+    debug((u64)pmalloc(4));
+
+    pfree(0x4000,2);
+
+    //map_p_range(0x2000,3,0);
+
+    debug("pfree'd mem\n");
+
+    debug((u64)pmalloc(2));
+
+    debug("made it this far\n");
     hcf();
 
     debug(pml_space_end);
 
-    for (int i=kmalloc_table_size;i--;) {
+    for (u32 i=kmalloc_table_size;i--;) {
         if (kmalloc_table[i]) {
-            debug((uint64_t)kmalloc_table+i);
+            debug((u64)kmalloc_table+i);
             hcf();
         }
     }
@@ -144,24 +179,24 @@ void pmm_init() {
     return;
 }
 
-void* kmalloc(int size) {
+void* kmalloc(u32 size) {
     // remember to fix equivelent problems in kfree() if fixing stuff
 
     size += 4;
 
-    int large_blks = size >> 10; // TODO: calculate bitshift based on kmalloc_blk_size
-    int blks = ((size & (kmalloc_blk_size*8-1)) >> 7) + 1; // TODO: check not exactly equal before adding 1
+    u32 large_blks = size >> 10; // TODO: calculate bitshift based on kmalloc_blk_size
+    u32 blks = ((size & (kmalloc_blk_size*8-1)) >> 7) + 1; // TODO: check not exactly equal before adding 1
 
     if (large_blks) {
-        char find = ((1<<blks)-1)<<(8-blks);
-        char* kmalloc_ptr = kmalloc_table;
-        for (;(uint64_t)kmalloc_ptr!=(uint64_t)kmalloc_data;kmalloc_ptr++) { // loop through the kmalloc table
+        u8 find = ((1<<blks)-1)<<(8-blks);
+        u8* kmalloc_ptr = kmalloc_table;
+        for (;(u64)kmalloc_ptr!=(u64)kmalloc_data;kmalloc_ptr++) { // loop through the kmalloc table
             
             if (*kmalloc_ptr) // block not free
                 continue;
             
-            int b = (int)(kmalloc_ptr-kmalloc_table);
-            for (int j=large_blks;--j;) { // check enough are free
+            u32 b = (u32)(kmalloc_ptr-kmalloc_table);
+            for (u32 j=large_blks;--j;) { // check enough are free
                 if (*++kmalloc_ptr)
                     break;
             }
@@ -169,30 +204,30 @@ void* kmalloc(int size) {
                 continue;
             
             // check still smaller than the end of the table
-            if ((uint64_t)kmalloc_ptr>=(uint64_t)kmalloc_data)
+            if ((u64)kmalloc_ptr>=(u64)kmalloc_data)
                 return 0;
             
             *kmalloc_ptr |= find; // set block part taken
-            for (int k=large_blks;k--;) // fill taken blocks
+            for (u32 k=large_blks;k--;) // fill taken blocks
                 *--kmalloc_ptr = 0xff;
             
-            int* data = (int*)(kmalloc_data+(b<<10)+4);
+            u32* data = (u32*)(kmalloc_data+(b<<10)+4);
             *data = large_blks*8+blks;
 
             return (void*)(++data);
         }
     } else {
-        char find = ((1<<blks)-1);
-        char* kmalloc_ptr = kmalloc_table;
-        for (;(uint64_t)kmalloc_ptr!=(uint64_t)kmalloc_data;kmalloc_ptr++) {
+        u8 find = ((1<<blks)-1);
+        u8* kmalloc_ptr = kmalloc_table;
+        for (;(u64)kmalloc_ptr!=(u64)kmalloc_data;kmalloc_ptr++) {
             
             if (find & *kmalloc_ptr)
                 continue;
 
-            int j=0;
-            for (char c=*kmalloc_ptr; j<9-blks && !(find<<++j & c););
+            u32 j=0;
+            for (u8 c=*kmalloc_ptr; j<9-blks && !(find<<++j & c););
             *kmalloc_ptr |= find << --j;
-            int* data = (int*)(kmalloc_data+((int)(kmalloc_ptr-kmalloc_table)<<10)+((8-(j+blks))<<7));
+            u32* data = (u32*)(kmalloc_data+((u32)(kmalloc_ptr-kmalloc_table)<<10)+((8-(j+blks))<<7));
             *data = blks;
             return (void*)(++data);
         }
@@ -204,28 +239,27 @@ void* kmalloc(int size) {
 
 void kfree(void* ptr) {
 
-    int size = *(int*)(ptr-sizeof(int));
-    int large_blks = size >> 10;
-    int blks = ((size & (kmalloc_blk_size*8-1)) >> 7) + 1;
+    u32 size = *(u32*)(ptr-sizeof(u32));
+    u32 large_blks = size >> 10;
+    u32 blks = ((size & (kmalloc_blk_size*8-1)) >> 7) + 1;
 
     if (large_blks) {
         return;
-        char bits = ((1<<blks)-1)<<(8-blks);
-        char* kmalloc_ptr = kmalloc_table + ((ptr-kmalloc_data)>>10);
+        u8 bits = ((1<<blks)-1)<<(8-blks);
+        u8* kmalloc_ptr = kmalloc_table + ((ptr-kmalloc_data)>>10);
         for (;large_blks--;)
             *kmalloc_ptr++ = 0;
         *kmalloc_ptr ^= bits;
     } else {
-        char* kmalloc_ptr = kmalloc_table + ((ptr-kmalloc_data)>>10);
-        char bits = ((1<<blks)-1) << (8-((ptr-kmalloc_data)>>7 & 0b111)-blks);
+        u8* kmalloc_ptr = kmalloc_table + ((ptr-kmalloc_data)>>10);
+        u8 bits = ((1<<blks)-1) << (8-((ptr-kmalloc_data)>>7 & 0b111)-blks);
         *kmalloc_ptr ^= bits;
     }
 }
 
 void print_kmalloc_allocated_table() {
-    char* str = "kmalloc table:\n";
-    debug_str(str);
-    for (int i=0;i<kmalloc_table_size;i++) {
+    debug("kmalloc table:\n");
+    for (u32 i=0;i<kmalloc_table_size;i++) {
         if (!kmalloc_table[i]) {
             debug_binary(0);
             return;

@@ -7,10 +7,10 @@
 
 #include <debugging.h>
 
-uint64_t* pml4 = (uint64_t*)0x1000;
-extern uint64_t pml3;
-extern uint64_t pml2;
-extern uint64_t pml1;
+u64* pml4 = (u64*)0x1000;
+extern u64 pml3;
+extern u64 pml2;
+extern u64 pml1;
 
 void vmm_init() {
 
@@ -18,41 +18,41 @@ void vmm_init() {
 }
 
 // translate virtual address to an array of pml 4-1 addresses, 4 is highest (index 4)
-void translate_vaddr_to_pmap(long virtual_address,word pml_map[4]) {
+void translate_vaddr_to_pmap(u64 virtual_address, u16 pml_map[4]) {
 
     virtual_address>>=12; // divide virtual_address by 4096 (page size) to get the absolute page number
 
-    for (uchar i=0;i<4;virtual_address>>=9,i++)
-        pml_map[i] = (short)(virtual_address&0x01ff);
+    for (u8 i=0;i<4;virtual_address>>=9,i++)
+        pml_map[i] = (u16)(virtual_address&0x01ff);
     
     return;
 }
 
-void map_pages(uint64_t vaddress, uint64_t paddress, int num_pages) {
+void map_pages(u64 vaddress, u64 paddress, u32 num_pages) {
 
-    word pml_map[4];
+    u16 pml_map[4];
     translate_vaddr_to_pmap(vaddress,pml_map);
 
     desc_table:
 
-    uint64_t* pml_n = (uint64_t*)0x1000;
+    u64* pml_n = (u64*)0x1000;
 
-    for (uchar level=4;--level;) {
+    for (u8 level=4;--level;) {
         if (!pml_n[pml_map[level]]) {
-            uint64_t pml_table = (uint64_t)kmalloc(0x2000);
+            u64 pml_table = (u64)kmalloc(0x2000);
             if (!pml_table) {
                 panic(-100);
             }
             pml_table = ((pml_table>>12)+1)<<12;
             pml_n[pml_map[level]] = pml_table | 3;
         }
-        pml_n = (uint64_t*)(pml_n[pml_map[level]]&~0xfff);
+        pml_n = (u64*)(pml_n[pml_map[level]]&~0xfff);
     }
 
     do {
         *pml_n++ = paddress | 3;
         paddress += 0x1000;
-        if (!((long)pml_n&0xfff)) {
+        if (!((u64)pml_n&0xfff)) {
             pml_map[1]++;
             pml_map[0] = 0;
             goto desc_table;

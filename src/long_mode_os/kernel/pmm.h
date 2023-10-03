@@ -2,11 +2,13 @@
 
 void pmm_init();
 
-void map_p_range(uint64_t addr,int pages,uchar type);
+void map_p_range(u64 addr,u32 pages,u8 type);
 
-uint64_t pmalloc(int pages);
+u64 pmalloc(u32 pages);
 
-void* kmalloc(int size);
+void pfree(u64 pageStart,u32 num);
+
+void* kmalloc(u32 size);
 
 void print_kmalloc_allocated_table();
 

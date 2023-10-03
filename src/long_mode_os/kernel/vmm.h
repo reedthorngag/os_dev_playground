@@ -2,8 +2,8 @@
 
 void vmm_init();
 
-void translate_vaddr_to_pmap(long virtual_address,word map[4]);
+void translate_vaddr_to_pmap(u64 virtual_address,u16 map[4]);
 
-void map_pages(uint64_t vaddress, uint64_t paddress, int num_pages);
+void map_pages(u64 vaddress, u64 paddress, u32 num_pages);
 
 
