@@ -15,6 +15,9 @@ extern u64 pml1;
 void vmm_init() {
 
     pmm_init();
+
+    map_pages(0x1000000,0,5);
+    hcf();
 }
 
 // translate virtual address to an array of pml 4-1 addresses, 4 is highest (index 4)
@@ -49,7 +52,7 @@ void map_pages(u64 vaddress, u64 paddress, u32 num_pages) {
         pml_n = (u64*)(pml_n[pml_map[level]]&~0xfff);
     }
 
-    do {
+    while (num_pages--) {
         *pml_n++ = paddress | 3;
         paddress += 0x1000;
         if (!((u64)pml_n&0xfff)) {
@@ -57,7 +60,7 @@ void map_pages(u64 vaddress, u64 paddress, u32 num_pages) {
             pml_map[0] = 0;
             goto desc_table;
         }
-    } while (--num_pages);
+    }
 
     return;
 }

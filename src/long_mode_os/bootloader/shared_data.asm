@@ -25,6 +25,9 @@ global pml_space_end
 pml_space_start: dq 0
 pml_space_end: dq 0
 
+global physical_kernel_start
+physical_kernel_start: dq 0
+
 global mem_map_size
 mem_map_size: dw 0
 global mem_map_buffer

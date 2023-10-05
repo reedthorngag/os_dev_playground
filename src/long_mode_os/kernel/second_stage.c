@@ -10,12 +10,15 @@ extern u64 pml_space_start;
 extern u64 pml_space_end;
 extern u8 _physical_kernel_start;
 extern u64 screen_res_x;
+extern u64 physical_kernel_start;
 
 void map() {
 
     pml_space_addr = 0x80000;
     pml_space_ptr = (u64*)(&_physical_kernel_start+pml_space_addr);
     pml_space_end = kernel_start+pml_space_addr;
+
+    physical_kernel_start = (u64)&_physical_kernel_start;
 
     map_kernel(kernel_start,(u64)&_physical_kernel_start,0x2000);
 
@@ -57,8 +60,6 @@ void map_kernel(u64 vaddress, u64 paddress, u32 num_pages) {
     desc_table:
 
     u64* pml_n = pml4_tmp;
-
-    
 
     for (u8 level=4;--level;) {
         if (!pml_n[pml_map[level]]) {

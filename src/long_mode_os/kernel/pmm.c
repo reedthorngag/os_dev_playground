@@ -8,12 +8,14 @@ extern u8 kernel_end;
 extern u64 pml_space_start;
 extern u64 pml_space_end;
 
+extern u64 physical_kernel_start;
+
 extern u32 screen_buffer_ptr_real;
 
 u8* kmalloc_table;
 void* kmalloc_data;
 const u16 kmalloc_blk_size = 128;
-u32 kmalloc_table_size; // in blocks
+u32 kmalloc_table_size;
 
 u8* nibble_map_ptr; // physical memory map start ptr
 u64 nibble_map_size; // in bytes
@@ -21,11 +23,37 @@ u64 nibble_map_size; // in bytes
 extern u64 mem_map_buffer;
 extern u16 mem_map_size;
 
+// nibble map key:
+// type 0: free
+// type 1: allocated mem
+// type 2: kernel mem
+// type 3: mem mapped io and screen mem
+// type 4-14: undefined
+// type 15: unusable mem/mem holes
+
 struct mem_map_ent {
     u64 addr;
     u64 size;
     u32 type;
 };
+
+void pmm_init() {
+
+    u64 abs_size = (u64)(screen_buffer_ptr_real&~0xfff)-(u64)pml_space_end;
+    kmalloc_table_size = (u32)(abs_size>>(kmalloc_blk_size>>5));
+
+    kmalloc_table = (u8*)pml_space_end;
+    kmalloc_data = (void*)(pml_space_end+kmalloc_table_size);
+
+    create_physical_mem_map();
+
+    kmalloc_data = (void*)pmalloc(1000,2); // 4MB
+    kmalloc_table_size = (u64)kmalloc_data>>(kmalloc_blk_size>>5);
+
+    kmalloc_table = (u8*)pmalloc(kmalloc_table_size>>12,2);
+
+    return;
+}
 
 void create_physical_mem_map() {
     struct mem_map_ent* map = (struct mem_map_ent*)&mem_map_buffer;
@@ -67,7 +95,6 @@ void create_physical_mem_map() {
     debug_("nibble_map_start:",(u64)nibble_map_ptr);
     debug_("size: ",nibble_map_size);
     map_pages((u64)nibble_map_ptr, (u64)nibble_map_ptr, (nibble_map_size>>12)+((nibble_map_size&0xfff)>0));
-    debug("here!\n");
 
     u64* ptr = (u64*)nibble_map_ptr;
     for (u64 target = (u64)ptr + nibble_map_size; (u64)++ptr < target;) {
@@ -78,8 +105,11 @@ void create_physical_mem_map() {
     for (u32 i=0;i<mem_map_size;i++) {
         struct mem_map_ent ent = map[i];
         if (ent.type != 1 && ent.type != 3) continue;
-        map_p_range(ent.addr&(~0xfff),(ent.size>>12)+1,0); // assume (exceds the bounds if not) page aligned, this could/will break on real hardware
+        map_p_range(ent.addr&(~0xfff),(ent.size>>12),0); // assume (exceds the bounds if not) page aligned, this could/will break on real hardware
     }
+
+    // map kernel
+    map_p_range(physical_kernel_start&~0x1fff,(((u64)kmalloc_table-(u64)&kernel_start)>>12),2);
 }
 
 void map_p_range(u64 addr,u32 pages,u8 type) {
@@ -98,22 +128,24 @@ void map_p_range(u64 addr,u32 pages,u8 type) {
     }
 }
 
-u64 pmalloc(u32 pages) {
+u64 pmalloc(u32 pages,u8 type) {
     u8* ptr = nibble_map_ptr;
     for (u32 size=nibble_map_size<<1;size--;) {
 
-        if ((*ptr++)>0xf*(size&1)) continue;
+        ptr += (1-(size&1));
+        if (*ptr>0xf*(size&1)) continue;
 
         u32 n=pages;
-        for (;--n && size--;) {
-
-            if ((*ptr++)>0xf*(size&1)) break;
+        for (;--n && size; size--) {
+            if (*ptr > 0xf*(size&1)) break;
+            ptr += size&1;
         }
 
         if (n) continue;
 
         for (;pages--;size++) {
-            *(--ptr) |= (u8)(1<<(4*(size&1)));
+            *ptr |= (u8)(type<<(4*(size&1)));
+            ptr-= (1-(size&1));
         }
 
         debug_("ptr: ",(u64)ptr);
@@ -121,7 +153,7 @@ u64 pmalloc(u32 pages) {
         return ((((u64)ptr-(u64)nibble_map_ptr)<<1)+(size&1))<<12;
     }
 
-    return -1;
+    return ~0;
 }
 
 void pfree(u64 start_addr,u32 num) {
@@ -131,52 +163,10 @@ void pfree(u64 start_addr,u32 num) {
 
     for (;num--;rel_addr--) {
         debug_("ptr: ",(u64)ptr);
-        *ptr-- &= (u8)(0xf<<(4*(1-(rel_addr&1))));
+        *ptr &= (u8)(0xf<<(4*(1-(rel_addr&1))));
+        ptr-= (1-(rel_addr&1));
     }
 
-}
-
-void pmm_init() {
-
-    u64 abs_size = (u64)(screen_buffer_ptr_real&~0xfff)-(u64)pml_space_end;
-    kmalloc_table_size = (u32)(abs_size>>(kmalloc_blk_size>>5));
-
-    kmalloc_table = (u8*)pml_space_end;
-    kmalloc_data = (void*)(pml_space_end+kmalloc_table_size);
-
-    create_physical_mem_map();
-
-    debug("testing pmalloc...\n");
-
-    debug((u64)pmalloc(3));
-
-    debug((u64)pmalloc(2));
-
-    debug((u64)pmalloc(4));
-
-    pfree(0x4000,2);
-
-    //map_p_range(0x2000,3,0);
-
-    debug("pfree'd mem\n");
-
-    debug((u64)pmalloc(2));
-
-    debug("made it this far\n");
-    hcf();
-
-    debug(pml_space_end);
-
-    for (u32 i=kmalloc_table_size;i--;) {
-        if (kmalloc_table[i]) {
-            debug((u64)kmalloc_table+i);
-            hcf();
-        }
-    }
-    
-    hcf();
-
-    return;
 }
 
 void* kmalloc(u32 size) {

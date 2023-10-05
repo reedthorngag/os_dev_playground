@@ -3,11 +3,12 @@
 #include <screen.h>
 #include <debugging.h>
 #include <vmm.h>
+#include <pmm.h>
 
 extern u16 screen_res_x;
 extern u16 screen_res_y;
 extern u32 screen_buffer_ptr_real;
-extern u32 screen_buffer_size;
+extern u32 screen_buffer_size; // in 1KB blocks
 extern u16 bytes_per_line;
 extern u8  bytes_per_pixel;
 
@@ -16,12 +17,14 @@ extern u64 _binary_zap_vga16_psf_end;
 extern u64 _binary_zap_vga16_psf_size;
 
 u16* screen_buffer_ptr = (u16*)0x1000000;
-u16 screen_default_background = RGB(0,0,0);
+u16 screen_default_background = RGB(255,0,0);
 
 
 void screen_init() {
-    map_pages((u64)screen_buffer_ptr,screen_buffer_ptr_real&~0xfff,screen_buffer_size>>2);
-    
+
+    map_p_range(screen_buffer_ptr_real,screen_buffer_size>>10,3);
+
+    map_pages((u64)screen_buffer_ptr,screen_buffer_ptr_real&~0xfff,screen_buffer_size>>10);
 
     wipe_screen();
 }
@@ -30,8 +33,8 @@ void wipe_screen() {
     u16* screen_buf = screen_buffer_ptr;
 
     u64 screen_buf_end = (u64)screen_buf + (u64)(screen_buffer_size<<2);
-
     for (;(u64)screen_buf<screen_buf_end;screen_buf++) {
+        debug((u64)screen_buf);
         *screen_buf = screen_default_background;
     }
 }
