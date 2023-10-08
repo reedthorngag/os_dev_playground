@@ -22,6 +22,8 @@ void map() {
 
     map_kernel(kernel_start,(u64)&_physical_kernel_start,0x2000);
 
+    map_kernel(0x400000,0x10000,3);
+
     pml_space_start = kernel_start+pml_space_addr;
 
     u64* from = &screen_res_x;
@@ -48,7 +50,7 @@ void vaddr_to_pmap(u64 virtual_address,u16 pml_map[4]) {
     virtual_address>>=12; // divide virtual_address by 4096 (page size) to get the absolute page number
 
     for (u8 i=0;i<4;virtual_address>>=9,i++)
-        pml_map[i] = (short)(virtual_address&0x01ff);
+        pml_map[i] = (u16)(virtual_address&0x01ff);
     
     return;
 }
@@ -71,7 +73,7 @@ void map_kernel(u64 vaddress, u64 paddress, u32 num_pages) {
         pml_n = (u64*)(pml_n[pml_map[level]]&~0xfff);
     }
 
-    do {
+    while (num_pages--) {
         *pml_n++ = paddress | 3;
         paddress += 0x1000;
         if (!((u64)pml_n&0xfff)) {
@@ -79,7 +81,7 @@ void map_kernel(u64 vaddress, u64 paddress, u32 num_pages) {
             pml_map[0] = 0;
             goto desc_table;
         }
-    } while (--num_pages);
+    }
 
     return;
 }

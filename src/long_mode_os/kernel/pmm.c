@@ -47,10 +47,16 @@ void pmm_init() {
 
     create_physical_mem_map();
 
-    kmalloc_data = (void*)pmalloc(1000,2); // 4MB
-    kmalloc_table_size = (u64)kmalloc_data>>(kmalloc_blk_size>>5);
+    u64 _kmalloc_data = pmalloc(1000,2); // 4MB
+    map_pages(_kmalloc_data,_kmalloc_data,1000);
 
-    kmalloc_table = (u8*)pmalloc(kmalloc_table_size>>12,2);
+    kmalloc_table_size = _kmalloc_data>>(kmalloc_blk_size>>5);
+
+    u64 _kmalloc_table = pmalloc((kmalloc_table_size>>12)+1,2);
+    map_pages(_kmalloc_table,_kmalloc_table,(kmalloc_table_size>>12)+1);
+
+    kmalloc_data = (void*)_kmalloc_data;
+    kmalloc_table = (u8*)_kmalloc_table;
 
     return;
 }
@@ -95,6 +101,7 @@ void create_physical_mem_map() {
     debug_("nibble_map_start:",(u64)nibble_map_ptr);
     debug_("size: ",nibble_map_size);
     map_pages((u64)nibble_map_ptr, (u64)nibble_map_ptr, (nibble_map_size>>12)+((nibble_map_size&0xfff)>0));
+    hcf();
 
     u64* ptr = (u64*)nibble_map_ptr;
     for (u64 target = (u64)ptr + nibble_map_size; (u64)++ptr < target;) {
