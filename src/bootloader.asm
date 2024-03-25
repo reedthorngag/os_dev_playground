@@ -9,8 +9,11 @@ start:
 	sti
 
 	mov ax, 0x07c0
-	mov ds, ax		; this should already be set, but better safe than sorry
+	mov ds, ax
 	
+	call load_program
+
+	call clear
 
 	call command_line
 	; nothing after this should run
@@ -36,8 +39,7 @@ hang:
 	cli	; disable interrupts
 	hlt	; halt the processor
 
-#include "file_system/create_folder.asm"
-#include "file_system/get_file.asm"
+#include "load_program.asm"
 
 
 disk: db 0x00
@@ -45,6 +47,9 @@ disk: db 0x00
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55		        ; The standard PC boot signature
 
+
+#include "file_system/create_folder.asm"
+#include "file_system/get_file.asm"
 
 #include "utils/utils.asm"
 

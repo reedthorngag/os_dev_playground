@@ -2,14 +2,12 @@
 
 clear
 
-rm bin/compiled
+touch bin/compiled
 
-python3 preprocessor.py "bootloader.asm" src/real_mode_os
+python3 preprocessor.py "bootloader.asm" src || rm bin/compiled
 
 cd bin
 
-nasm -f bin output.asm
+nasm -f bin output.asm -o os.img || rm compiled
 
-mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 60 -exclude-list ../exclude.txt -o os.iso -b output .
-
-touch compiled
+#mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 60 -exclude-list ../exclude.txt -o os.iso -b output .
