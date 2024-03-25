@@ -1,88 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 clear
 
 rm bin/compiled
-rm bin/linked
 
-python3 preprocessor.py "bootloader.asm" src/long_mode_os/bootloader
+python3 preprocessor.py "bootloader.asm" src/real_mode_os
 
 cd bin
 
-nasm -f elf64 output.asm -o asm.ob
+nasm -f bin output.asm
 
-nasm -f elf64 ./../src/long_mode_os/bootloader/shared_data.asm -o asm.o
+mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 60 -exclude-list ../exclude.txt -o os.iso -b output .
 
-gcc -c -g -Wall -m64 ../src/long_mode_os/**/*.c -I ../src/long_mode_os/global_includes/ -I ../src/long_mode_os/kernel/ -I ../src/long_mode_os/kernel/memory/ -I ../src/long_mode_os/drivers/ -mcmodel=large -nostdlib -ffreestanding -mno-red-zone -fno-exceptions -nodefaultlibs -fno-builtin -fno-pic && touch compiled
-
-if ! [ -e compiled ]
-then
-    echo compile failed!
-    rm *.ob
-    rm *.obj
-    mv font.o font.o.preserve
-    rm *.o
-    mv font.o.preserve font.o
-    exit 1
-fi
-
-mv second_stage.o second_stage.obj
-
-ld -m elf_x86_64 -M -static -nostdlib -T ../bootloader_linker.ld asm.ob -o bootloader.img > bootloader_linker_map.txt
-
-ld -m elf_x86_64 -M -static -nostdlib -T ../second_stage_linker.ld *.obj -o second_stage.img > second_stage_linker_map.txt && touch linked
-
-if [ -e linked ]
-then
-    rm bin/linked
-else
-    echo second stage linking failed!
-    rm *.ob
-    rm *.obj
-    mv font.o font.o.preserve
-    rm *.o
-    mv font.o.preserve font.o
-    exit 1
-fi
-
-ld -m elf_x86_64 -M -static -nostdlib -T ../kernel_linker.ld *.o -o kernel.img > kernel_linker_map.txt && touch linked
-
-if ! [ -e linked ]
-then
-    echo kernel linking failed!
-    rm *.ob
-    rm *.obj
-    mv font.o font.o.preserve
-    rm *.o
-    mv font.o.preserve font.o
-    exit 1
-fi
-
-
-tail -c +1025 second_stage.img > second_stage_tmp.img
-mv second_stage_tmp.img second_stage.img
-
-cat bootloader.img > os.img
-cat second_stage.img >> os.img
-cat kernel.img >> os.img
-
-ls -lh bootloader.img
-ls -lh second_stage.img
-ls -lh kernel.img
-ls -lh os.img
-
-rm *.ob
-rm *.obj
-mv font.o font.o.preserve
-rm *.o
-mv font.o.preserve font.o
-
-#mkisofs -no-emul-boot -input-charset utf-8 -boot-load-size 10 -exclude-list ../exclude.txt -o os.iso -b os.img .
-
-truncate -s 4MiB os.img
-
-ls -lh os.img
-
-echo compiled
-
-cd ..
+touch compiled
