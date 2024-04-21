@@ -21,7 +21,7 @@ start_editor:
 
 .get_input_loop:
 
-    hlt
+    hlt ; halts until the next interrupt, keyboard events create interrupts
 
     mov ah,0x01
     int 0x16
