@@ -55,6 +55,8 @@ command_line:
 #include "tictactoe/tictactoe.asm"
 #include "rubiks_cube/rubiks_cube.asm"
 
+#include "commands/bubble_sort.asm"
+
 #include "commands/clear.asm"
 #include "commands/echo.asm"
 #include "commands/help.asm"
@@ -102,6 +104,7 @@ commands_array:
     dw commands.push
     dw commands.tictactoe
     dw commands.rubiks_cube
+    dw commands.bubble_sort
 
     dw 0xffff
 
@@ -165,4 +168,10 @@ commands:
         dw rubiks_cube
         db 0
         db 'think you are good enough to solve a rubiks cube?',0
+
+.bubble_sort:
+        db 'bubble_sort',0
+        dw bubble_sort
+        db 0
+        db 'bubble sort demonstration (to prove its not hard to write in asm)',0
 
